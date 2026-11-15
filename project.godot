@@ -1,0 +1,21 @@
+; Engine configuration file.
+config_version=5
+
+[application]
+config/name="Dead Acres"
+run/main_scene="res://scenes/ui/menu.tscn"
+config/features=PackedStringArray("4.7")
+
+[autoload]
+
+Net="*res://scripts/net/network.gd"
+Building="*res://scripts/building/building_system.gd"
+Hud="*res://scenes/ui/hud.tscn"
+
+[display]
+window/size/viewport_width=1280
+window/size/viewport_height=720
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
