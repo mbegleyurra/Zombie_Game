@@ -25,6 +25,9 @@ const BuildingFactory = preload("res://scripts/world/building_factory.gd")
 const DayNight = preload("res://scripts/world/day_night.gd")
 const LootItem = preload("res://scripts/world/loot_item.gd")
 const PropFactory = preload("res://scripts/world/prop_factory.gd")
+const ModelUtil = preload("res://scripts/world/model_util.gd")
+const KenneyDressing = preload("res://scripts/world/kenney_dressing.gd")
+const KENNEY_GY := "res://assets/kenney/graveyard/"
 
 const MAX_TREES := 900
 const MAX_ROCKS := 300
@@ -46,6 +49,9 @@ var material: StandardMaterial3D
 var locations: Array = []
 var loot_by_id: Dictionary = {}
 var spawn_center := Vector2.ZERO
+## XZ of procedural trees, rocks and roadside wrecks, so the Kenney dressing can keep clear of them.
+var prop_points := PackedVector2Array()
+var dressing_counts: Dictionary = {}
 
 var _loot_counter: int = 0
 var _dyn_counter: int = 1000000
@@ -72,6 +78,10 @@ func build(p_seed: int) -> void:
 	var t2: int = Time.get_ticks_msec()
 	_build_locations()
 	var t3: int = Time.get_ticks_msec()
+	var dressing = KenneyDressing.new(self)
+	add_child(dressing.build())
+	dressing_counts = dressing.counts
+	print("[World] kenney dressing: %s" % [str(dressing_counts)])
 	day_night = DayNight.new()
 	day_night.name = "DayNight"
 	day_night.time_hours = start_hour
@@ -284,6 +294,7 @@ func _build_props() -> void:
 			continue
 		var y: float = terrain.height_at(x, z)
 		tree_xf.append(Transform3D(Basis(Vector3.UP, rot).scaled(Vector3(s, s, s)), Vector3(x, y, z)))
+		prop_points.append(Vector2(x, z))
 		canopy_cols.append(palette[pal_i] if gate < 0.8 else palette[(pal_i + 2) % palette.size()])
 		var cs := CollisionShape3D.new()
 		cs.shape = trunk_shape
@@ -365,6 +376,7 @@ func _build_rocks(rng: RandomNumberGenerator, body: StaticBody3D, limit: float) 
 			rcs.shape = sph
 			rcs.position = Vector3(px, py + float(d[5]) * ps, pz)
 			body.add_child(rcs)
+			prop_points.append(Vector2(px, pz))
 			count += 1
 	for si in 4:
 		var d: Array = defs[si]
@@ -473,6 +485,7 @@ func _build_roadside(body: StaticBody3D) -> void:
 			if terrain.normal_at(cp.x, cp.y).y > 0.9:
 				var kinds: Array = ["sedan", "pickup", "van"]
 				var cxf := Transform3D(Basis(Vector3.UP, rng.randf_range(0.0, TAU)), Vector3(cp.x, terrain.height_at(cp.x, cp.y), cp.y))
+				prop_points.append(cp)
 				PropFactory.add_car(mu, body, cxf, str(kinds[rng.randi_range(0, 2)]), PropFactory.random_car_color(rng), rng.randi_range(1, 2), rng)
 	if mu.is_empty():
 		return
@@ -530,5 +543,137 @@ func _build_locations() -> void:
 				_factory.build_warehouse(root, rng)
 			"church":
 				_factory.build_church(root, rng)
+				_build_graveyard(root, rng)
 			_:
 				_factory.build_farm(root, rng)
+				_build_farm_extras(root, rng)
+
+
+# ------------------------------------------------------------------ Kenney graveyard / farm dressing
+
+## Puts one Kenney model on the ground at a location-local offset, with a box collider on layer 1.
+func _place_model(root: Node3D, file: String, height: float, local: Vector3, yaw: float, solid: bool = true) -> Node3D:
+	var m: Node3D = ModelUtil.load_fit(KENNEY_GY + file, height)
+	if m == null:
+		return null
+	var wp: Vector3 = root.transform * local
+	m.position = Vector3(local.x, terrain.height_at(wp.x, wp.z) - root.position.y, local.z)
+	m.rotation.y = yaw
+	root.add_child(m)
+	if solid:
+		var body := StaticBody3D.new()
+		var cs := CollisionShape3D.new()
+		var bs := BoxShape3D.new()
+		var sz: Vector3 = m.get_meta("size") as Vector3
+		bs.size = Vector3(sz.x, sz.y, sz.z) * 0.9
+		cs.shape = bs
+		cs.position = Vector3(0, sz.y * 0.5, 0)
+		body.position = m.position
+		body.rotation.y = yaw
+		body.add_child(cs)
+		root.add_child(body)
+	return m
+
+
+## Rows of gravestones, crosses, a small crypt and pines behind the chapel.
+func _build_graveyard(root: Node3D, rng: RandomNumberGenerator) -> void:
+	var stones: Array = ["gravestone-bevel.glb", "gravestone-round.glb", "gravestone-cross.glb",
+		"gravestone-wide.glb", "gravestone-broken.glb", "gravestone-decorative.glb"]
+	for row in 2:
+		for col in 6:
+			if rng.randf() < 0.15:
+				continue
+			# Rows sit beyond the procedural headstones (z 8.5..12.1, two rows) and inside the iron fence (z 18.5)
+			var lp := Vector3(-7.5 + float(col) * 3.0 + rng.randf_range(-0.4, 0.4), 0.0, 14.6 + float(row) * 2.2 + rng.randf_range(-0.3, 0.3))
+			_place_model(root, str(stones[rng.randi_range(0, stones.size() - 1)]), rng.randf_range(1.0, 1.3), lp, rng.randf_range(-0.15, 0.15))
+	_place_model(root, "cross-column.glb", 2.0, Vector3(0.0, 0.0, 19.5), 0.0)
+	# Crypt kept inside the west fence (x -15) and clear of the procedural headstone rows
+	_place_model(root, "crypt-small.glb", 3.4, Vector3(-12.2, 0.0, 15.6), PI * 0.5)
+	_place_model(root, "pine-crooked.glb", 5.5, Vector3(11.5, 0.0, 20.4), 0.0)
+	_place_model(root, "pine-fall.glb", 5.0, Vector3(-9.0, 0.0, 20.0), 0.0)
+	_place_model(root, "lantern-glass.glb", 0.6, Vector3(3.2, 0.0, 11.0), 0.0, false)
+	_dress_graveyard(root, rng)
+
+
+## Churchyard edging and set dressing: stone wall along the back, columns on the iron-fence corners,
+## stone piers and lightposts at the south gate, urns, candles, pumpkins, a shovel and a second lantern.
+## Draws from the per-location rng only after the church interior is built, so loot layout is unaffected.
+func _dress_graveyard(root: Node3D, rng: RandomNumberGenerator) -> void:
+	# Back wall: a column every fourth piece, ~1 in 5 plain sections damaged, closed off with a final column.
+	var x := -13.0
+	var n := 0
+	while x < 13.0:
+		var piece := "stone-wall.glb"
+		var step := 1.656
+		if n % 4 == 0:
+			piece = "stone-wall-column.glb"
+			step = 1.416
+		elif rng.randf() < 0.2:
+			piece = "stone-wall-damaged.glb"
+		_place_model(root, piece, 1.2, Vector3(x + step * 0.5, 0.0, 21.6), 0.0)
+		x += step
+		n += 1
+	_place_model(root, "stone-wall-column.glb", 1.2, Vector3(x + 0.708, 0.0, 21.6), 0.0)
+	# Iron-fence corner columns
+	# Set just outside each corner (fence colliders end at the corner) so the column does not overlap the fence
+	for cx in [-15.0, 15.0]:
+		for cz in [6.5, 18.5]:
+			_place_model(root, "iron-fence-border-column.glb", 1.6, Vector3(cx + signf(cx) * 0.9, 0.0, cz + (-0.9 if cz < 10.0 else 0.9)), 0.0)
+	# South gate: stone piers beside the opening, a lightpost behind each pier with its arm toward the gate
+	for sx in [-1.0, 1.0]:
+		_place_model(root, "stone-wall-column.glb", 1.5, Vector3(sx * 2.9, 0.0, 7.6), 0.0)   # inside the fence line, flanking the gate
+		var post: Node3D = _place_model(root, "lightpost-single.glb", 3.0, Vector3(sx * 4.6, 0.0, 5.4), -sx * PI * 0.5, false)
+		_add_post_collision(root, post, 0.14)
+	_place_model(root, "lantern-candle.glb", 0.6, Vector3(-3.2, 0.0, 11.0), 0.0, false)
+	# Urns and candles at the foot of the cross column, pumpkins and a shovel between the grave rows
+	_place_model(root, "urn-round.glb", 0.8, Vector3(-1.7, 0.0, 19.3), 0.0)
+	_place_model(root, "urn-square.glb", 0.8, Vector3(1.7, 0.0, 19.3), 0.0)
+	_place_model(root, "candle-multiple.glb", 0.3, Vector3(-0.9, 0.0, 18.3), rng.randf() * TAU, false)
+	_place_model(root, "candle.glb", 0.25, Vector3(0.8, 0.0, 18.2), rng.randf() * TAU, false)
+	_place_model(root, "pumpkin-carved.glb", 0.5, Vector3(-2.0, 0.0, 10.0), 0.6, false)
+	_place_model(root, "pumpkin-tall-carved.glb", 0.7, Vector3(6.0, 0.0, 13.2), -0.4, false)
+	_place_model(root, "pumpkin.glb", 0.45, Vector3(10.0, 0.0, 16.8), rng.randf() * TAU, false)
+	_place_model(root, "shovel-dirt.glb", 1.1, Vector3(-5.8, 0.0, 17.2), 0.8, false)
+
+
+## Thin cylinder collider for a slim model (lightpost) whose full bounding box would be too wide.
+func _add_post_collision(root: Node3D, m: Node3D, radius: float) -> void:
+	if m == null:
+		return
+	var sz: Vector3 = m.get_meta("size") as Vector3
+	var body := StaticBody3D.new()
+	var cs := CollisionShape3D.new()
+	var sh := CylinderShape3D.new()
+	sh.radius = radius
+	sh.height = sz.y
+	cs.shape = sh
+	cs.position = Vector3(0, sz.y * 0.5, 0)
+	body.position = m.position
+	body.add_child(cs)
+	root.add_child(body)
+
+
+## Hay bales and pumpkins on the edge of each farm pad.
+func _build_farm_extras(root: Node3D, rng: RandomNumberGenerator) -> void:
+	for i in 5:
+		# Reject spots on the farm fence/barn: stay outside the fence rectangle (x -19..19, z -15..17) by 2.4 m
+		var lp := Vector3.ZERO
+		var wp := Vector3.ZERO
+		var found := false
+		for _try in 14:
+			var a: float = rng.randf() * TAU
+			var r: float = rng.randf_range(20.0, 26.0)
+			lp = Vector3(cos(a) * r, 0.0, sin(a) * r)
+			if lp.x > -21.4 and lp.x < 21.4 and lp.z > -17.4 and lp.z < 19.4:
+				continue
+			wp = root.transform * lp
+			if terrain.normal_at(wp.x, wp.z).y < 0.92:
+				continue
+			found = true
+			break
+		if not found:
+			continue
+		if i < 3:
+			_place_model(root, "hay-bale.glb" if i % 2 == 0 else "hay-bale-bundled.glb", 1.1, lp, rng.randf() * TAU)
+		else:
+			_place_model(root, "pumpkin.glb", 0.45, lp, rng.randf() * TAU, false)

@@ -47,10 +47,13 @@ const ITEMS := {
 	"food": {
 		"name": "Canned Food", "type": "consumable", "stack": 8, "weight": 0.4, "hunger": 35.0,
 		"color": Color(0.8, 0.55, 0.2), "shape": "can", "desc": "Restores hunger.",
+		"model": "res://assets/kenney/food/can.glb", "model_height": 0.17,
+		"models": [["res://assets/kenney/food/can.glb", 0.17], ["res://assets/kenney/food/can-small.glb", 0.07]],
 	},
 	"water": {
 		"name": "Water Bottle", "type": "consumable", "stack": 8, "weight": 0.5, "thirst": 40.0,
 		"color": Color(0.35, 0.65, 0.9), "shape": "bottle", "desc": "Restores thirst.",
+		"model": "res://assets/kenney/food/soda-bottle.glb", "model_height": 0.3,
 	},
 	"scrap": {
 		"name": "Scrap Metal", "type": "material", "stack": 30, "weight": 0.3,

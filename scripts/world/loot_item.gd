@@ -8,6 +8,7 @@ extends StaticBody3D
 signal picked_up(item, by)
 
 const ItemDB = preload("res://scripts/world/item_db.gd")
+const ModelUtil = preload("res://scripts/world/model_util.gd")
 const SELF_PATH := "res://scripts/world/loot_item.gd"
 const ITEM_LAYER := 8
 
@@ -64,6 +65,21 @@ func _build_visual() -> void:
 	_visual = Node3D.new()
 	_visual.name = "Visual"
 	add_child(_visual)
+	var model_path: String = str(info.get("model", ""))
+	var model_height: float = float(info.get("model_height", 0.25))
+	# Optional "models": [[path, height], ...]. The variant is chosen from loot_id, so every peer
+	# (and the world seed) shows the same model for the same pickup.
+	var variants: Array = info.get("models", []) as Array
+	if not variants.is_empty():
+		var pick: Array = variants[absi(loot_id) % variants.size()] as Array
+		model_path = str(pick[0])
+		model_height = float(pick[1])
+	if model_path != "":
+		var m: Node3D = ModelUtil.load_fit(model_path, model_height)
+		if m != null:
+			_visual.add_child(m)
+			_add_box_collision(m.get_meta("size") as Vector3)
+			return
 	var size := Vector3(0.22, 0.12, 0.16)
 	match shape_kind:
 		"gun":
@@ -123,6 +139,10 @@ func _build_visual() -> void:
 			var bm2 := BoxMesh.new()
 			bm2.size = size
 			_add_mesh(bm2, col, Vector3(0, size.y * 0.5, 0))
+	_add_box_collision(size)
+
+
+func _add_box_collision(size: Vector3) -> void:
 	var cs := CollisionShape3D.new()
 	var bs := BoxShape3D.new()
 	bs.size = size + Vector3(0.12, 0.12, 0.12)

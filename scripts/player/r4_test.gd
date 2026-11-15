@@ -146,7 +146,7 @@ func _run() -> void:
 	check(kinds[0].max_health == 100.0 and kinds[1].max_health < 100.0 and kinds[2].max_health > 200.0, "walker 100 / runner < 100 / bloater > 200 hp")
 	check(kinds[1].runner and not kinds[0].runner and not kinds[2].runner, "runner flag only on the runner")
 	check(kinds[2].chase_speed < kinds[0].chase_speed and kinds[1].runner_speed > kinds[0].chase_speed, "bloater slower, runner faster than walker")
-	check(tri_by_kind[0] > 1560 and tri_by_kind[1] > 1560 and tri_by_kind[2] > 1560, "all variants above the old 1560-triangle zombie")
+	check(tri_by_kind[0] > 600 and tri_by_kind[1] > 1560 and tri_by_kind[2] > 1560, "runner/bloater above the old 1560-triangle zombie; Kenney walker (low-poly model) above 600")
 	check(tri_by_kind[0] != tri_by_kind[1] and tri_by_kind[1] != tri_by_kind[2] and tri_by_kind[0] != tri_by_kind[2], "variant meshes differ")
 	var legacy = sp.spawn_zombie_at(Vector3(60, 0.1, 40), true)
 	check(legacy.kind == Zombie.KIND_RUNNER and legacy.runner, "legacy spawn_zombie_at(pos, true) is a runner")

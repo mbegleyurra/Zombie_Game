@@ -23,6 +23,11 @@ const KIND_RUNNER := 1
 const KIND_BLOATER := 2
 const FLINCH_TIME := 0.28
 const DEATH_TIME := 1.1   ## seconds for the full collapse animation
+const WALKER_MODEL := "res://assets/kenney/mini/character-zombie.glb"
+const WALKER_SCALE := 2.6        ## Kenney model is ~0.67 tall: x2.6 = ~1.75 m
+const WALKER_HEAD_LINE := 1.36   ## head hit line for the Kenney walker (head spans ~0.9-1.77 m); must stay above the ~1.32 m a 300 m rifle drop lands at
+const WALKER_RADIUS := 0.4       ## collision capsule radius for the Kenney walker: its scaled head/legs are ~0.8-0.9 m wide, the stock 0.32 let shots pass through the head edge
+const WALKER_HEAD_RADIUS := 0.44 ## extra head sphere: the head is ~0.94 m wide, wider than the capsule; centre offset + radius must stay under half the narrowest door (1.2 m)
 
 @export var max_health: float = 100.0
 @export var walk_speed: float = 1.1
@@ -93,6 +98,10 @@ var _body: Node3D
 var _head: Node3D
 var _arms: Array[Node3D] = []
 var _legs: Array[Node3D] = []
+var _skel: Skeleton3D          ## Kenney walker rig (null for the procedural bodies)
+var _bone_head: int = -1
+var _bone_arm: Array[int] = []
+var _bone_leg: Array[int] = []
 var _mat_skin: StandardMaterial3D
 var _mat_shirt: StandardMaterial3D
 var _mat_pants: StandardMaterial3D
@@ -165,7 +174,8 @@ func _rpc_damage(amount: float, headshot: bool, attacker: int) -> void:
 
 
 func is_head_hit(world_pos: Vector3) -> bool:
-	return world_pos.y > global_position.y + 1.48
+	var line := WALKER_HEAD_LINE if _skel != null else 1.48
+	return world_pos.y > global_position.y + line
 
 
 func _take_damage(amount: float, headshot: bool, attacker: int) -> void:
@@ -613,6 +623,7 @@ func _process(delta: float) -> void:
 	_fall = move_toward(_fall, 1.0 if dead else 0.0, delta / (DEATH_TIME * (1.3 if kind == KIND_BLOATER else 1.0)))
 	if dead:
 		_death_pose()
+		_sync_rig()
 		return
 	_body.rotation.x = 0.0
 	_body.position.y = 0.0
@@ -623,15 +634,16 @@ func _process(delta: float) -> void:
 		_legs[0].rotation.x = swing * 0.7
 		_legs[1].rotation.x = -swing * 0.7
 	var reach := state_id == State.CHASE or state_id == State.ATTACK
-	var arm_base := -1.35 if reach else -0.25
+	# Zombie faces -Z; a +X rotation swings a hanging arm toward -Z (forward).
+	var arm_base := 1.35 if reach else 0.25
 	if _arms.size() == 2:
 		var punch := 0.0
 		if _attack_anim > 0.0:
 			punch = sin((0.6 - _attack_anim) / 0.6 * PI) * 0.9
-		_arms[0].rotation.x = arm_base - swing * 0.2 - punch
-		_arms[1].rotation.x = arm_base + swing * 0.2 - punch
-		_arms[0].rotation.x = lerpf(_arms[0].rotation.x, -2.75, _wind_pose)
-		_arms[1].rotation.x = lerpf(_arms[1].rotation.x, -2.75, _wind_pose)
+		_arms[0].rotation.x = arm_base - swing * 0.2 + punch
+		_arms[1].rotation.x = arm_base + swing * 0.2 + punch
+		_arms[0].rotation.x = lerpf(_arms[0].rotation.x, 2.75, _wind_pose)
+		_arms[1].rotation.x = lerpf(_arms[1].rotation.x, 2.75, _wind_pose)
 		_arms[0].rotation.z = 0.1 + sin(_anim_phase) * 0.05
 		_arms[1].rotation.z = -0.1 - sin(_anim_phase) * 0.05
 	var lurch := 0.12 if reach else 0.05
@@ -642,6 +654,7 @@ func _process(delta: float) -> void:
 	_head.rotation.x = (0.1 if reach else 0.25) - 0.35 * _wind_pose
 	if _flinch > 0.0:
 		_apply_flinch()
+	_sync_rig()
 	# hit flash tint
 	if _mat_skin:
 		_mat_skin.emission_enabled = _hit_flash > 0.0
@@ -723,6 +736,121 @@ func _build_leg(_side: float, hip: Vector3, length: float, radius: float, seg: i
 
 
 func _build_walker() -> void:
+	if not _build_kenney_walker():
+		_build_walker_procedural()
+
+
+## Walker: the Kenney Mini Characters zombie, scaled up to near-human height. Its pose is
+## driven from code through the same pivots the procedural bodies use (_head/_arms/_legs
+## are empty Node3Ds whose rotations _sync_rig copies onto the bones). Returns false, so the
+## procedural body is built instead, when the asset or its bones are missing.
+func _build_kenney_walker() -> bool:
+	if not ResourceLoader.exists(WALKER_MODEL):
+		return false
+	var ps := load(WALKER_MODEL) as PackedScene
+	if ps == null:
+		return false
+	var model := ps.instantiate() as Node3D
+	if model == null:
+		return false
+	var skel := model.find_child("Skeleton3D", true, false) as Skeleton3D
+	if skel == null:
+		model.free()
+		return false
+	var head_b := skel.find_bone("head")
+	var arm_b: Array[int] = [skel.find_bone("arm-left"), skel.find_bone("arm-right")]
+	var leg_b: Array[int] = [skel.find_bone("leg-left"), skel.find_bone("leg-right")]
+	if head_b < 0 or arm_b.has(-1) or leg_b.has(-1):
+		model.free()
+		return false
+	var ap := model.find_child("AnimationPlayer", true, false)
+	if ap != null:
+		ap.get_parent().remove_child(ap)   # poses come from code, not the stock clips
+		ap.free()
+	model.scale = Vector3.ONE * WALKER_SCALE
+	model.rotation.y = PI   # Kenney faces +Z; zombies face -Z
+	_body.add_child(model)
+	# one fixed look for every walker: the model's own texture. Private copy so the hit
+	# flash does not light up every walker sharing the imported material.
+	var tex_mat: StandardMaterial3D = null
+	for n in model.find_children("*", "MeshInstance3D", true, false):
+		var mi := n as MeshInstance3D
+		if tex_mat == null:
+			var src := mi.mesh.surface_get_material(0) as StandardMaterial3D
+			if src != null:
+				tex_mat = src.duplicate() as StandardMaterial3D
+		if tex_mat != null:
+			mi.material_override = tex_mat
+	if tex_mat != null:
+		_mat_skin = tex_mat
+	_head = Node3D.new()
+	_body.add_child(_head)
+	for _i in range(2):
+		var arm := Node3D.new()
+		_body.add_child(arm)
+		_arms.append(arm)
+		var leg := Node3D.new()
+		_body.add_child(leg)
+		_legs.append(leg)
+	_skel = skel
+	_bone_head = head_b
+	_bone_arm = arm_b
+	_bone_leg = leg_b
+	var cs := get_node_or_null("Collision") as CollisionShape3D
+	if cs != null and cs.shape is CapsuleShape3D:
+		var shape := (cs.shape as CapsuleShape3D).duplicate() as CapsuleShape3D   # scene sub-resource is shared by every zombie
+		shape.radius = WALKER_RADIUS
+		cs.shape = shape
+	_add_walker_head_shape()
+	return true
+
+
+## Second collision shape over the walker's head, centred on the head mesh's rest-pose x/z
+## bounds (zombie-local), so shots at the head edge that the capsule misses still hit.
+func _add_walker_head_shape() -> void:
+	var lo := Vector2(INF, INF)
+	var hi := Vector2(-INF, -INF)
+	for n in _body.find_children("*", "MeshInstance3D", true, false):
+		var mi := n as MeshInstance3D
+		var xf := Transform3D.IDENTITY
+		var node: Node = mi
+		while node != null and node != self:
+			xf = (node as Node3D).transform * xf
+			node = node.get_parent()
+		var verts: PackedVector3Array = mi.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+		for v in verts:
+			var w := xf * v
+			if w.y >= WALKER_HEAD_LINE:
+				lo = Vector2(minf(lo.x, w.x), minf(lo.y, w.z))
+				hi = Vector2(maxf(hi.x, w.x), maxf(hi.y, w.z))
+	if lo.x > hi.x:
+		return
+	var sphere := SphereShape3D.new()
+	sphere.radius = WALKER_HEAD_RADIUS
+	var head_cs := CollisionShape3D.new()
+	head_cs.name = "HeadCollision"
+	head_cs.shape = sphere
+	head_cs.position = Vector3((lo.x + hi.x) * 0.5, 1.33, (lo.y + hi.y) * 0.5)
+	add_child(head_cs)
+
+
+## Copies the pivot rotations onto the Kenney bones. The model is turned 180 deg about Y, so
+## X/Z rotations flip sign; arms are aimed by direction (the rest pose is a T-pose along +-X).
+## _arms[0]/_legs[0] sit on the zombie's -X side = the model's +X side = "arm-left"/"leg-left".
+func _sync_rig() -> void:
+	if _skel == null:
+		return
+	_skel.set_bone_pose_rotation(_bone_head, Quaternion.from_euler(Vector3(-_head.rotation.x, 0.0, -_head.rotation.z)))
+	for i in range(2):
+		_skel.set_bone_pose_rotation(_bone_leg[i], Quaternion(Vector3.RIGHT, -_legs[i].rotation.x))
+		var r := _arms[i]
+		var el := -PI * 0.5 + r.rotation.x   # 0 rad = hanging, +x swings up/forward
+		var out := absf(r.rotation.z) * (1.0 if i == 0 else -1.0)
+		var d := Vector3(out, sin(el), cos(el)).normalized()   # model +Z = zombie forward
+		_skel.set_bone_pose_rotation(_bone_arm[i], Quaternion(Vector3.RIGHT if i == 0 else Vector3.LEFT, d))
+
+
+func _build_walker_procedural() -> void:
 	_mesh(_body, _box_mesh(Vector3(0.5, 0.62, 0.27)), Vector3(0, 1.17, 0), _mat_shirt)
 	_mesh(_body, _box_mesh(Vector3(0.46, 0.22, 0.25)), Vector3(0, 0.78, 0), _mat_pants)
 	_mesh(_body, _box_mesh(Vector3(0.47, 0.05, 0.26)), Vector3(0, 0.9, 0), _material(Color(0.12, 0.1, 0.08)))   # belt
@@ -805,6 +933,8 @@ func _apply_kind() -> void:
 
 
 func _apply_variant() -> void:
+	if _skel != null:
+		return   # Kenney walkers all share one fixed look: model texture, scale 1
 	var rng := RandomNumberGenerator.new()
 	rng.seed = variant_seed
 	_mat_skin.albedo_color = Color(0.55 + rng.randf() * 0.2, 0.62 + rng.randf() * 0.15, 0.5 + rng.randf() * 0.1)

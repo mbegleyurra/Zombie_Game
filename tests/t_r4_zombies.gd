@@ -62,17 +62,25 @@ func _run() -> void:
 	info("max_health walker=%.0f runner=%.0f bloater=%.0f" % [w.max_health, r.max_health, b.max_health])
 	check(b.health != w.health or b.max_health != w.max_health or b._body.scale != w._body.scale, "bloater differs from a walker (health or build)")
 	# ---- appearance differs per variant seed and per kind
-	var a1 = sp.spawn_zombie_at(_ground(main, base + Vector3(40, 0, 40)), false, Zombie.KIND_WALKER)
-	var a2 = sp.spawn_zombie_at(_ground(main, base + Vector3(44, 0, 40)), false, Zombie.KIND_WALKER)
+	var a1 = sp.spawn_zombie_at(_ground(main, base + Vector3(40, 0, 40)), false, Zombie.KIND_RUNNER)
+	var a2 = sp.spawn_zombie_at(_ground(main, base + Vector3(44, 0, 40)), false, Zombie.KIND_RUNNER)
+	var w1 = sp.spawn_zombie_at(_ground(main, base + Vector3(48, 0, 40)), false, Zombie.KIND_WALKER)
+	var w2 = sp.spawn_zombie_at(_ground(main, base + Vector3(52, 0, 40)), false, Zombie.KIND_WALKER)
 	for _i in 5:
 		await physics_frame
 	a1.variant_seed = 1111
 	a2.variant_seed = 2222
 	var c1: Color = a1._mat_shirt.albedo_color
 	var c2: Color = a2._mat_shirt.albedo_color
-	check(c1 != c2, "different variant_seed -> different shirt colour (%s vs %s)" % [c1, c2])
+	check(c1 != c2, "runners: different variant_seed -> different shirt colour (%s vs %s)" % [c1, c2])
 	a2.variant_seed = 1111
-	check(a2._mat_shirt.albedo_color == a1._mat_shirt.albedo_color, "same variant_seed -> same look (deterministic)")
+	check(a2._mat_shirt.albedo_color == a1._mat_shirt.albedo_color, "runners: same variant_seed -> same look (deterministic)")
+	# walkers are the Kenney model with one fixed look: the seed changes nothing
+	w1.variant_seed = 1111
+	w2.variant_seed = 2222
+	check(w1._skel != null and w2._skel != null, "walkers use the Kenney rig")
+	check(w1._mat_skin.albedo_color == w2._mat_skin.albedo_color and w1._body.scale == w2._body.scale, "walkers: every seed gives the same colour and scale")
+	check(w1._mat_skin.albedo_texture != null and w1._mat_skin.albedo_color == Color(1, 1, 1, 1), "walkers keep the model's own texture, untinted")
 	check(b._mat_skin.albedo_color != w._mat_skin.albedo_color or b._body.scale != w._body.scale, "bloater looks different from a walker")
 	# ---- speeds: runner outruns walker when both chase
 	check(r.runner_speed > r.chase_speed, "runner_speed %.1f > chase_speed %.1f" % [r.runner_speed, r.chase_speed])

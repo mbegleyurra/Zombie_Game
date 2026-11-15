@@ -8,6 +8,8 @@ const LootContainer = preload("res://scripts/world/loot_container.gd")
 const LootItem = preload("res://scripts/world/loot_item.gd")
 const ItemDB = preload("res://scripts/world/item_db.gd")
 const PropFactory = preload("res://scripts/world/prop_factory.gd")
+const ModelUtil = preload("res://scripts/world/model_util.gd")
+const KENNEY_FOOD := "res://assets/kenney/food/"
 
 const F := 0.06   # floor top height above ground (small enough to step over)
 const T := 0.3    # default wall thickness
@@ -135,6 +137,16 @@ func _seg(axis: int, fixed: float, l: float, r: float, ylo: float, yhi: float, c
 
 func _floor_slab(cx: float, cz: float, w: float, d: float, col: Color) -> void:
 	_box(Vector3(cx, F - 0.25, cz), Vector3(w, 0.5, d), col)
+
+
+## Decorative Kenney Food Kit prop: no collision, no loot, so it never affects play. pos is location-local.
+func _deco(file: String, height: float, pos: Vector3, yaw: float = 0.0) -> void:
+	var m: Node3D = ModelUtil.load_fit(KENNEY_FOOD + file, height)
+	if m == null:
+		return
+	m.position = pos
+	m.rotation.y = yaw
+	_root.add_child(m)
 
 
 ## Gable roof, ridge along X. y_eave = wall top. Solid convex collision wedge above the eaves.
@@ -295,6 +307,14 @@ func build_farm(root: Node3D, rng: RandomNumberGenerator) -> void:
 	_container("fridge", "farm", 4.3, -3.5, 0.0)
 	_container("crate", "farm", -2.2, 3.0, 0.3)
 	_scatter("farm", 3, -4.4, 4.4, -3.4, 3.4)
+	# Food Kit dressing: dinner table (top F+0.8) and kitchen counter (top F+0.9)
+	_deco("plate.glb", 0.03, Vector3(2.9, F + 0.8, 0.55), 0.0)
+	_deco("plate.glb", 0.03, Vector3(3.5, F + 0.8, 1.05), 0.0)
+	_deco("apple.glb", 0.08, Vector3(3.5, F + 0.83, 1.05), 0.0)
+	_deco("mug.glb", 0.1, Vector3(3.2, F + 0.8, 0.8), 0.8)
+	_deco("pot-stew.glb", 0.2, Vector3(2.4, F + 0.9, -3.5), 0.0)
+	_deco("frying-pan.glb", 0.04, Vector3(2.9, F + 0.9, -3.5), 0.5)
+	_deco("loaf.glb", 0.15, Vector3(3.4, F + 0.9, -3.45), 0.2)
 	# Barn: x in [10,18], z in [-5,1]
 	var bx := 14.0
 	var bz := -2.0
@@ -352,6 +372,16 @@ func build_gas_station(root: Node3D, rng: RandomNumberGenerator) -> void:
 	_container("fridge", "gas_station", -5.5, -2.6, PI * 0.5)
 	_container("fridge", "gas_station", -5.5, 2.6, PI * 0.5)
 	_scatter("gas_station", 4, -5.0, 5.0, -3.2, 3.2)
+	# Food Kit dressing: counter clutter (counter top F+1.1) and litter on the floor
+	_deco("soda-can.glb", 0.13, Vector3(1.7, F + 1.1, -0.35), 0.4)
+	_deco("soda-can.glb", 0.13, Vector3(1.95, F + 1.1, -0.55), 1.2)
+	_deco("plate.glb", 0.03, Vector3(2.2, F + 1.1, -0.3), 0.0)
+	_deco("candy-bar.glb", 0.02, Vector3(2.2, F + 1.13, -0.3), 0.3)
+	_deco("bottle-ketchup.glb", 0.2, Vector3(4.1, F + 1.1, -0.4), 0.0)
+	_deco("mug.glb", 0.1, Vector3(4.45, F + 1.1, -0.6), 2.0)
+	_deco("soda-can-crushed.glb", 0.1, Vector3(-1.2, F, 2.2), 0.7)
+	_deco("can-open.glb", 0.11, Vector3(-3.4, F, 0.8), 1.9)
+	_deco("plate-broken.glb", 0.025, Vector3(1.6, F, 2.6), 0.3)
 	# Forecourt: slab, canopy, pumps
 	_box(Vector3(0, F - 0.25, 11.0), Vector3(16.0, 0.5, 10.0), C_FLOOR_CONCRETE)
 	for px in [-6.0, 6.0]:
@@ -606,7 +636,10 @@ func build_church(root: Node3D, rng: RandomNumberGenerator) -> void:
 			var gx: float = -12.0 + float(ci) * 4.0 + rng.randf_range(-0.6, 0.6)
 			var gz: float = 8.5 + float(row) * 3.2 + rng.randf_range(-0.4, 0.4)
 			var gxf := Transform3D(Basis(Vector3.UP, rng.randf_range(-0.25, 0.25)), Vector3(gx, F, gz))
-			_mu.add_box_xf(gxf, Vector3(0, 0.45, 0), Vector3(0.7, 0.9, 0.16), stone.darkened(rng.randf_range(0.0, 0.25)))
+			var shade: float = rng.randf_range(0.0, 0.25)
+			if row >= 2:
+				continue   # third row dropped (Kenney graveyard rows occupy that ground); rng draws kept so loot layout is unchanged
+			_mu.add_box_xf(gxf, Vector3(0, 0.45, 0), Vector3(0.7, 0.9, 0.16), stone.darkened(shade))
 			_mu.add_box_xf(gxf, Vector3(0, 0.06, 0.9), Vector3(0.9, 0.12, 1.8), Color(0.38, 0.3, 0.2))
 			PropFactory.add_collision(_body, gxf, Vector3(0, 0.45, 0), Vector3(0.7, 0.9, 0.16))
 	_fence_rect(-15.0, 6.5, 15.0, 18.5, 4.0, C_FENCE_IRON, 1.4)
