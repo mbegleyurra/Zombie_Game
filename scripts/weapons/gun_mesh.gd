@@ -28,6 +28,8 @@ static func build(model: String) -> Node3D:
 			_shotgun(root)
 		"hunting":
 			_hunting(root)
+		"ar":
+			_ar(root)
 		_:
 			_pistol(root)
 	return root
@@ -275,3 +277,43 @@ static func _hunting(r: Node3D) -> void:
 	_box(r, Vector3(0.034, 0.03, 0.1), Vector3(0, 0.03, 0.08), WOOD, Vector3(-8, 0, 0))    # cheek rest
 	_post(r, 0.006, 0.014, Vector3(0.03, -0.02, -0.5), STEEL, 0.6, 8)                      # sling stud
 	_muzzle(r, -0.99, 0.015)
+
+
+static func _ar(r: Node3D) -> void:
+	# modern assault rifle: polymer receiver, free-float rail handguard, folding-style stock, red-dot optic
+	_box(r, Vector3(0.05, 0.08, 0.28), Vector3(0, 0.0, -0.14), POLYMER)                    # upper/lower receiver
+	_box(r, Vector3(0.048, 0.018, 0.28), Vector3(0, 0.049, -0.14), DARK)                   # top rail base
+	_ribs(r, 9, Vector3(0.022, 0.01, 0.012), Vector3(0, 0.063, -0.03), Vector3(0, 0, -0.03), DARK)  # top rail teeth
+	_box(r, Vector3(0.056, 0.062, 0.34), Vector3(0, 0.0, -0.45), DARK)                     # free-float handguard
+	_ribs(r, 7, Vector3(0.06, 0.012, 0.02), Vector3(0, 0.015, -0.3), Vector3(0, 0, -0.045), STEEL, 0.5)  # handguard vent slots
+	_ribs(r, 6, Vector3(0.02, 0.012, 0.012), Vector3(0, 0.043, -0.31), Vector3(0, 0, -0.045), DARK)  # handguard top rail
+	_barrel(r, 0.011, 0.16, Vector3(0, 0.005, -0.7), STEEL)                                # barrel
+	_barrel(r, 0.016, 0.09, Vector3(0, 0.005, -0.8), DARK, 0.6, 8)                         # flash hider
+	_barrel(r, 0.018, 0.02, Vector3(0, 0.005, -0.835), STEEL, 0.6, 8)                      # hider crown
+	_box(r, Vector3(0.03, 0.04, 0.03), Vector3(0, 0.025, -0.62), STEEL, Vector3.ZERO, 0.5) # gas block
+	_box(r, Vector3(0.008, 0.05, 0.01), Vector3(0, 0.07, -0.64), DARK)                     # folding front sight
+	_box(r, Vector3(0.042, 0.14, 0.06), Vector3(0, -0.105, -0.17), POLYMER, Vector3(5, 0, 0))  # curved 20 rd magazine
+	_ribs(r, 5, Vector3(0.044, 0.008, 0.062), Vector3(0, -0.06, -0.17), Vector3(0, -0.022, 0.003), DARK)  # magazine ribs
+	_box(r, Vector3(0.04, 0.012, 0.07), Vector3(0, -0.178, -0.165), DARK, Vector3(5, 0, 0))  # magazine floor plate
+	_box(r, Vector3(0.036, 0.1, 0.05), Vector3(0, -0.08, -0.03), POLYMER, Vector3(-18, 0, 0))  # pistol grip
+	_ribs(r, 4, Vector3(0.038, 0.006, 0.04), Vector3(0, -0.05, -0.04), Vector3(0, -0.02, 0.003), DARK)  # grip texture
+	_box(r, Vector3(0.012, 0.03, 0.01), Vector3(0, -0.055, -0.09), DARK, Vector3(-10, 0, 0))  # trigger
+	_box(r, Vector3(0.03, 0.01, 0.09), Vector3(0, -0.07, -0.085), POLYMER)                 # trigger guard
+	_box(r, Vector3(0.012, 0.012, 0.03), Vector3(0.028, 0.015, -0.12), DARK)               # ejection port cover
+	_box(r, Vector3(0.012, 0.016, 0.014), Vector3(0.028, 0.0, -0.05), DARK)                # forward assist
+	_box(r, Vector3(0.026, 0.012, 0.03), Vector3(0, 0.062, -0.01), DARK)                   # charging handle
+	_box(r, Vector3(0.012, 0.012, 0.02), Vector3(-0.028, -0.04, -0.13), DARK)              # magazine release
+	_box(r, Vector3(0.008, 0.01, 0.03), Vector3(-0.027, 0.01, -0.03), STEEL, Vector3.ZERO, 0.6)  # selector lever
+	_box(r, Vector3(0.042, 0.075, 0.22), Vector3(0, -0.005, 0.2), POLYMER, Vector3(-3, 0, 0))   # stock body
+	_box(r, Vector3(0.034, 0.03, 0.14), Vector3(0, 0.05, 0.17), POLYMER)                   # cheek riser
+	_barrel(r, 0.02, 0.12, Vector3(0, 0.02, 0.1), STEEL, 0.5, 8)                           # buffer tube
+	_box(r, Vector3(0.046, 0.09, 0.022), Vector3(0, -0.005, 0.32), DARK)                   # butt pad
+	_box(r, Vector3(0.012, 0.022, 0.06), Vector3(0.027, 0.0, 0.15), DARK)                  # stock latch/adjuster
+	# red-dot optic on the top rail
+	_box(r, Vector3(0.034, 0.012, 0.07), Vector3(0, 0.077, -0.12), DARK)                   # optic mount
+	_box(r, Vector3(0.036, 0.04, 0.07), Vector3(0, 0.1, -0.12), DARK)                      # optic body
+	var lens := _box(r, Vector3(0.026, 0.026, 0.004), Vector3(0, 0.1, -0.157), GLASS, Vector3.ZERO, 0.9)  # front lens
+	lens.material_override = _mat(GLASS, 0.9, 0.1)
+	_box(r, Vector3(0.004, 0.004, 0.003), Vector3(0, 0.1, -0.1575), Color(1.0, 0.1, 0.1))  # reticle dot
+	_post(r, 0.006, 0.014, Vector3(0.03, -0.02, -0.28), STEEL, 0.6, 8)                     # sling swivel
+	_muzzle(r, -0.845, 0.005)

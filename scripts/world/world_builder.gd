@@ -27,6 +27,7 @@ const LootItem = preload("res://scripts/world/loot_item.gd")
 const PropFactory = preload("res://scripts/world/prop_factory.gd")
 const ModelUtil = preload("res://scripts/world/model_util.gd")
 const KenneyDressing = preload("res://scripts/world/kenney_dressing.gd")
+const KayKitForest = preload("res://scripts/world/kaykit_forest.gd")
 const KENNEY_GY := "res://assets/kenney/graveyard/"
 
 const MAX_TREES := 900
@@ -52,6 +53,7 @@ var spawn_center := Vector2.ZERO
 ## XZ of procedural trees, rocks and roadside wrecks, so the Kenney dressing can keep clear of them.
 var prop_points := PackedVector2Array()
 var dressing_counts: Dictionary = {}
+var forest_counts: Dictionary = {}
 
 var _loot_counter: int = 0
 var _dyn_counter: int = 1000000
@@ -72,6 +74,7 @@ func build(p_seed: int) -> void:
 	add_child(terrain)
 	terrain.setup(world_seed)
 	_plan_locations()
+	load("res://scripts/world/dungeon_builder.gd").attach(self)
 	terrain.build_chunks(material)
 	var t1: int = Time.get_ticks_msec()
 	_build_props()
@@ -82,6 +85,10 @@ func build(p_seed: int) -> void:
 	add_child(dressing.build())
 	dressing_counts = dressing.counts
 	print("[World] kenney dressing: %s" % [str(dressing_counts)])
+	var forest = KayKitForest.new(self)
+	add_child(forest.build())
+	forest_counts = forest.counts
+	print("[World] kaykit forest: %s" % [str(forest_counts)])
 	day_night = DayNight.new()
 	day_night.name = "DayNight"
 	day_night.time_hours = start_hour

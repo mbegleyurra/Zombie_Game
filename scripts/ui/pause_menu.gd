@@ -15,8 +15,11 @@ const BASE_SENS := 0.0022  # matches Player.mouse_sensitivity default
 const SENS_MIN := 25.0
 const SENS_MAX := 300.0
 const SETTINGS_PATH := "user://settings.cfg"
-const BTN_SIZE := Vector2(340, 54)
-const BTN_FONT := 22
+const BTN_SIZE := Vector2(380, 56)
+const BTN_FONT := 26
+const BODY_FONT := 22
+const HEAD_FONT := 48
+const NOTE_FONT := 20
 const KEY_COL := Color(0.95, 0.8, 0.35)
 ## [action, keys] shown on the controls screen. Matches Player.register_inputs and Building.
 const CONTROL_ROWS := [
@@ -31,9 +34,9 @@ const CONTROL_ROWS := [
 	["Weapon slots", "1 - 5"],
 	["Interact / loot", "E"],
 	["Medkit / Food / Water", "H  /  J  /  K"],
-	["Build mode", "B  (1-5 or wheel select, LMB place, X or RMB remove, F door)"],
+	["Build mode", "B  (1-5/wheel select, LMB place, X/RMB remove, F door)"],
 	["Pause / back", "Esc"],
-	["Hide HUD hints", "F1"],
+	["Show / hide controls strip", "F1"],
 ]
 
 static var _sens_pct: float = -1.0
@@ -92,32 +95,32 @@ static func make_controls_panel(on_back: Callable) -> Control:
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	panel.add_child(center)
 	var box := VBoxContainer.new()
-	box.custom_minimum_size = Vector2(620, 0)
-	box.add_theme_constant_override("separation", 8)
+	box.custom_minimum_size = Vector2(960, 0)
+	box.add_theme_constant_override("separation", 6)
 	center.add_child(box)
 
 	var title := Label.new()
 	title.text = "CONTROLS"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 40)
+	title.add_theme_font_size_override("font_size", HEAD_FONT)
 	box.add_child(title)
 
 	var grid := GridContainer.new()
 	grid.columns = 2
 	grid.add_theme_constant_override("h_separation", 32)
-	grid.add_theme_constant_override("v_separation", 4)
+	grid.add_theme_constant_override("v_separation", 2)
 	box.add_child(grid)
 	for row in CONTROL_ROWS:
 		var a := Label.new()
 		a.text = row[0]
-		a.custom_minimum_size = Vector2(210, 0)
-		a.add_theme_font_size_override("font_size", 18)
+		a.custom_minimum_size = Vector2(300, 0)
+		a.add_theme_font_size_override("font_size", BODY_FONT)
 		grid.add_child(a)
 		var k := Label.new()
 		k.text = row[1]
 		k.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		k.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		k.add_theme_font_size_override("font_size", 18)
+		k.add_theme_font_size_override("font_size", BODY_FONT)
 		k.add_theme_color_override("font_color", KEY_COL)
 		grid.add_child(k)
 
@@ -126,8 +129,8 @@ static func make_controls_panel(on_back: Callable) -> Control:
 	box.add_child(sens_row)
 	var sl := Label.new()
 	sl.text = "Mouse sensitivity"
-	sl.custom_minimum_size = Vector2(210, 0)
-	sl.add_theme_font_size_override("font_size", 18)
+	sl.custom_minimum_size = Vector2(300, 0)
+	sl.add_theme_font_size_override("font_size", BODY_FONT)
 	sens_row.add_child(sl)
 	var slider := HSlider.new()
 	slider.min_value = SENS_MIN
@@ -141,8 +144,8 @@ static func make_controls_panel(on_back: Callable) -> Control:
 	sens_row.add_child(slider)
 	var val := Label.new()
 	val.text = "%d%%" % int(slider.value)
-	val.custom_minimum_size = Vector2(60, 0)
-	val.add_theme_font_size_override("font_size", 18)
+	val.custom_minimum_size = Vector2(70, 0)
+	val.add_theme_font_size_override("font_size", BODY_FONT)
 	sens_row.add_child(val)
 	slider.value_changed.connect(func(v: float) -> void:
 		val.text = "%d%%" % int(v)
@@ -151,8 +154,8 @@ static func make_controls_panel(on_back: Callable) -> Control:
 	var note := Label.new()
 	note.text = "Menus: arrow keys / D-pad to move, Enter / A to select, Esc / B to go back.\nIn-game actions are keyboard and mouse only."
 	note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	note.add_theme_font_size_override("font_size", 14)
-	note.modulate = Color(1, 1, 1, 0.7)
+	note.add_theme_font_size_override("font_size", NOTE_FONT)
+	note.modulate = Color(1, 1, 1, 0.85)
 	box.add_child(note)
 
 	var back := Button.new()
@@ -187,11 +190,12 @@ func _ready() -> void:
 	var title := Label.new()
 	title.text = "PAUSED"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 40)
+	title.add_theme_font_size_override("font_size", HEAD_FONT)
 	box.add_child(title)
 	var note := Label.new()
 	note.text = "The world keeps running."
 	note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	note.add_theme_font_size_override("font_size", BODY_FONT)
 	box.add_child(note)
 
 	resume_btn = _button(box, "Resume", func() -> void: resume_requested.emit())
@@ -200,10 +204,10 @@ func _ready() -> void:
 	quit_btn = _button(box, "Quit Game", func() -> void: quit_requested.emit())
 
 	var hint := Label.new()
-	hint.text = "Esc / B: resume"
+	hint.text = "Esc - Resume     Arrow keys + Enter - Choose"
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint.add_theme_font_size_override("font_size", 14)
-	hint.modulate = Color(1, 1, 1, 0.7)
+	hint.add_theme_font_size_override("font_size", NOTE_FONT)
+	hint.modulate = Color(1, 1, 1, 0.85)
 	box.add_child(hint)
 
 	controls_panel = make_controls_panel(close_controls)

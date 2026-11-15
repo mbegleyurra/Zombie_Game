@@ -3,6 +3,8 @@ extends RefCounted
 ## Usage: const ItemDB = preload("res://scripts/world/item_db.gd")
 ##        ItemDB.get_item("medkit"), ItemDB.roll_table("hospital", rng)
 
+const KayKitRes = preload("res://scripts/world/kaykit_resources.gd")
+
 const ITEMS := {
 	"weapon_pistol": {
 		"name": "9mm Pistol", "type": "weapon", "weapon_id": "pistol", "stack": 1, "weight": 1.0,
@@ -23,6 +25,10 @@ const ITEMS := {
 	"weapon_hunting": {
 		"name": "Hunting Rifle", "type": "weapon", "weapon_id": "hunting", "stack": 1, "weight": 3.6,
 		"color": Color(0.45, 0.32, 0.18), "shape": "gun", "desc": "Bolt-action 7.62 rifle.",
+	},
+	"weapon_ar": {
+		"name": "Assault Rifle", "type": "weapon", "weapon_id": "ar", "stack": 1, "weight": 3.8,
+		"color": Color(0.15, 0.16, 0.17), "shape": "gun", "desc": "Heavy-hitting 5.56 assault rifle, 20 round magazine.",
 	},
 	"ammo_9mm": {
 		"name": "9mm Rounds", "type": "ammo", "caliber": "9mm", "stack": 120, "weight": 0.012,
@@ -106,14 +112,14 @@ const TABLES := {
 		"entries": [
 			["medkit", 34, 1, 2], ["water", 14, 1, 2], ["food", 10, 1, 2], ["ammo_9mm", 8, 6, 15],
 			["scrap", 6, 1, 2], ["ammo_556", 3, 5, 10], ["ammo_762", 2, 3, 6],
-			["weapon_pistol", 1.5, 1, 1], ["weapon_m4", 1, 1, 1],
+			["weapon_pistol", 1.5, 1, 1], ["weapon_m4", 1, 1, 1], ["weapon_ar", 0.8, 1, 1],
 			],
 	},
 	"police": {
 		"rolls": [2, 4],
 		"entries": [
 			["ammo_9mm", 20, 8, 20], ["ammo_12ga", 12, 3, 8], ["ammo_556", 8, 6, 15], ["medkit", 8, 1, 1],
-			["weapon_pistol", 8, 1, 1], ["weapon_shotgun", 6, 1, 1], ["weapon_m4", 3, 1, 1],
+			["weapon_pistol", 8, 1, 1], ["weapon_shotgun", 6, 1, 1], ["weapon_m4", 3, 1, 1], ["weapon_ar", 3, 1, 1],
 			["water", 6, 1, 2], ["food", 4, 1, 2], ["scrap", 4, 1, 3],
 		],
 	},
@@ -139,14 +145,54 @@ const TABLES := {
 			["scrap", 25, 1, 2], ["planks", 20, 1, 3], ["food", 12, 1, 1], ["water", 12, 1, 1],
 			["ammo_9mm", 10, 4, 10], ["ammo_12ga", 8, 1, 3], ["medkit", 3, 1, 1], ["ammo_556", 4, 4, 8],
 			["ammo_762", 3, 3, 6],
-			["weapon_pistol", 1, 1, 1], ["weapon_hunting", 1, 1, 1], ["weapon_m4", 0.5, 1, 1],
+			["weapon_pistol", 1, 1, 1], ["weapon_hunting", 1, 1, 1], ["weapon_m4", 0.5, 1, 1], ["weapon_ar", 0.7, 1, 1],
 			],
 	},
 }
 
 
 static func has_item(id: String) -> bool:
-	return ITEMS.has(canonical(id))
+	return _items().has(canonical(id))
+
+
+static var _items_cache: Dictionary = {}
+static var _tables_cache: Dictionary = {}
+
+
+## ITEMS plus the KayKit resource items, with KayKit model overrides applied to existing items.
+static func _items() -> Dictionary:
+	if _items_cache.is_empty():
+		var m: Dictionary = ITEMS.duplicate(true)
+		for id in KayKitRes.ITEMS:
+			m[id] = KayKitRes.ITEMS[id]
+		for id in KayKitRes.VISUALS:
+			if m.has(id):
+				var d: Dictionary = (m[id] as Dictionary).duplicate()
+				for k in (KayKitRes.VISUALS[id] as Dictionary):
+					d[k] = KayKitRes.VISUALS[id][k]
+				m[id] = d
+		_items_cache = m
+	return _items_cache
+
+
+## TABLES plus the KayKit tables and extra entries; entries naming an unknown item id are dropped.
+static func _tables() -> Dictionary:
+	if _tables_cache.is_empty():
+		var items: Dictionary = _items()
+		var m: Dictionary = TABLES.duplicate(true)
+		for name in KayKitRes.TABLES:
+			m[name] = (KayKitRes.TABLES[name] as Dictionary).duplicate(true)
+		for name in KayKitRes.EXTRA:
+			if m.has(name):
+				(m[name]["entries"] as Array).append_array((KayKitRes.EXTRA[name] as Array).duplicate(true))
+		for name in m:
+			var kept: Array = []
+			for e in (m[name]["entries"] as Array):
+				if items.has(str((e as Array)[0])):
+					kept.append(e)
+			m[name]["entries"] = kept
+		_tables_cache = m
+	return _tables_cache
 
 
 ## Resolves caliber strings ("9mm", "5.56", "556") to the ammo item id; other ids pass through.
@@ -186,18 +232,22 @@ static func give_to(player, id: String, count: int) -> bool:
 		var r = player.add_item(cid, count)
 		if r is bool and not r:
 			return false
-	if cid == "planks" or cid == "scrap":
+	var feed: Array = KayKitRes.feed_for(cid)
+	if cid == "planks" or cid == "scrap" or not feed.is_empty():
 		var tree := Engine.get_main_loop() as SceneTree
 		var m: Node = tree.get_first_node_in_group("main_world") if tree != null else null
 		if m != null and m.has_method("give_materials"):
-			m.give_materials(cid, count)
+			if feed.is_empty():
+				m.give_materials(cid, count)
+			else:
+				m.give_materials(str(feed[0]), count * int(feed[1]))
 	return true
 
 
 static func get_item(id: String) -> Dictionary:
 	id = canonical(id)
-	if ITEMS.has(id):
-		return ITEMS[id] as Dictionary
+	if _items().has(id):
+		return _items()[id] as Dictionary
 	return {}
 
 
@@ -212,11 +262,11 @@ static func item_color(id: String) -> Color:
 
 
 static func all_ids() -> Array:
-	return ITEMS.keys()
+	return _items().keys()
 
 
 static func table_names() -> Array:
-	return TABLES.keys()
+	return _tables().keys()
 
 
 ## Returns the ammo item id for a caliber string like "9mm", "5.56", "12ga", "7.62" (or "" if none).
@@ -237,7 +287,7 @@ static func make_stack(id: String, count: int) -> Dictionary:
 ## Rolls a loot table. Returns Array of {"id": String, "count": int}, duplicates merged.
 ## rolls_override >= 0 forces the number of picks.
 static func roll_table(table: String, rng: RandomNumberGenerator, rolls_override: int = -1) -> Array:
-	var t: Dictionary = TABLES.get(table, TABLES["wild"]) as Dictionary
+	var t: Dictionary = _tables().get(table, _tables()["wild"]) as Dictionary
 	var rr: Array = t["rolls"]
 	var rolls: int = rolls_override if rolls_override >= 0 else rng.randi_range(int(rr[0]), int(rr[1]))
 	var merged := {}
@@ -258,7 +308,7 @@ static func roll_table(table: String, rng: RandomNumberGenerator, rolls_override
 
 ## One weighted pick from a table: {"id", "count"}.
 static func pick_one(table: String, rng: RandomNumberGenerator) -> Dictionary:
-	var t: Dictionary = TABLES.get(table, TABLES["wild"]) as Dictionary
+	var t: Dictionary = _tables().get(table, _tables()["wild"]) as Dictionary
 	var entries: Array = t["entries"]
 	var total := 0.0
 	for e in entries:

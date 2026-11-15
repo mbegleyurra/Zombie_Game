@@ -38,6 +38,7 @@ static func _ensure() -> void:
 	_cache["m4"] = _m4()
 	_cache["shotgun"] = _shotgun()
 	_cache["hunting"] = _hunting()
+	_cache["ar"] = _ar()
 
 
 static func _pistol() -> WeaponData:
@@ -242,4 +243,48 @@ static func _hunting() -> WeaponData:
 	w.sight_height = 0.115
 	w.noise_radius = 130.0
 	w.weight = 4.0
+	return w
+
+
+static func _ar() -> WeaponData:
+	# 5.56x45mm battle/assault rifle (SCAR-L / AR-15 class): 20 rd mag, ~940 m/s, selective-fire run as full auto.
+	# Hits harder and reaches further than the pistol and the M4; slower rate and heavier kick than the M4.
+	var w := WeaponData.new()
+	w.id = "ar"
+	w.display_name = "Assault Rifle"
+	w.caliber = "556"
+	w.model = "ar"
+	w.damage = 46.0
+	w.headshot_mult = 3.5
+	w.penetration = 0.65
+	w.max_penetrations = 2
+	w.falloff_start = 90.0
+	w.falloff_end = 320.0
+	w.min_damage_frac = 0.65
+	w.max_range = 400.0
+	w.muzzle_velocity = 940.0
+	w.mag_size = 20
+	w.fire_rate_rpm = 540.0
+	w.automatic = true
+	w.reload_tactical = 2.4
+	w.reload_empty = 3.1
+	w.spread_deg = 1.0
+	w.ads_spread_mult = 0.3
+	w.move_spread_deg = 2.8
+	w.bloom_per_shot = 0.2
+	w.recoil_pitch = 1.4
+	w.recoil_yaw = 0.55
+	# firm climb that settles into a slow left/right drift
+	w.recoil_pattern = PackedVector2Array([
+		Vector2(0.0, 1.8), Vector2(0.1, 1.5), Vector2(-0.15, 1.3), Vector2(0.25, 1.15),
+		Vector2(0.35, 1.0), Vector2(0.3, 0.9), Vector2(-0.25, 0.85), Vector2(-0.4, 0.8),
+	])
+	w.zero_range = 120.0
+	w.recoil_recovery = 7.5
+	w.sway = 1.15
+	w.ads_fov = 50.0
+	w.ads_time = 0.19
+	w.sight_height = 0.1
+	w.noise_radius = 95.0
+	w.weight = 3.8
 	return w

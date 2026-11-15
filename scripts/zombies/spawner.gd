@@ -38,6 +38,7 @@ const MASK_WORLD := 1
 
 var night_factor: float = 0.0
 var container: Node
+var skeletons: Node   ## SkeletonSpawner child (open-world skeletons + dungeon markers)
 var _mp_spawner: MultiplayerSpawner
 var _packed: PackedScene
 var _timer: float = 2.0
@@ -65,6 +66,9 @@ func _ready() -> void:
 	var net := get_node_or_null("/root/Net")
 	if net != null:
 		net.peer_scene_ready.connect(_on_peer_scene_ready)
+	skeletons = SkeletonSpawner.new()
+	skeletons.name = "SkeletonSpawner"   # child of this node: same path on every peer
+	add_child(skeletons)
 
 
 ## Zombies are hidden from every peer until that peer reports its main scene is built
@@ -108,6 +112,8 @@ func kill_all() -> void:
 		return
 	for c in container.get_children():
 		c.queue_free()
+	if skeletons != null:
+		skeletons.call("kill_all")
 
 
 # ================================================================== loop

@@ -85,9 +85,8 @@ var _model: PlayerModel   ## Kenney body (null when the asset is missing: the bo
 var _legs: Array[Node3D] = []
 var _arms: Array[Node3D] = []
 var _hud: CanvasLayer
-var _lbl_stats: Label
-var _lbl_ammo: Label
 var _lbl_prompt: Label
+var _prompt_panel: PanelContainer
 var _lbl_dead: Label
 var _crosshair: Label
 var _hurt_rect: ColorRect
@@ -545,8 +544,9 @@ func _update_hover() -> void:
 	if _lbl_prompt:
 		var text := ""
 		if _hovered != null:
-			text = "[E] " + (str(_hovered.call("get_prompt")) if _hovered.has_method("get_prompt") else "Interact")
+			text = "E - " + (str(_hovered.call("get_prompt")) if _hovered.has_method("get_prompt") else "Interact")
 		_lbl_prompt.text = text
+		_prompt_panel.visible = text != ""
 
 
 func _interact() -> void:
@@ -693,20 +693,33 @@ func _build_hud() -> void:
 	_crosshair = _make_label("+", Control.PRESET_CENTER, 22)
 	_crosshair.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_crosshair.position -= Vector2(10, 16)
-	_lbl_stats = _make_label("", Control.PRESET_TOP_LEFT, 16)
-	_lbl_stats.position = Vector2(14, 12)
-	_lbl_ammo = _make_label("", Control.PRESET_BOTTOM_RIGHT, 20)
-	_lbl_ammo.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	_lbl_ammo.position = Vector2(-260, -90)
-	_lbl_ammo.size = Vector2(240, 70)
-	_lbl_prompt = _make_label("", Control.PRESET_CENTER, 18)
+	# Vitals, weapon and ammo are drawn by the Hud autoload (scripts/ui/hud.gd), not here.
+	_prompt_panel = PanelContainer.new()
+	_prompt_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_prompt_panel.visible = false
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0, 0, 0, 0.6)
+	sb.set_corner_radius_all(6)
+	sb.content_margin_left = 14
+	sb.content_margin_right = 14
+	sb.content_margin_top = 6
+	sb.content_margin_bottom = 6
+	_prompt_panel.add_theme_stylebox_override("panel", sb)
+	_hud.add_child(_prompt_panel)
+	_prompt_panel.set_anchors_preset(Control.PRESET_CENTER)
+	_prompt_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_prompt_panel.position = Vector2(-160, 50)
+	_lbl_prompt = Label.new()
+	_lbl_prompt.add_theme_font_size_override("font_size", 26)
+	_lbl_prompt.add_theme_color_override("font_outline_color", Color.BLACK)
+	_lbl_prompt.add_theme_constant_override("outline_size", 4)
 	_lbl_prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_lbl_prompt.position = Vector2(-120, 40)
-	_lbl_prompt.size = Vector2(240, 30)
-	_lbl_dead = _make_label("YOU DIED", Control.PRESET_CENTER, 48)
+	_lbl_prompt.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_prompt_panel.add_child(_lbl_prompt)
+	_lbl_dead = _make_label("YOU DIED", Control.PRESET_CENTER, 56)
 	_lbl_dead.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_lbl_dead.position = Vector2(-180, -80)
-	_lbl_dead.size = Vector2(360, 80)
+	_lbl_dead.position = Vector2(-220, -80)
+	_lbl_dead.size = Vector2(440, 90)
 	_lbl_dead.modulate = Color(0.8, 0.1, 0.1)
 	_lbl_dead.visible = false
 
@@ -724,15 +737,8 @@ func _make_label(text: String, preset: int, font_size: int) -> Label:
 
 
 func _refresh_hud() -> void:
-	if _lbl_stats == null:
+	if _crosshair == null:
 		return
-	_lbl_stats.text = "HP %d   STA %d\nFOOD %d   WATER %d" % [roundi(health), roundi(stamina), roundi(hunger), roundi(thirst)]
-	var st := weapons.status()
-	if str(st["weapon"]) == "":
-		_lbl_ammo.text = ""
-	else:
-		var chamber := "+1" if bool(st["chambered"]) else ""
-		_lbl_ammo.text = "%s\n%d%s / %d" % [str(st["name"]), int(st["mag"]), chamber, int(st["reserve"])]
 	_crosshair.visible = not weapons.aiming and not is_dead
 
 

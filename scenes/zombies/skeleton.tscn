@@ -1,0 +1,21 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/zombies/skeleton_enemy.gd" id="1_skeleton"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_skeleton"]
+radius = 0.34
+height = 1.8
+
+[node name="Skeleton" type="CharacterBody3D" groups=["zombies", "skeletons"]]
+collision_layer = 4
+collision_mask = 1
+floor_snap_length = 0.4
+script = ExtResource("1_skeleton")
+
+[node name="Collision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_skeleton")
+
+[node name="NavAgent" type="NavigationAgent3D" parent="."]
+path_desired_distance = 1.0
+target_desired_distance = 1.2

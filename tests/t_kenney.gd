@@ -424,5 +424,17 @@ func _phase3_main() -> void:
 	check(cur == 1, "exactly one current Camera3D in main (%d)" % cur)
 	var pk: Array = []
 	_models(p, "res://assets/kenney/", pk)
-	check(pk.is_empty(), "player scene contains no Kenney models (%d)" % pk.size())
+	# QA: PlayerModel (commit 86f33b7) deliberately builds the Avatar from res://assets/kenney/mini/ (shadow-only for the
+	# local player). The old assertion "no Kenney models at all" predates it; still reject Kenney models outside the Avatar.
+	var pk_other: Array = []
+	for m in pk:
+		var under_avatar := false
+		var a: Node = m as Node
+		while a != null and a != p:
+			if a.name == "Avatar":
+				under_avatar = true
+			a = a.get_parent()
+		if not under_avatar:
+			pk_other.append(m)
+	check(pk_other.is_empty(), "player scene has no Kenney models outside the Avatar (%d; %d inside the Avatar)" % [pk_other.size(), pk.size() - pk_other.size()])
 	info("camera fov %.0f, head y %.2f" % [cam.fov, head.position.y])

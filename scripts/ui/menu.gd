@@ -103,18 +103,19 @@ func _build() -> void:
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(center)
 	var box := VBoxContainer.new()
-	box.custom_minimum_size = Vector2(400, 0)
+	box.custom_minimum_size = Vector2(520, 0)
 	box.add_theme_constant_override("separation", 12)
 	center.add_child(box)
 
 	var title := Label.new()
 	title.text = "DEAD ACRES"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 56)
+	title.add_theme_font_size_override("font_size", 72)
 	box.add_child(title)
 	var sub := Label.new()
 	sub.text = "Co-op survival, 2-4 players"
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	sub.add_theme_font_size_override("font_size", 26)
 	box.add_child(sub)
 
 	solo_btn = Button.new()
@@ -132,8 +133,8 @@ func _build() -> void:
 	_ip = LineEdit.new()
 	_ip.placeholder_text = "Host IP (e.g. 192.168.1.20 or ip:port)"
 	_ip.text = "127.0.0.1"
-	_ip.custom_minimum_size = Vector2(0, 46)
-	_ip.add_theme_font_size_override("font_size", 20)
+	_ip.custom_minimum_size = Vector2(0, 52)
+	_ip.add_theme_font_size_override("font_size", 22)
 	_ip.text_submitted.connect(func(_t: String) -> void: _on_join())
 	box.add_child(_ip)
 	join_btn = Button.new()
@@ -157,7 +158,16 @@ func _build() -> void:
 	_status = Label.new()
 	_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_status.add_theme_font_size_override("font_size", 22)
 	box.add_child(_status)
+
+	var tip := Label.new()
+	tip.text = "Play Solo to start. Open Controls to see every key.\nIn game: E - Interact   LMB - Shoot   R - Reload   Esc - Menu"
+	tip.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	tip.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	tip.add_theme_font_size_override("font_size", 20)
+	tip.modulate = Color(1, 1, 1, 0.85)
+	box.add_child(tip)
 
 	controls_panel = PauseMenu.make_controls_panel(_close_controls)
 	add_child(controls_panel)

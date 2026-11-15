@@ -170,3 +170,15 @@ Looked at through the vision tool, so these are descriptions, not pixel measurem
 
 ## VERDICT
 Dressing integration is sound for doors, loot paths and spawn on 4 seeds. Two seeds show vehicles/crates on road centrelines (D9, D10), cosmetic to low gameplay impact. D1, D2/K3 and D3-D6 are closed; K1 is partly closed (D8). `t_r5_late` flake is pre-existing.
+
+
+## UPDATE 2026-11-15 (RAT, full QA pass; see tests/QA_REPORT.md)
+
+Tree tested: HEAD 3ed5daf plus the uncommitted KayKit work (gun_mesh, weapon_db, item_db, world_builder, spawner). Godot 4.7.2 headless.
+
+| Item | Status now | Evidence |
+|---|---|---|
+| D9 road car on a different road's centreline (seed 7) | NOT REPRODUCED | `t_kenney_dress`: `seed 7: road centrelines free of dressing (0/2956 samples blocked)`; also seed 20260101 0/2516, seed 31337 0/2497, seed 424242 0/2814. The road-corridor scan is the test's phase 3 (centreline capsule free along every road). |
+| D10 gas-station barrel on road#14 (seed 7) | NOT REPRODUCED | same scan, same 0 blocked samples. The world builds differently now (KayKit forest and dungeon change RNG-dependent placement), so this may have moved rather than been fixed: it is closed for these 4 seeds only. |
+| D8 walker head wider than the capsule | STILL OPEN (Low) | `t_kenney_walker_fit` (seed 31337): capsule r=0.34 h=1.70. Rest-pose vertex extents: head upper x -0.36..0.47, z -0.34..0.49 (max radius 0.51); head lower z -0.43..0.50; torso z -0.65..0.67. Ray grid at y=1.5 and 1.7 hits only z-offsets -0.2..+0.2 (rows `. . X X X . .`), so ~0.1-0.3 m of head and ~0.3 m of torso (arms) at the sides cannot be hit. Doorway clearance is fine (see QA_REPORT section 2), so there is room to widen the head sphere. |
+| `t_kenney` player-scene check | RESOLVED (test was stale) | `player scene contains no Kenney models` failed because `PlayerModel` (commit 86f33b7) deliberately builds the avatar from `res://assets/kenney/mini/`. Isolation: a copy of the project with `PlayerModel.build` forced to `return false` gives t_kenney 177 PASS / 0 FAIL. Assertion changed to reject Kenney models outside the Avatar node (1 inside, 0 outside); t_kenney now 177 PASS / 0 FAIL. |

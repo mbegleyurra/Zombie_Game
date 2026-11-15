@@ -61,6 +61,11 @@ func _run() -> void:
 	check(z.is_in_group("zombies"), "zombie in group zombies")
 	var w = player.weapons
 	var wd2: WeaponData = w.weapon_data()
+	# QA: zero the cone before the first shot. With the stock 1.1 deg pistol spread the camera ray (1.62 m) sits
+	# near the zombie's crown (1.7 m capsule), so ~37% of random cones miss at 14 m (measured 63/100 hits).
+	wd2.spread_deg = 0.0
+	wd2.move_spread_deg = 0.0
+	wd2.bloom_per_shot = 0.0
 	w._try_fire(wd2)
 	await _frames(2)
 	var s0: Dictionary = w.status()
