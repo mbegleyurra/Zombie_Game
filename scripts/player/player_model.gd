@@ -101,6 +101,16 @@ func current_clip() -> String:
 	return _clip
 
 
+## First person (first_person=true): meshes are shadows-only, the body is never drawn.
+## Third person: the full body is drawn.
+func set_local_view(first_person: bool) -> void:
+	local_view = first_person
+	var mode := GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY if first_person \
+		else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	for mi in _meshes:
+		mi.cast_shadow = mode
+
+
 func _play(clip: String, blend: float = 0.15) -> void:
 	if clip == _clip or _ap == null or not _ap.has_animation(clip):
 		return

@@ -28,6 +28,7 @@ const PropFactory = preload("res://scripts/world/prop_factory.gd")
 const ModelUtil = preload("res://scripts/world/model_util.gd")
 const KenneyDressing = preload("res://scripts/world/kenney_dressing.gd")
 const KayKitForest = preload("res://scripts/world/kaykit_forest.gd")
+const VehicleSpawner = preload("res://scripts/vehicles/vehicle_spawner.gd")
 const KENNEY_GY := "res://assets/kenney/graveyard/"
 
 const MAX_TREES := 900
@@ -85,6 +86,9 @@ func build(p_seed: int) -> void:
 	add_child(dressing.build())
 	dressing_counts = dressing.counts
 	print("[World] kenney dressing: %s" % [str(dressing_counts)])
+	var vehicles = VehicleSpawner.new(self)
+	add_child(vehicles.build())
+	print("[World] drivable vehicles: %d" % vehicles.cars.size())
 	var forest = KayKitForest.new(self)
 	add_child(forest.build())
 	forest_counts = forest.counts

@@ -54,6 +54,8 @@ func _ready() -> void:
 	if _net != null:
 		_net.ping_result.connect(func(ms: float): _ping_label.text = "PING %d ms" % int(round(ms)))
 		_net.left.connect(func() -> void: close_pause(false))
+	for ui in ["inventory_ui", "map_ui", "death_ui"]:
+		add_child(load("res://scripts/ui/%s.gd" % ui).new())   # overlays sit under the pause menu
 	_pause = PauseMenu.new()
 	add_child(_pause)
 	_pause.resume_requested.connect(func() -> void: close_pause(true))
@@ -150,7 +152,7 @@ func is_paused() -> bool:
 
 ## True while any overlay owns the mouse; gameplay input (building clicks) must stand down.
 func is_ui_open() -> bool:
-	return paused or _loot_panel.visible
+	return paused or _loot_panel.visible or not get_tree().get_nodes_in_group("ui_open").is_empty()
 
 
 func open_pause() -> void:
@@ -208,8 +210,6 @@ func apply_state(st: Dictionary) -> void:
 		set_vital("hunger", float(st["hunger"]), float(st.get("max_hunger", 100.0)))
 	if st.has("thirst"):
 		set_vital("thirst", float(st["thirst"]), float(st.get("max_thirst", 100.0)))
-	if st.has("stamina"):
-		set_vital("stamina", float(st["stamina"]), float(st.get("max_stamina", 100.0)))
 	if st.has("ammo"):
 		set_ammo(int(st["ammo"]), int(st.get("reserve", st.get("reserve_ammo", 0))))
 	if st.get("weapon") is Dictionary:
@@ -287,7 +287,6 @@ func _build_ui() -> void:
 	var vitals := VBoxContainer.new()
 	vp.add_child(vitals)
 	vitals.add_child(_make_bar("health", "HEALTH", COL_HEALTH))
-	vitals.add_child(_make_bar("stamina", "STAMINA", Color(0.55, 0.8, 0.3)))
 	vitals.add_child(_make_bar("hunger", "FOOD", COL_HUNGER))
 	vitals.add_child(_make_bar("thirst", "WATER", COL_THIRST))
 

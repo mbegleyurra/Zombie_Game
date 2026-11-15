@@ -33,7 +33,10 @@ const CROUCH_HEIGHT := 1.1
 const EYE_STAND := 1.62
 const EYE_CROUCH := 1.0
 const BASE_FOV := 75.0
-const JUMP_STAMINA := 10.0
+const TP_DISTANCE := 2.8      ## third-person boom length (m); the spring arm shortens it on collision
+const TP_SHOULDER := 0.45     ## camera sits this far to the right of the head
+const TP_HEIGHT := 0.2        ## and this far above it
+const TP_MARGIN := 0.12
 const HUNGER_RATE := 0.045   ## per second (about 37 minutes from full to empty)
 const THIRST_RATE := 0.07
 
@@ -52,7 +55,7 @@ const ID_ALIASES := {
 
 var peer_id: int = 1
 var health: float = 100.0
-var stamina: float = 100.0
+var stamina: float = 100.0   ## legacy: stamina is removed, so this stays full. Kept for get_hud_state/tests/netcode compatibility.
 var hunger: float = 100.0
 var thirst: float = 100.0
 var is_dead: bool = false
@@ -63,8 +66,9 @@ var equipped_id: String = ""
 var base_fov: float = BASE_FOV
 var inventory: Dictionary = {}
 
-var _stamina_lock: bool = false
-var _stamina_delay: float = 0.0
+var third_person: bool = false   ## local view only (not replicated); toggled with the toggle_camera action (V)
+var _tp_arm: SpringArm3D
+var _tp_camera: Camera3D
 var _step_timer: float = 0.0
 var _interact_timer: float = 0.0
 var _hurt_flash: float = 0.0
@@ -73,6 +77,7 @@ var _last_pos: Vector3 = Vector3.ZERO
 var _remote_speed: float = 0.0
 var _shown_gun_id: String = "?"
 var relay: DamageRelay
+var vehicle: Node = null   ## set by scripts/vehicles/vehicle.gd while seated: this body then stops walking
 
 @onready var head: Node3D = $Head
 @onready var camera: Camera3D = $Head/Camera3D
@@ -109,6 +114,7 @@ static func register_inputs() -> void:
 	_key("use_medkit", [KEY_H])
 	_key("use_food", [KEY_J])
 	_key("use_water", [KEY_K])
+	_key("toggle_camera", [KEY_V])
 	_mouse("fire", MOUSE_BUTTON_LEFT)
 	_mouse("aim", MOUSE_BUTTON_RIGHT)
 	for i in range(5):
@@ -158,6 +164,7 @@ func _ready() -> void:
 	if local:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 		_build_hud()
+		_build_third_person()
 		weapons.ammo_changed.connect(_refresh_hud)
 		weapons.weapon_changed.connect(func(id: String) -> void: equipped_id = id)
 		weapons.hit_confirmed.connect(_on_hit_confirmed)
@@ -204,6 +211,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	elif event.is_action_pressed("interact") and not is_dead:
 		_interact()
+	elif event.is_action_pressed("toggle_camera"):
+		set_third_person(not third_person)
 	elif event.is_action_pressed("use_medkit") and not is_dead:
 		use_item("medkit")
 	elif event.is_action_pressed("use_food") and not is_dead:
@@ -216,6 +225,8 @@ func _physics_process(delta: float) -> void:
 	if not is_multiplayer_authority():
 		return
 	_update_stats(delta)
+	if vehicle != null and not is_dead:
+		return
 	if is_dead:
 		velocity.x = move_toward(velocity.x, 0.0, 20.0 * delta)
 		velocity.z = move_toward(velocity.z, 0.0, 20.0 * delta)
@@ -229,8 +240,8 @@ func _physics_process(delta: float) -> void:
 		input = Vector2.ZERO
 	var on_floor := is_on_floor()
 	var want_sprint := Input.is_action_pressed("sprint") and input.y < -0.1 and not crouching \
-		and not _stamina_lock and on_floor and not weapons.aiming
-	is_sprinting = want_sprint and stamina > 0.0
+		and on_floor and not weapons.aiming
+	is_sprinting = want_sprint
 	var speed := CROUCH_SPEED if crouching else (SPRINT_SPEED if is_sprinting else WALK_SPEED)
 	if weapons.aiming:
 		speed *= 0.65
@@ -241,15 +252,12 @@ func _physics_process(delta: float) -> void:
 	velocity.x = move_toward(velocity.x, dir.x * speed, accel * delta)
 	velocity.z = move_toward(velocity.z, dir.z * speed, accel * delta)
 	if on_floor:
-		if Input.is_action_just_pressed("jump") and not crouching and stamina >= JUMP_STAMINA \
+		if Input.is_action_just_pressed("jump") and not crouching \
 				and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 			velocity.y = JUMP_VELOCITY
-			stamina -= JUMP_STAMINA
-			_stamina_delay = 1.0
 	else:
 		velocity.y -= GRAVITY * delta
 	move_and_slide()
-	_update_stamina(delta)
 	_footsteps(delta)
 	var target_fov := BASE_FOV + (8.0 if is_sprinting else 0.0)
 	base_fov = lerpf(base_fov, target_fov, clampf(delta * 8.0, 0.0, 1.0))
@@ -275,6 +283,7 @@ func _process_local(delta: float) -> void:
 		_interact_timer = 0.1
 		_update_hover()
 	_hurt_flash = maxf(0.0, _hurt_flash - delta * 1.6)
+	_update_third_person()
 	if _hurt_rect:
 		_hurt_rect.color.a = _hurt_flash * 0.45
 	_refresh_hud()
@@ -322,23 +331,6 @@ func _update_stats(delta: float) -> void:
 		_hurt(0.8 * delta, false)
 	elif hunger > 60.0 and thirst > 60.0 and health < max_health:
 		health = minf(max_health, health + 0.6 * delta)
-
-
-func _update_stamina(delta: float) -> void:
-	if is_sprinting and velocity.length() > 0.5:
-		stamina = maxf(0.0, stamina - 14.0 * delta)
-		_stamina_delay = 1.0
-		if stamina <= 0.0:
-			_stamina_lock = true
-	else:
-		_stamina_delay -= delta
-		if _stamina_delay <= 0.0:
-			var rate := 18.0 if not crouching else 26.0
-			if hunger <= 0.0 or thirst <= 0.0:
-				rate *= 0.4
-			stamina = minf(100.0, stamina + rate * delta)
-	if _stamina_lock and stamina >= 20.0:
-		_stamina_lock = false
 
 
 func speed_ratio() -> float:
@@ -408,7 +400,6 @@ func is_head_hit(world_pos: Vector3) -> bool:
 ## Called by the owning peer (or via net_respawn from the server).
 func respawn(pos: Vector3) -> void:
 	health = max_health
-	stamina = 100.0
 	hunger = maxf(hunger, 60.0)
 	thirst = maxf(thirst, 60.0)
 	is_dead = false
@@ -550,6 +541,9 @@ func _update_hover() -> void:
 
 
 func _interact() -> void:
+	if vehicle != null:
+		vehicle.call("interact", self)
+		return
 	var t := _hover_target()
 	if t != null:
 		t.call("interact", self)
@@ -589,6 +583,65 @@ func apply_look_delta(yaw_deg: float, pitch_deg: float) -> void:
 
 
 # ================================================================== avatar (what other players see)
+
+## Local-only third-person camera: a SpringArm3D on the Head (so it follows pitch), offset to
+## the right shoulder, that pulls the camera in when world geometry is in the way. The first-person
+## Camera3D stays the "aim camera" the weapons and hover ray read; _update_third_person points it
+## at whatever the third-person crosshair is over, so shots land where the crosshair is.
+func _build_third_person() -> void:
+	_tp_arm = SpringArm3D.new()
+	_tp_arm.name = "ThirdPersonArm"
+	var shape := SphereShape3D.new()
+	shape.radius = 0.25
+	_tp_arm.shape = shape
+	_tp_arm.spring_length = TP_DISTANCE
+	_tp_arm.margin = TP_MARGIN
+	_tp_arm.collision_mask = 1
+	_tp_arm.position = Vector3(TP_SHOULDER, TP_HEIGHT, 0.0)
+	head.add_child(_tp_arm)
+	_tp_arm.add_excluded_object(get_rid())
+	_tp_camera = Camera3D.new()
+	_tp_camera.name = "ThirdPersonCamera"
+	_tp_camera.current = false
+	_tp_arm.add_child(_tp_camera)
+
+
+## Local player only. Third person shows the full body (and its gun) and hides the viewmodel.
+func set_third_person(on: bool) -> void:
+	if not is_multiplayer_authority() or _tp_camera == null:
+		return
+	third_person = on
+	_tp_camera.current = on
+	camera.current = not on
+	weapons.visible = not on
+	if _model != null:
+		_model.set_local_view(not on)
+	elif _avatar != null:
+		_avatar.visible = on
+	if _avatar_gun != null:
+		_avatar_gun.visible = on
+	if on:
+		_shown_gun_id = "?"   # rebuild the body's gun for the current weapon
+		_sync_avatar_gun()
+	else:
+		camera.rotation = Vector3.ZERO
+
+
+func _update_third_person() -> void:
+	if not third_person or _tp_camera == null:
+		return
+	_tp_camera.fov = camera.fov
+	var from := _tp_camera.global_position
+	var dir := -_tp_camera.global_transform.basis.z
+	var q := PhysicsRayQueryParameters3D.create(from, from + dir * 200.0, 0xFFFFFFFF, [get_rid()])
+	var res := get_world_3d().direct_space_state.intersect_ray(q)
+	var target: Vector3 = res["position"] if not res.is_empty() else from + dir * 200.0
+	var eye := head.global_position
+	var to_target := target - eye
+	if to_target.length() < 0.6:
+		to_target = dir   # target hugging the head: keep the camera's own direction
+	camera.global_basis = Basis.looking_at(to_target.normalized(), head.global_basis.y)
+
 
 func _build_avatar(local: bool) -> void:
 	_avatar = Node3D.new()
@@ -645,10 +698,10 @@ func _update_avatar(delta: float) -> void:
 	if _model != null:
 		var spd := Vector2(velocity.x, velocity.z).length() if is_multiplayer_authority() else _remote_speed
 		_model.animate(delta, spd, look_pitch, crouching, is_sprinting, is_dead, equipped_id != "")
-		if not is_multiplayer_authority():
+		if not is_multiplayer_authority() or third_person:
 			_sync_avatar_gun()
 		return
-	if is_multiplayer_authority():
+	if is_multiplayer_authority() and not third_person:
 		return
 	# lie down when dead, otherwise swing legs by measured speed
 	var tilt := -PI * 0.5 if is_dead else 0.0

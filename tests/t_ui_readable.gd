@@ -171,7 +171,9 @@ func _run() -> void:
 	var caps := []
 	for k in hud._bars:
 		caps.append(((hud._bars[k] as Control).get_parent().get_child(0) as Label).text)
-	check("HEALTH" in caps and "STAMINA" in caps and "FOOD" in caps and "WATER" in caps, "vitals are named: %s" % str(caps))
+	check("HEALTH" in caps and "FOOD" in caps and "WATER" in caps, "vitals are named: %s" % str(caps))
+	check(not ("STAMINA" in caps) and not hud._bars.has("stamina"), "stamina bar is removed")
+	hud.apply_state({"stamina": 50.0})   # legacy key must be ignored, not crash
 	check(p.get_node_or_null("PlayerHUD") != null and p._lbl_prompt != null, "player keeps its prompt layer")
 
 	# ---- weapon / ammo labels and reload cue
