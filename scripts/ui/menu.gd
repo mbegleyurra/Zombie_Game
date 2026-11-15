@@ -1,6 +1,9 @@
 extends Control
 ## Main menu, built entirely in code. Play Solo / Host / Join (IP[:port]) / Quit.
 ## Command line shortcuts (after `--`): --solo, --host  or  --join=<ip[:port]>
+## Controls button opens the shared keybind help + mouse sensitivity panel (Esc / B closes it).
+
+const PauseMenu := preload("res://scripts/ui/pause_menu.gd")
 
 var _net = null
 var _ip: LineEdit
@@ -9,13 +12,16 @@ var _status: Label
 var solo_btn: Button
 var host_btn: Button
 var join_btn: Button
+var controls_btn: Button
 var quit_btn: Button
+var controls_panel: Control
 
 
 func _ready() -> void:
 	_net = get_node_or_null("/root/Net")
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	_build()
+	solo_btn.grab_focus.call_deferred()
 	if _net == null:
 		_status.text = "Net autoload missing (check project.godot)"
 		return
@@ -71,6 +77,22 @@ func Net_default_port() -> int:
 	return _net.DEFAULT_PORT
 
 
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel") and controls_panel != null and controls_panel.visible:
+		_close_controls()
+		get_viewport().set_input_as_handled()
+
+
+func _open_controls() -> void:
+	controls_panel.visible = true
+	(controls_panel.get_meta("back_btn") as Button).grab_focus()
+
+
+func _close_controls() -> void:
+	controls_panel.visible = false
+	controls_btn.grab_focus()
+
+
 func _build() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	var bg := ColorRect.new()
@@ -81,7 +103,7 @@ func _build() -> void:
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(center)
 	var box := VBoxContainer.new()
-	box.custom_minimum_size = Vector2(340, 0)
+	box.custom_minimum_size = Vector2(400, 0)
 	box.add_theme_constant_override("separation", 12)
 	center.add_child(box)
 
@@ -97,25 +119,38 @@ func _build() -> void:
 
 	solo_btn = Button.new()
 	solo_btn.text = "Play Solo"
+	PauseMenu.style_button(solo_btn)
 	solo_btn.pressed.connect(_on_solo)
 	box.add_child(solo_btn)
 
 	host_btn = Button.new()
 	host_btn.text = "Host Game"
+	PauseMenu.style_button(host_btn)
 	host_btn.pressed.connect(_on_host)
 	box.add_child(host_btn)
 
 	_ip = LineEdit.new()
 	_ip.placeholder_text = "Host IP (e.g. 192.168.1.20 or ip:port)"
 	_ip.text = "127.0.0.1"
+	_ip.custom_minimum_size = Vector2(0, 46)
+	_ip.add_theme_font_size_override("font_size", 20)
+	_ip.text_submitted.connect(func(_t: String) -> void: _on_join())
 	box.add_child(_ip)
 	join_btn = Button.new()
 	join_btn.text = "Join Game"
+	PauseMenu.style_button(join_btn)
 	join_btn.pressed.connect(_on_join)
 	box.add_child(join_btn)
 
+	controls_btn = Button.new()
+	controls_btn.text = "Controls"
+	PauseMenu.style_button(controls_btn)
+	controls_btn.pressed.connect(_open_controls)
+	box.add_child(controls_btn)
+
 	quit_btn = Button.new()
 	quit_btn.text = "Quit"
+	PauseMenu.style_button(quit_btn)
 	quit_btn.pressed.connect(func(): get_tree().quit())
 	box.add_child(quit_btn)
 
@@ -123,3 +158,6 @@ func _build() -> void:
 	_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(_status)
+
+	controls_panel = PauseMenu.make_controls_panel(_close_controls)
+	add_child(controls_panel)

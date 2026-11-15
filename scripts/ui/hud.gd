@@ -22,6 +22,7 @@ var _ammo_label: Label
 var _prompt_label: Label
 var _build_label: Label
 var _ping_label: Label
+var _hint_label: Label
 var _loot_panel: PanelContainer
 var _loot_title: Label
 var _loot_list: VBoxContainer
@@ -89,8 +90,12 @@ func show_loot(title: String, items: Array) -> void:
 		var b := Button.new()
 		b.text = "%s  x%d" % [str(it.get("name", "?")), int(it.get("count", 1))]
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		PauseMenu.style_button(b)
+		b.custom_minimum_size = Vector2(0, 44)
 		b.pressed.connect(func(): loot_taken.emit(i))
 		_loot_list.add_child(b)
+	if _loot_list.get_child_count() > 0:
+		(_loot_list.get_child(0) as Button).grab_focus.call_deferred()
 	if not _loot_panel.visible:
 		_prev_mouse = Input.mouse_mode
 	_loot_panel.visible = true
@@ -145,10 +150,19 @@ func _on_pause_disconnect() -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if not event.is_action_pressed("ui_cancel") or _net == null or not _net.active:
+	if _net == null or not _net.active:
+		return
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F1:
+		_hint_label.visible = not _hint_label.visible
+		get_viewport().set_input_as_handled()
+		return
+	if not event.is_action_pressed("ui_cancel"):
 		return
 	if paused:
-		close_pause(true)
+		if _pause.controls_open():
+			_pause.close_controls()
+		else:
+			close_pause(true)
 	elif _loot_panel.visible:
 		hide_loot()
 	else:
@@ -189,6 +203,10 @@ func _poll_player() -> void:
 		_player = _net.get_local_player()
 	if _player == null:
 		return
+	# Mouse sensitivity setting -> local player's existing look variable (no player.gd change).
+	var want_sens: float = PauseMenu.sens_value()
+	if not is_equal_approx(float(_player.get("mouse_sensitivity")), want_sens):
+		_player.set("mouse_sensitivity", want_sens)
 	var st := {}
 	if _player.has_method("get_hud_state"):
 		st = _player.get_hud_state()
@@ -248,25 +266,34 @@ func _build_ui() -> void:
 	_prompt_label = _make_label(root, Control.PRESET_CENTER, Rect2(-250, 50, 500, 30), HORIZONTAL_ALIGNMENT_CENTER, 20)
 	_build_label = _make_label(root, Control.PRESET_CENTER_BOTTOM, Rect2(-420, -70, 840, 55), HORIZONTAL_ALIGNMENT_CENTER, 16)
 	_ping_label = _make_label(root, Control.PRESET_TOP_RIGHT, Rect2(-176, 12, 160, 24), HORIZONTAL_ALIGNMENT_RIGHT, 14)
+	_hint_label = _make_label(root, Control.PRESET_TOP_LEFT, Rect2(16, 100, 520, 90), HORIZONTAL_ALIGNMENT_LEFT, 14)
+	_hint_label.text = "[WASD] Move  [Shift] Sprint  [Ctrl] Crouch  [Space] Jump\n[LMB] Fire  [RMB] Aim  [R] Reload  [1-5] Weapons\n[E] Interact  [H] Medkit  [J] Food  [K] Water\n[B] Build  [Esc] Menu / Controls  [F1] Hide hints"
+	_hint_label.modulate = Color(1, 1, 1, 0.75)
 
 	_loot_panel = PanelContainer.new()
 	_loot_panel.set_anchors_preset(Control.PRESET_CENTER_RIGHT)
-	_loot_panel.offset_left = -340
+	_loot_panel.offset_left = -400
 	_loot_panel.offset_right = -20
-	_loot_panel.offset_top = -160
-	_loot_panel.offset_bottom = 160
+	_loot_panel.offset_top = -220
+	_loot_panel.offset_bottom = 220
 	_loot_panel.visible = false
 	root.add_child(_loot_panel)
 	var box := VBoxContainer.new()
 	_loot_panel.add_child(box)
 	_loot_title = Label.new()
 	_loot_title.text = "Loot"
+	_loot_title.add_theme_font_size_override("font_size", 24)
 	box.add_child(_loot_title)
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	box.add_child(scroll)
 	_loot_list = VBoxContainer.new()
-	_loot_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	box.add_child(_loot_list)
+	_loot_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(_loot_list)
 	var close := Button.new()
-	close.text = "Close"
+	close.text = "Close  (Esc)"
+	PauseMenu.style_button(close)
 	close.pressed.connect(hide_loot)
 	box.add_child(close)
 

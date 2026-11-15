@@ -84,6 +84,13 @@ func _run() -> void:
 	zb.set_physics_process(false)
 	z.position = Vector3(30, 0.0, 30)
 	await _frames(3)
+	# the first shot's recoil left the view pitched up; at 10 m that is ~0.2 m, enough to clear a human-height head
+	print("INFO  look_pitch before headshot test = %.2f deg" % player.look_pitch)
+	player.look_pitch = 0.0
+	player.head.rotation_degrees.x = 0.0
+	player.rotation.y = 0.0
+	w._recoil_target = Vector2.ZERO
+	w._recoil_cur = Vector2.ZERO
 	w._cooldown = 0.0
 	w.state = WeaponController.State.READY
 	w._try_fire(wd2)

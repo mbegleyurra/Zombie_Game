@@ -81,6 +81,7 @@ var relay: DamageRelay
 
 var _avatar: Node3D
 var _avatar_gun: Node3D
+var _model: PlayerModel   ## Kenney body (null when the asset is missing: the box avatar is used)
 var _legs: Array[Node3D] = []
 var _arms: Array[Node3D] = []
 var _hud: CanvasLayer
@@ -593,6 +594,13 @@ func _build_avatar(local: bool) -> void:
 	_avatar = Node3D.new()
 	_avatar.name = "Avatar"
 	add_child(_avatar)
+	# Kenney body; the local player's copy is shadows-only so the first-person view is unchanged
+	var model := PlayerModel.new()
+	if model.build(peer_id, local):
+		_model = model
+		_avatar.add_child(model)
+		return
+	model.free()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = peer_id
 	var shirt := Color.from_hsv(rng.randf(), 0.55, 0.6)
@@ -634,6 +642,12 @@ func _part(parent: Node3D, mesh: Mesh, size: Vector3, pos: Vector3, color: Color
 
 
 func _update_avatar(delta: float) -> void:
+	if _model != null:
+		var spd := Vector2(velocity.x, velocity.z).length() if is_multiplayer_authority() else _remote_speed
+		_model.animate(delta, spd, look_pitch, crouching, is_sprinting, is_dead, equipped_id != "")
+		if not is_multiplayer_authority():
+			_sync_avatar_gun()
+		return
 	if is_multiplayer_authority():
 		return
 	# lie down when dead, otherwise swing legs by measured speed
@@ -647,16 +661,22 @@ func _update_avatar(delta: float) -> void:
 		var aim_up := -look_pitch * PI / 180.0
 		_arms[1].rotation.x = -1.2 + aim_up if equipped_id != "" else -swing
 		_arms[0].rotation.x = -1.0 + aim_up if equipped_id != "" else swing
-	if equipped_id != _shown_gun_id:
-		_shown_gun_id = equipped_id
-		if _avatar_gun != null:
-			_avatar_gun.queue_free()
-			_avatar_gun = null
-		if equipped_id != "" and WeaponDB.has_weapon(equipped_id):
-			_avatar_gun = GunMesh.build(WeaponDB.get_weapon(equipped_id).model)
-			_avatar_gun.position = Vector3(0.22, 1.25, -0.2)
-			_avatar.add_child(_avatar_gun)
+	_sync_avatar_gun()
 	_avatar.position.y = 0.0 if not crouching else -0.35
+
+
+## Remote peers see the gun the player has equipped.
+func _sync_avatar_gun() -> void:
+	if equipped_id == _shown_gun_id:
+		return
+	_shown_gun_id = equipped_id
+	if _avatar_gun != null:
+		_avatar_gun.queue_free()
+		_avatar_gun = null
+	if equipped_id != "" and WeaponDB.has_weapon(equipped_id):
+		_avatar_gun = GunMesh.build(WeaponDB.get_weapon(equipped_id).model)
+		_avatar_gun.position = Vector3(0.22, 1.25 if not crouching else 0.9, -0.2)
+		_avatar.add_child(_avatar_gun)
 
 
 # ================================================================== HUD (minimal; the full UI lives in scenes/ui)

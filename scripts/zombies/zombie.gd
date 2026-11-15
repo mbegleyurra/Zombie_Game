@@ -24,10 +24,12 @@ const KIND_BLOATER := 2
 const FLINCH_TIME := 0.28
 const DEATH_TIME := 1.1   ## seconds for the full collapse animation
 const WALKER_MODEL := "res://assets/kenney/mini/character-zombie.glb"
-const WALKER_SCALE := 2.6        ## Kenney model is ~0.67 tall: x2.6 = ~1.75 m
+const WALKER_SCALE := 2.43       ## Kenney model is ~0.70 tall: x2.43 = ~1.70 m (was 2.6 = 1.82 m, taller than the 1.8 m player once the huge head is counted)
+const WALKER_WIDTH := 0.8        ## extra x/z squash on the Kenney model: its chibi head is ~0.94 m wide at unit scale, so height alone left it looking giant; ~0.7 m wide head now
+const WALKER_HEIGHT := 1.7       ## walker capsule height (feet to crown)
 const WALKER_HEAD_LINE := 1.36   ## head hit line for the Kenney walker (head spans ~0.9-1.77 m); must stay above the ~1.32 m a 300 m rifle drop lands at
-const WALKER_RADIUS := 0.4       ## collision capsule radius for the Kenney walker: its scaled head/legs are ~0.8-0.9 m wide, the stock 0.32 let shots pass through the head edge
-const WALKER_HEAD_RADIUS := 0.44 ## extra head sphere: the head is ~0.94 m wide, wider than the capsule; centre offset + radius must stay under half the narrowest door (1.2 m)
+const WALKER_RADIUS := 0.34      ## collision capsule radius for the Kenney walker: its scaled head/legs are ~0.6-0.7 m wide, the stock 0.32 let shots pass through the head edge
+const WALKER_HEAD_RADIUS := 0.36 ## extra head sphere: the head is ~0.7 m wide, wider than the capsule; centre offset + radius must stay under half the narrowest door (1.2 m)
 
 @export var max_health: float = 100.0
 @export var walk_speed: float = 1.1
@@ -36,7 +38,7 @@ const WALKER_HEAD_RADIUS := 0.44 ## extra head sphere: the head is ~0.94 m wide,
 @export var runner_speed: float = 5.4
 @export var sight_range: float = 28.0
 @export var sight_fov_deg: float = 110.0
-@export var attack_range: float = 1.7
+@export var attack_range: float = 1.55
 @export var attack_damage: float = 12.0
 @export var attack_interval: float = 1.2
 @export var wind_up_time: float = 0.55      ## telegraphed, planted wind-up before a swing lands
@@ -767,7 +769,7 @@ func _build_kenney_walker() -> bool:
 	if ap != null:
 		ap.get_parent().remove_child(ap)   # poses come from code, not the stock clips
 		ap.free()
-	model.scale = Vector3.ONE * WALKER_SCALE
+	model.scale = Vector3(WALKER_SCALE * WALKER_WIDTH, WALKER_SCALE, WALKER_SCALE * WALKER_WIDTH)
 	model.rotation.y = PI   # Kenney faces +Z; zombies face -Z
 	_body.add_child(model)
 	# one fixed look for every walker: the model's own texture. Private copy so the hit
@@ -800,7 +802,9 @@ func _build_kenney_walker() -> bool:
 	if cs != null and cs.shape is CapsuleShape3D:
 		var shape := (cs.shape as CapsuleShape3D).duplicate() as CapsuleShape3D   # scene sub-resource is shared by every zombie
 		shape.radius = WALKER_RADIUS
+		shape.height = WALKER_HEIGHT
 		cs.shape = shape
+		cs.position.y = WALKER_HEIGHT * 0.5
 	_add_walker_head_shape()
 	return true
 
