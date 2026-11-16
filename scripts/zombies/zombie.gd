@@ -31,6 +31,22 @@ const WALKER_HEAD_LINE := 1.36   ## head hit line for the Kenney walker (head sp
 const WALKER_RADIUS := 0.34      ## collision capsule radius for the Kenney walker: its scaled head/legs are ~0.6-0.7 m wide, the stock 0.32 let shots pass through the head edge
 const WALKER_HEAD_RADIUS := 0.36 ## extra head sphere: the head is ~0.7 m wide, wider than the capsule; centre offset + radius must stay under half the narrowest door (1.2 m)
 
+# --- dismemberment: bit flags in `severed` (replicated) ---
+const PART_HEAD := 1
+const PART_ARM_L := 2    ## _arms[0], zombie-local -X side
+const PART_ARM_R := 4    ## _arms[1], +X side
+const PART_LEG_L := 8    ## _legs[0], -X side
+const PART_LEG_R := 16   ## _legs[1], +X side
+const ARM_SEVER_FRAC := 0.3     ## damage a limb must take, as a fraction of max health, before it comes off
+const LEG_SEVER_FRAC := 0.4
+const HEAD_SEVER_FRAC := 0.9    ## accumulated head damage that decapitates (a killing headshot always does)
+const ARM_REACH_LOSS := 0.2     ## attack range lost per missing arm
+const ARM_DAMAGE_LOSS := 0.3    ## attack damage lost per missing arm
+const LEG_SPEED := [1.0, 0.55, 0.25]   ## speed multiplier by number of missing legs (2 = crawling)
+const CRAWL_HEIGHT := 0.5       ## head line and collision height multiplier while crawling
+const MAX_GIBS := 16
+const MAX_DECALS := 48
+
 @export var max_health: float = 100.0
 @export var walk_speed: float = 1.1
 @export var investigate_speed: float = 2.3
@@ -69,6 +85,13 @@ var winding: bool = false:
 		if winding and not v and state_id != State.DEAD:
 			_attack_anim = 0.6
 		winding = v
+## Bit mask of PART_* flags for body parts shot off. Server writes it; the setter plays the
+## visuals/gib on every peer and reapplies the gameplay effects (reach, crawl).
+var severed: int = 0:
+	set(v):
+		severed = v
+		if _built:
+			_apply_severed(true)
 ## Set by the spawner at creation (server only uses these).
 var night_mult: float = 0.0
 
@@ -93,6 +116,18 @@ var _jump_cool: float = 0.0
 var _nav_timer: float = 0.0
 var _use_nav: bool = false
 var _dead_handled: bool = false
+# dismemberment bookkeeping
+var _part_dmg: Dictionary = {}          ## PART_* -> damage taken so far (server)
+var _sev_applied: int = 0               ## bits whose visuals are already applied on this peer
+var _base_range: float = -1.0
+var _base_damage: float = -1.0
+var _leg_speed: float = 1.0
+var _crawling: bool = false
+var _stumps: Array[Node] = []
+var last_gib: RigidBody3D = null
+static var _gibs: Array = []
+static var _decals: Array = []
+static var _blood_mat: StandardMaterial3D
 
 # visuals / animation
 var _built: bool = false
@@ -148,7 +183,7 @@ func _ready() -> void:
 
 func _setup_sync() -> void:
 	var cfg := SceneReplicationConfig.new()
-	for prop in ["position", "rotation", "state_id", "health", "runner", "kind", "variant_seed", "winding"]:
+	for prop in ["position", "rotation", "state_id", "health", "runner", "kind", "variant_seed", "winding", "severed"]:
 		var path := NodePath(".:" + prop)
 		cfg.add_property(path)
 		cfg.property_set_spawn(path, true)
@@ -169,33 +204,60 @@ func request_damage(amount: float, headshot: bool = false, attacker: int = 0) ->
 		rpc_id(1, "_rpc_damage", amount, headshot, attacker)
 
 
+## Like request_damage, but also carries where the bullet hit (world position, picks the body
+## part for dismemberment) and its direction (blood spray + knockback). Bullets call this.
+func request_hit(amount: float, headshot: bool = false, attacker: int = 0, hit_pos: Vector3 = Vector3.ZERO, shot_dir: Vector3 = Vector3.ZERO) -> void:
+	if multiplayer.is_server():
+		_take_damage(amount, headshot, attacker, hit_pos, shot_dir)
+	else:
+		rpc_id(1, "_rpc_hit", amount, headshot, attacker, hit_pos, shot_dir)
+
+
 @rpc("any_peer", "call_remote", "reliable")
 func _rpc_damage(amount: float, headshot: bool, attacker: int) -> void:
 	if multiplayer.is_server():
 		_take_damage(amount, headshot, attacker)
 
 
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_hit(amount: float, headshot: bool, attacker: int, hit_pos: Vector3, shot_dir: Vector3) -> void:
+	if multiplayer.is_server():
+		_take_damage(amount, headshot, attacker, hit_pos, shot_dir)
+
+
 func is_head_hit(world_pos: Vector3) -> bool:
-	var line := WALKER_HEAD_LINE if _skel != null else 1.48
-	return world_pos.y > global_position.y + line
+	return world_pos.y > global_position.y + _head_y() * (CRAWL_HEIGHT if _crawling else 1.0)
 
 
-func _take_damage(amount: float, headshot: bool, attacker: int) -> void:
+## Server only. `hit_pos` ZERO = unknown (region falls back to the headshot flag).
+func _take_damage(amount: float, headshot: bool, attacker: int, hit_pos: Vector3 = Vector3.ZERO, shot_dir: Vector3 = Vector3.ZERO) -> void:
 	if state_id == State.DEAD or amount <= 0.0:
 		return
 	health -= amount
 	_hit_flash = 0.15
-	if health <= 0.0:
+	var dir := _push_dir(attacker, shot_dir)
+	# dismemberment: the part under the bullet takes the damage and comes off past its threshold
+	var part := _part_at(hit_pos, headshot)
+	var fatal := health <= 0.0
+	var off := _damage_part(part, amount, fatal)
+	if off != 0:
+		_gib_dir = dir
+		severed |= off
+		if off & PART_HEAD:
+			health = 0.0   # no head, no zombie
+			fatal = true
+	_hit_fx_all(hit_pos, dir, amount, headshot or (off & PART_HEAD) != 0)
+	if fatal:
 		health = 0.0
 		_die()
 		return
-	_stagger = (0.35 if headshot else 0.18) * (0.4 if kind == KIND_BLOATER else 1.0)
-	# a hit interrupts a swing in progress and shoves the zombie back along the shot
+	var push := _knock(dir, amount, headshot)
+	_stagger = maxf((0.35 if headshot else 0.2) * (0.4 if kind == KIND_BLOATER else 1.0), push / 14.0)
+	# a hit interrupts a swing in progress
 	if winding:
 		winding = false
 		_attack_wind = false
 		_attack_cool = maxf(_attack_cool, 0.3)
-	_knock_from(attacker, headshot)
 	# getting shot draws the zombie to the shooter
 	for n in get_tree().get_nodes_in_group("players"):
 		var p := n as Player
@@ -204,17 +266,37 @@ func _take_damage(amount: float, headshot: bool, attacker: int) -> void:
 			break
 
 
-## Server only: shove the zombie away from whoever hit it (bloaters barely move).
-func _knock_from(attacker: int, headshot: bool) -> void:
-	for n in get_tree().get_nodes_in_group("players"):
-		var p := n as Player
-		if p != null and p.peer_id == attacker:
-			var away := global_position - p.global_position
-			away.y = 0.0
-			if away.length_squared() > 0.01:
-				var push := (7.0 if headshot else 4.5) * (0.35 if kind == KIND_BLOATER else 1.0)
-				velocity += away.normalized() * push
-			return
+## Horizontal direction the hit shoves the zombie: along the shot when known, else away
+## from the shooter, else straight back.
+func _push_dir(attacker: int, shot_dir: Vector3) -> Vector3:
+	var d := shot_dir
+	d.y = 0.0
+	if d.length_squared() < 0.01:
+		d = Vector3.ZERO
+		for n in get_tree().get_nodes_in_group("players"):
+			var p := n as Player
+			if p != null and p.peer_id == attacker:
+				d = global_position - p.global_position
+				d.y = 0.0
+				break
+	if d.length_squared() < 0.01:
+		d = global_transform.basis.z   # zombies face -Z: shoved backwards
+		d.y = 0.0
+	return d.normalized()
+
+
+## Server only: shove the zombie along `dir`. Scales with damage, harder on a headshot,
+## bloaters barely move. Returns the horizontal speed added.
+func _knock(dir: Vector3, amount: float, headshot: bool) -> float:
+	var push := clampf(4.5 + amount * 0.08, 4.5, 10.0)
+	if headshot:
+		push *= 1.4
+	if kind == KIND_BLOATER:
+		push *= 0.35
+	velocity.x += dir.x * push
+	velocity.z += dir.z * push
+	velocity.y = maxf(velocity.y, 1.6)   # small hop so the shove reads
+	return push
 
 
 func _die() -> void:
@@ -224,6 +306,331 @@ func _die() -> void:
 	get_tree().create_timer(corpse_time).timeout.connect(func() -> void:
 		if is_instance_valid(self):
 			queue_free())
+
+
+# ================================================================== dismemberment & gore
+
+var _crawl_t: float = 0.0
+var _gib_dir: Vector3 = Vector3.BACK
+
+
+## Body-region lines in zombie-local metres. Subclasses with another build override these.
+func _head_y() -> float:
+	return WALKER_HEAD_LINE if _skel != null else 1.48
+
+
+func _leg_y() -> float:
+	return 0.65     ## below this a hit is a leg
+
+
+func _arm_x() -> float:
+	return 0.4 if kind == KIND_BLOATER else 0.24   ## beyond this sideways offset a torso-height hit is an arm
+
+
+func _stump_color() -> Color:
+	return Color(0.4, 0.04, 0.04)
+
+
+func _gib_color(part: int) -> Color:
+	if (part & (PART_LEG_L | PART_LEG_R)) != 0:
+		return Color(0.25, 0.28, 0.35)
+	return Color(0.6, 0.66, 0.52)
+
+
+func _supports_crawl() -> bool:
+	return true
+
+
+## Which PART_* a bullet at `hit_pos` struck (0 = torso). ZERO position = unknown: the
+## headshot flag alone decides.
+func _part_at(hit_pos: Vector3, headshot: bool) -> int:
+	if hit_pos == Vector3.ZERO:
+		return PART_HEAD if headshot else 0
+	if headshot or is_head_hit(hit_pos):
+		return PART_HEAD
+	var l := to_local(hit_pos)
+	var k := CRAWL_HEIGHT if _crawling else 1.0
+	if l.y < _leg_y() * k:
+		return PART_LEG_L if l.x < 0.0 else PART_LEG_R
+	if absf(l.x) > _arm_x():
+		return PART_ARM_L if l.x < 0.0 else PART_ARM_R
+	return 0
+
+
+## Server: adds `amount` to the part's damage tally. Returns the part when it comes off
+## (tally past its threshold, or the hit is fatal), else 0.
+func _damage_part(part: int, amount: float, fatal: bool) -> int:
+	if part == 0 or (severed & part) != 0:
+		return 0
+	var total := float(_part_dmg.get(part, 0.0)) + amount
+	_part_dmg[part] = total
+	var frac := LEG_SEVER_FRAC
+	if part == PART_HEAD:
+		frac = HEAD_SEVER_FRAC
+	elif part == PART_ARM_L or part == PART_ARM_R:
+		frac = ARM_SEVER_FRAC
+	if fatal or total >= max_health * frac:
+		return part
+	return 0
+
+
+func _part_list() -> Array:
+	return [PART_HEAD, PART_ARM_L, PART_ARM_R, PART_LEG_L, PART_LEG_R]
+
+
+## Runs on every peer when `severed` changes (gibs = a live change, not a late-join catch-up).
+func _apply_severed(gibs: bool) -> void:
+	var diff := severed & ~_sev_applied
+	_sev_applied = severed
+	for part in _part_list():
+		if (diff & part) != 0:
+			_hide_part(part)
+			_add_stump(part)
+			if gibs:
+				_spawn_gib(part)
+	_recompute_limb_effects()
+	_apply_sever_pose()
+
+
+func _hide_part(part: int) -> void:
+	var n: Node3D = null
+	match part:
+		PART_HEAD:
+			n = _head
+		PART_ARM_L:
+			n = _arms[0] if _arms.size() > 0 else null
+		PART_ARM_R:
+			n = _arms[1] if _arms.size() > 1 else null
+		PART_LEG_L:
+			n = _legs[0] if _legs.size() > 0 else null
+		PART_LEG_R:
+			n = _legs[1] if _legs.size() > 1 else null
+	if n != null:
+		n.visible = false
+
+
+## Zombie-local position of the joint a part comes off at.
+func _joint_local(part: int) -> Vector3:
+	var sx := 1.0
+	if (part & (PART_ARM_L | PART_LEG_L)) != 0:
+		sx = -1.0
+	if part == PART_HEAD:
+		return Vector3(0.0, _head_y() - 0.02, 0.0)
+	if part == PART_ARM_L or part == PART_ARM_R:
+		return Vector3(sx * _arm_x() * 1.15, _head_y() - 0.2, 0.0)
+	return Vector3(sx * 0.13, _leg_y() + 0.1, 0.0)
+
+
+func _add_stump(part: int) -> void:
+	if _body == null:
+		return
+	var sm := SphereMesh.new()
+	sm.radius = 0.11 if part == PART_HEAD else 0.07
+	sm.height = sm.radius * 2.0
+	sm.radial_segments = 8
+	sm.rings = 4
+	var mi := _mesh(_body, sm, _joint_local(part), _material(_stump_color(), 0.6))
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_stumps.append(mi)
+
+
+## Skinned bodies cannot hide a limb by visibility: scale its bone to nothing instead
+## (reapplied every frame, animation clips rewrite bone poses).
+func _apply_sever_pose() -> void:
+	if _skel == null:
+		return
+	var tiny := Vector3(0.001, 0.001, 0.001)
+	if (severed & PART_HEAD) != 0 and _bone_head >= 0:
+		_skel.set_bone_pose_scale(_bone_head, tiny)
+	for i in range(mini(_bone_arm.size(), 2)):
+		if (severed & (PART_ARM_L if i == 0 else PART_ARM_R)) != 0 and _bone_arm[i] >= 0:
+			_skel.set_bone_pose_scale(_bone_arm[i], tiny)
+	for i in range(mini(_bone_leg.size(), 2)):
+		if (severed & (PART_LEG_L if i == 0 else PART_LEG_R)) != 0 and _bone_leg[i] >= 0:
+			_skel.set_bone_pose_scale(_bone_leg[i], tiny)
+
+
+static func _bits(v: int, a: int, b: int) -> int:
+	return (1 if (v & a) != 0 else 0) + (1 if (v & b) != 0 else 0)
+
+
+## Gameplay effects of missing limbs: arms cut reach and damage, legs cut speed, two
+## legs gone = crawling (low, slow, smaller hitbox).
+func _recompute_limb_effects() -> void:
+	if _base_range < 0.0:
+		_base_range = attack_range
+		_base_damage = attack_damage
+	var arms := _bits(severed, PART_ARM_L, PART_ARM_R)
+	var legs := _bits(severed, PART_LEG_L, PART_LEG_R)
+	attack_range = _base_range * (1.0 - ARM_REACH_LOSS * arms)
+	attack_damage = _base_damage * (1.0 - ARM_DAMAGE_LOSS * arms)
+	_leg_speed = float(LEG_SPEED[legs])
+	var crawl := legs >= 2 and _supports_crawl()
+	if crawl and not _crawling:
+		_crawling = true
+		_apply_crawl_shape()
+
+
+func _apply_crawl_shape() -> void:
+	var cs := get_node_or_null("Collision") as CollisionShape3D
+	if cs != null and cs.shape is CapsuleShape3D:
+		var shape := (cs.shape as CapsuleShape3D).duplicate() as CapsuleShape3D   # never edit the shared scene shape
+		shape.height = maxf(shape.radius * 2.0 + 0.02, shape.height * CRAWL_HEIGHT)
+		cs.shape = shape
+		cs.position.y = shape.height * 0.5
+	var hc := get_node_or_null("HeadCollision") as CollisionShape3D
+	if hc != null:
+		hc.position.y *= CRAWL_HEIGHT
+
+
+func _fx_root() -> Node:
+	if not is_inside_tree():
+		return null
+	var cur := get_tree().current_scene
+	return cur if cur != null else get_tree().root
+
+
+## A severed part tumbling away: a real physics body that never collides with actors.
+func _spawn_gib(part: int) -> RigidBody3D:
+	var scene := _fx_root()
+	if scene == null:
+		return null
+	var rb := RigidBody3D.new()
+	rb.collision_layer = 0
+	rb.collision_mask = MASK_WORLD
+	rb.mass = 2.0
+	var mi := MeshInstance3D.new()
+	var cshape := CollisionShape3D.new()
+	if part == PART_HEAD:
+		var s := SphereShape3D.new()
+		s.radius = 0.17
+		cshape.shape = s
+		mi.mesh = _sphere_mesh(0.17, 10, 6)
+	else:
+		var r := 0.06 if (part == PART_ARM_L or part == PART_ARM_R) else 0.08
+		var h := 0.6 if r < 0.07 else 0.8
+		var c := CapsuleShape3D.new()
+		c.radius = r
+		c.height = h
+		cshape.shape = c
+		mi.mesh = _capsule_mesh(r, h, 8, 3)
+	mi.material_override = _material(_gib_color(part))
+	rb.add_child(mi)
+	rb.add_child(cshape)
+	scene.add_child(rb)
+	rb.global_position = global_transform * _joint_local(part)
+	var away := _gib_dir
+	if away.length_squared() < 0.01:
+		away = Vector3(randf_range(-1.0, 1.0), 0.0, randf_range(-1.0, 1.0)).normalized()
+	rb.linear_velocity = away * randf_range(2.5, 4.5) + Vector3(randf_range(-1.0, 1.0), randf_range(2.5, 4.5), randf_range(-1.0, 1.0))
+	rb.angular_velocity = Vector3(randf_range(-9.0, 9.0), randf_range(-9.0, 9.0), randf_range(-9.0, 9.0))
+	_blood_burst(rb.global_position, away, 40, 1.3)
+	while _gibs.size() >= MAX_GIBS:
+		var old = _gibs.pop_front()
+		if is_instance_valid(old):
+			old.queue_free()
+	_gibs.append(rb)
+	get_tree().create_timer(12.0).timeout.connect(func() -> void:
+		if is_instance_valid(rb):
+			rb.queue_free())
+	last_gib = rb
+	return rb
+
+
+## Particles for one hit: more with damage, much more on a headshot.
+static func blood_amount(amount: float, headshot: bool) -> int:
+	var n := 10 + int(amount * 0.6)
+	if headshot:
+		n = int(n * 1.8)
+	return clampi(n, 10, 90)
+
+
+## Server: shows the hit on this peer and tells the rest.
+func _hit_fx_all(hit_pos: Vector3, dir: Vector3, amount: float, headshot: bool) -> void:
+	var p := hit_pos if hit_pos != Vector3.ZERO else global_position + Vector3.UP * 1.2
+	_hit_fx(p, dir, amount, headshot)
+	if multiplayer.has_multiplayer_peer() and multiplayer.get_peers().size() > 0:
+		rpc("_rpc_hit_fx", p, dir, amount, headshot)
+
+
+@rpc("authority", "call_remote", "unreliable")
+func _rpc_hit_fx(pos: Vector3, dir: Vector3, amount: float, headshot: bool) -> void:
+	_hit_fx(pos, dir, amount, headshot)
+
+
+func _hit_fx(pos: Vector3, dir: Vector3, amount: float, headshot: bool) -> CPUParticles3D:
+	_gib_dir = dir
+	var ps := _blood_burst(pos, dir, blood_amount(amount, headshot), 1.0 + (0.4 if headshot else 0.0))
+	_floor_splat(pos, amount, headshot)
+	return ps
+
+
+static func _blood_material() -> StandardMaterial3D:
+	if _blood_mat == null:
+		_blood_mat = _material(Color(0.5, 0.02, 0.02), 0.4)
+	return _blood_mat
+
+
+func _blood_burst(pos: Vector3, dir: Vector3, n: int, speed: float = 1.0) -> CPUParticles3D:
+	var scene := _fx_root()
+	if scene == null:
+		return null
+	var ps := CPUParticles3D.new()
+	ps.one_shot = true
+	ps.amount = n
+	ps.lifetime = 0.7
+	ps.explosiveness = 1.0
+	ps.direction = (dir + Vector3.UP * 0.35).normalized()
+	ps.spread = 38.0
+	ps.initial_velocity_min = 1.5 * speed
+	ps.initial_velocity_max = (3.0 + n * 0.04) * speed
+	ps.gravity = Vector3(0.0, -9.8, 0.0)
+	var sm := SphereMesh.new()
+	sm.radius = 0.03
+	sm.height = 0.06
+	sm.radial_segments = 4
+	sm.rings = 2
+	ps.mesh = sm
+	ps.material_override = _blood_material()
+	ps.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	scene.add_child(ps)
+	ps.global_position = pos
+	ps.emitting = true
+	get_tree().create_timer(1.3).timeout.connect(func() -> void:
+		if is_instance_valid(ps):
+			ps.queue_free())
+	return ps
+
+
+## Flat blood puddles on the floor below the hit: more and bigger for harder hits.
+func _floor_splat(pos: Vector3, amount: float, headshot: bool) -> void:
+	var scene := _fx_root()
+	if scene == null:
+		return
+	var q := PhysicsRayQueryParameters3D.create(pos, pos + Vector3.DOWN * 3.0, MASK_WORLD, [get_rid()])
+	var res := get_world_3d().direct_space_state.intersect_ray(q)
+	if res.is_empty():
+		return
+	var count := clampi(1 + int(amount / 40.0) + (2 if headshot else 0), 1, 4)
+	for i in range(count):
+		var cm := CylinderMesh.new()
+		cm.top_radius = randf_range(0.08, 0.16) + minf(amount, 100.0) * 0.002
+		cm.bottom_radius = cm.top_radius
+		cm.height = 0.004
+		cm.radial_segments = 8
+		cm.rings = 1
+		var mi := MeshInstance3D.new()
+		mi.mesh = cm
+		mi.material_override = _blood_material()
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		scene.add_child(mi)
+		var fp: Vector3 = res["position"]
+		mi.global_position = fp + Vector3(randf_range(-0.5, 0.5), 0.012 + 0.002 * i, randf_range(-0.5, 0.5))
+		while _decals.size() >= MAX_DECALS:
+			var old = _decals.pop_front()
+			if is_instance_valid(old):
+				old.queue_free()
+		_decals.append(mi)
 
 
 # ================================================================== senses / alerts
@@ -382,8 +789,8 @@ func _physics_process(delta: float) -> void:
 		_use_nav = NavigationServer3D.map_get_regions(nav.get_navigation_map()).size() > 0
 	if _stagger > 0.0:
 		_stagger -= delta
-		velocity.x = move_toward(velocity.x, 0.0, 20.0 * delta)
-		velocity.z = move_toward(velocity.z, 0.0, 20.0 * delta)
+		velocity.x = move_toward(velocity.x, 0.0, 10.0 * delta)
+		velocity.z = move_toward(velocity.z, 0.0, 10.0 * delta)
 		move_and_slide()
 		return
 	match state_id:
@@ -480,7 +887,7 @@ func _do_attack(delta: float) -> void:
 
 
 func _speed_mult() -> float:
-	return 1.0 + 0.2 * night_mult
+	return (1.0 + 0.2 * night_mult) * _leg_speed
 
 
 ## While chasing: if a player-built piece (wall, barricade, window, closed door) is in
@@ -614,6 +1021,9 @@ func _process(delta: float) -> void:
 	_anim_phase += delta * (2.0 + _anim_speed * 1.6)
 	_attack_anim = maxf(0.0, _attack_anim - delta)
 	_hit_flash = maxf(0.0, _hit_flash - delta)
+	_crawl_t = move_toward(_crawl_t, 1.0 if _crawling else 0.0, delta * 2.5)
+	if _sev_applied != severed:
+		_apply_severed(false)   # late joiner: parts already gone when this zombie spawned here
 	_wind_pose = move_toward(_wind_pose, 1.0 if winding else 0.0, delta * (5.0 if winding else 16.0))
 	# a drop in (replicated) health is a hit on every peer: play the flinch
 	if health < _prev_health - 0.01 and state_id != State.DEAD:
@@ -650,6 +1060,7 @@ func _process(delta: float) -> void:
 		_arms[1].rotation.z = -0.1 - sin(_anim_phase) * 0.05
 	var lurch := 0.12 if reach else 0.05
 	_body.rotation.x += lurch + absf(swing) * 0.05
+	_body.rotation.x -= 1.0 * _crawl_t   # legless: pitched onto the arms, dragging forward
 	_body.rotation.z = sin(_anim_phase) * 0.04
 	_body.rotation.x -= 0.4 * _wind_pose
 	_head.rotation.z = sin(_anim_phase * 0.7) * 0.12
@@ -852,6 +1263,7 @@ func _sync_rig() -> void:
 		var out := absf(r.rotation.z) * (1.0 if i == 0 else -1.0)
 		var d := Vector3(out, sin(el), cos(el)).normalized()   # model +Z = zombie forward
 		_skel.set_bone_pose_rotation(_bone_arm[i], Quaternion(Vector3.RIGHT if i == 0 else Vector3.LEFT, d))
+	_apply_sever_pose()
 
 
 func _build_walker_procedural() -> void:

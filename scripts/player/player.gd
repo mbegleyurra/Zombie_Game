@@ -22,6 +22,8 @@ signal inventory_changed
 signal stats_changed
 signal damaged(amount: float)
 signal item_used(id: String)
+signal inventory_full(item_id: String)   ## a pickup / add was refused because it does not fit the grid
+signal notice(text: String)              ## short HUD message (also shown as a toast for the local player)
 
 const WALK_SPEED := 4.2
 const SPRINT_SPEED := 7.2
@@ -42,6 +44,8 @@ const THIRST_RATE := 0.07
 
 ## Loot/ItemDB ids and weapon_db ids differ ("ammo_9mm" vs "9mm", "hunting_rifle" vs
 ## "hunting"). Every inventory call funnels through normalize_id so both forms work.
+const InventoryGrid := preload("res://scripts/player/inventory_grid.gd")
+const ItemDB := preload("res://scripts/world/item_db.gd")
 const ID_ALIASES := {
 	"ammo_9mm": "9mm", "ammo_556": "556", "ammo_762": "762", "ammo_12ga": "12ga",
 	"5.56": "556", "7.62": "762", "ammo_5.56": "556", "ammo_7.62": "762",
@@ -65,6 +69,10 @@ var look_pitch: float = 0.0
 var equipped_id: String = ""
 var base_fov: float = BASE_FOV
 var inventory: Dictionary = {}
+var inv_cols: int = 10   ## grid size in cells (scripts/player/inventory_grid.gd); items take their ItemDB footprint
+var inv_rows: int = 6
+var _toast: Label
+var _toast_gen: int = 0
 
 var third_person: bool = false   ## local view only (not replicated); toggled with the toggle_camera action (V)
 var _tp_arm: SpringArm3D
@@ -431,10 +439,14 @@ static func normalize_id(id: String) -> String:
 ## Weapon items ("pistol", "ak", "m4", "shotgun", "hunting") are not stored in
 ## `inventory`; they go to the weapon controller, which equips a newly found gun.
 ## Picking up a gun you already own gives one magazine of its ammo instead.
-func add_item(id: String, n: int = 1) -> void:
+## Returns false (and changes nothing) when the item does not fit the grid inventory.
+func add_item(id: String, n: int = 1) -> bool:
 	if n <= 0:
-		return
+		return true
 	id = normalize_id(id)
+	if not InventoryGrid.can_add(self, id, n):
+		inventory_rejected(id)
+		return false
 	if WeaponDB.has_weapon(id):
 		if weapons.has_weapon(id):
 			var wd := WeaponDB.get_weapon(id)
@@ -443,10 +455,11 @@ func add_item(id: String, n: int = 1) -> void:
 			weapons.pickup_weapon(id)
 		inventory_changed.emit()
 		weapons.ammo_changed.emit()
-		return
+		return true
 	inventory[id] = int(inventory.get(id, 0)) + n
 	inventory_changed.emit()
 	weapons.ammo_changed.emit()
+	return true
 
 
 ## Removes up to n; returns how many were actually removed.
@@ -479,6 +492,51 @@ func count_item(id: String) -> int:
 
 func has_item(id: String, n: int = 1) -> bool:
 	return count_item(id) >= n
+
+
+## Grid inventory API (rules live in scripts/player/inventory_grid.gd).
+## Would n of this item fit right now? Nothing is changed.
+func can_fit_item(id: String, n: int = 1) -> bool:
+	return InventoryGrid.can_add(self, normalize_id(id), n)
+
+
+## Adds the item only when it fits. Returns false (HUD message, item stays where it was) when it does not.
+func try_add(id: String, n: int = 1) -> bool:
+	return add_item(id, n)
+
+
+## Breaks `units` of an item (ItemDB id, weapon id or ammo key) down into planks and scrap, which land in the
+## inventory and the Building stock like a pickup. Returns {ok, reason, item, removed, yield: {material: n}}.
+func deconstruct_item(id: String, units: int = 1) -> Dictionary:
+	var r: Dictionary = InventoryGrid.deconstruct(self, id, units)
+	if not bool(r["ok"]):
+		notice_msg(str(r["reason"]))
+	return r
+
+
+func inventory_rejected(id: String) -> void:
+	inventory_full.emit(id)
+	notice_msg("Inventory full - can't carry %s" % ItemDB.item_name(id))
+
+
+## Short message for the local player's HUD (toast for 2.5 s) and a `notice` signal for anything listening.
+func notice_msg(text: String) -> void:
+	notice.emit(text)
+	if _hud == null or text == "":
+		return
+	if _toast == null:
+		_toast = _make_label(text, Control.PRESET_CENTER_TOP, 28)
+		_toast.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_toast.add_theme_color_override("font_color", Color(1.0, 0.75, 0.3))
+		_toast.grow_horizontal = Control.GROW_DIRECTION_BOTH
+		_toast.position.y = 110.0
+	_toast.text = text
+	_toast.visible = true
+	_toast_gen += 1
+	var gen := _toast_gen
+	get_tree().create_timer(2.5).timeout.connect(func() -> void:
+		if gen == _toast_gen and is_instance_valid(_toast):
+			_toast.visible = false)
 
 
 ## Gives a weapon and equips it when it is new (no duplicates). Returns the slot or -1.

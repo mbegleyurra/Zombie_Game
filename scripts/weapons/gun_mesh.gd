@@ -30,6 +30,8 @@ static func build(model: String) -> Node3D:
 			_hunting(root)
 		"ar":
 			_ar(root)
+		"ar_t1", "ar_t2", "ar_t3":
+			_ar_tier(root, int(model.substr(4)))
 		_:
 			_pistol(root)
 	return root
@@ -317,3 +319,22 @@ static func _ar(r: Node3D) -> void:
 	_box(r, Vector3(0.004, 0.004, 0.003), Vector3(0, 0.1, -0.1575), Color(1.0, 0.1, 0.1))  # reticle dot
 	_post(r, 0.006, 0.014, Vector3(0.03, -0.02, -0.28), STEEL, 0.6, 8)                     # sling swivel
 	_muzzle(r, -0.845, 0.005)
+
+
+static func _ar_tier(r: Node3D, tier: int) -> void:
+	# workbench rifles: the base AR plus bolt-on parts that grow with the tier
+	_ar(r)
+	var accents: Array[Color] = [Color(0.85, 0.5, 0.15), Color(0.2, 0.5, 0.85), Color(0.8, 0.12, 0.12)]
+	var accent: Color = accents[clampi(tier, 1, 3) - 1]
+	_box(r, Vector3(0.052, 0.012, 0.3), Vector3(0, 0.03, -0.45), accent)                   # handguard accent stripe
+	_box(r, Vector3(0.012, 0.03, 0.05), Vector3(-0.03, 0.0, -0.05), accent)                # receiver tag
+	if tier >= 2:
+		_box(r, Vector3(0.03, 0.1, 0.035), Vector3(0, -0.07, -0.5), POLYMER, Vector3(8, 0, 0))  # vertical foregrip
+		_box(r, Vector3(0.042, 0.07, 0.06), Vector3(0, -0.205, -0.175), POLYMER, Vector3(5, 0, 0))  # extended magazine
+	if tier >= 3:
+		_box(r, Vector3(0.05, 0.05, 0.1), Vector3(0, -0.19, -0.2), accent)                 # magazine collar
+		_barrel(r, 0.014, 0.1, Vector3(0, 0.005, -0.89), DARK, 0.6, 8)                     # long muzzle brake
+		_box(r, Vector3(0.012, 0.02, 0.2), Vector3(0.032, 0.02, -0.45), STEEL, Vector3.ZERO, 0.6)  # heat shield
+		var m := muzzle_of(r)
+		if m != null:
+			m.position.z = -0.94

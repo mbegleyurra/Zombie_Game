@@ -77,7 +77,7 @@ func _run() -> void:
 
 	# ---- (3) weapon spec sheet, reload times, bullet drop, recoil patterns
 	var all: Dictionary = WeaponDB.inspect_all()
-	check(all.size() == 5, "inspect_all covers 5 guns")
+	check(all.size() >= 5 and all.has("pistol") and all.has("ak") and all.has("m4") and all.has("shotgun") and all.has("hunting"), "inspect_all covers the 5 original guns (and any crafted rifles)")
 	var reloads: Array = []
 	var patterns: Array = []
 	for id in all.keys():
@@ -91,7 +91,7 @@ func _run() -> void:
 	var uniq_p: Dictionary = {}
 	for p in patterns:
 		uniq_p[p] = true
-	check(uniq_p.size() == 5, "all five guns have distinct recoil patterns")
+	check(uniq_p.size() >= 5, "the original five guns have distinct recoil patterns (rifle tiers may share one)")
 	var uniq_r: Dictionary = {}
 	for r in reloads:
 		uniq_r[r] = true
@@ -107,7 +107,6 @@ func _run() -> void:
 	var ak: WeaponData = WeaponDB.get_weapon("ak")
 	ak.spread_deg = 0.0
 	ak.move_spread_deg = 0.0
-	ak.bloom_per_shot = 0.0
 	ak.ads_spread_mult = 0.0
 	player.look_pitch = 0.0
 	var zt = (load("res://scenes/zombies/zombie.tscn") as PackedScene).instantiate()

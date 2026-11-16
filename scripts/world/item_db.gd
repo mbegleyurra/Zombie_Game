@@ -69,6 +69,31 @@ const ITEMS := {
 		"name": "Wood Planks", "type": "material", "stack": 30, "weight": 0.6,
 		"color": Color(0.65, 0.47, 0.28), "shape": "long", "desc": "Used for building barricades.",
 	},
+	# Workbench rifles and their own ammo types (crafted at the workbench).
+	"weapon_ar_t1": {
+		"name": "Scrapper AR (Mk1)", "type": "weapon", "weapon_id": "ar_t1", "stack": 1, "weight": 3.6,
+		"color": Color(0.85, 0.5, 0.15), "shape": "gun", "desc": "Workbench-built assault rifle, 5.45 rounds, 24 round magazine.",
+	},
+	"weapon_ar_t2": {
+		"name": "Marauder AR (Mk2)", "type": "weapon", "weapon_id": "ar_t2", "stack": 1, "weight": 3.9,
+		"color": Color(0.2, 0.5, 0.85), "shape": "gun", "desc": "Workbench-built assault rifle, 6.8 rounds, 30 round magazine.",
+	},
+	"weapon_ar_t3": {
+		"name": "Reaper AR (Mk3)", "type": "weapon", "weapon_id": "ar_t3", "stack": 1, "weight": 4.2,
+		"color": Color(0.8, 0.12, 0.12), "shape": "gun", "desc": "Workbench-built assault rifle, .300 rounds, 40 round magazine.",
+	},
+	"ammo_545": {
+		"name": "5.45x39mm Rounds", "type": "ammo", "caliber": "545", "stack": 120, "weight": 0.011,
+		"color": Color(0.85, 0.5, 0.15), "shape": "box", "desc": "Ammo for the Scrapper AR.",
+	},
+	"ammo_68": {
+		"name": "6.8mm Rounds", "type": "ammo", "caliber": "68", "stack": 120, "weight": 0.013,
+		"color": Color(0.2, 0.5, 0.85), "shape": "box", "desc": "Ammo for the Marauder AR.",
+	},
+	"ammo_300": {
+		"name": ".300 Rounds", "type": "ammo", "caliber": "300", "stack": 120, "weight": 0.015,
+		"color": Color(0.8, 0.12, 0.12), "shape": "box", "desc": "Ammo for the Reaper AR.",
+	},
 }
 
 ## Loot tables: "rolls" = [min, max] number of weighted picks, "entries" = [item_id, weight, min_count, max_count].
@@ -76,10 +101,12 @@ const ITEMS := {
 const ALIASES := {
 	"9mm": "ammo_9mm", "556": "ammo_556", "5.56": "ammo_556",
 	"762": "ammo_762", "7.62": "ammo_762", "12ga": "ammo_12ga",
+	"545": "ammo_545", "68": "ammo_68", "300": "ammo_300",
 }
 ## Ammo item id -> the reserve key weapons read via player.count_item(caliber).
 const RESERVE_KEYS := {
 	"ammo_9mm": "9mm", "ammo_556": "556", "ammo_762": "762", "ammo_12ga": "12ga",
+	"ammo_545": "545", "ammo_68": "68", "ammo_300": "300",
 }
 
 const TABLES := {
@@ -213,6 +240,11 @@ static func give_to(player, id: String, count: int) -> bool:
 	var d: Dictionary = get_item(cid)
 	if player == null:
 		return false
+	# Grid inventory: an item that does not fit is refused (it stays on the ground) and the player is told.
+	if player.has_method("can_fit_item") and not player.can_fit_item(cid, count):
+		if player.has_method("inventory_rejected"):
+			player.inventory_rejected(cid)
+		return false
 	match str(d.get("type", "")):
 		"weapon":
 			var wid: String = str(d.get("weapon_id", ""))
@@ -321,3 +353,68 @@ static func pick_one(table: String, rng: RandomNumberGenerator) -> Dictionary:
 			chosen = e
 			break
 	return {"id": str(chosen[0]), "count": rng.randi_range(int(chosen[2]), int(chosen[3]))}
+
+
+# ---------------------------------------------------------------- grid inventory (footprints + deconstruct)
+
+## Cells an item occupies in the player's grid, [w, h]. An item entry may carry its own "cells": [w, h] and wins over
+## this table; anything not listed takes the type default in footprint() (weapons 4x2, everything else 1x1).
+const FOOTPRINTS := {
+	"weapon_pistol": [2, 1], "weapon_ak": [4, 2], "weapon_m4": [4, 2], "weapon_shotgun": [4, 2],
+	"weapon_hunting": [4, 2], "weapon_ar": [4, 2],
+}
+
+## Base materials an item breaks down into, per unit (see deconstruct_unit): item id -> {planks / scrap: n}.
+## An item entry may carry its own "deconstruct" dict. Weapons not listed fall back to a type default in
+## deconstruct_yield(); materials, food and water give nothing.
+const DECONSTRUCT := {
+	"weapon_pistol": {"scrap": 3},
+	"weapon_ak": {"scrap": 5, "planks": 2},
+	"weapon_m4": {"scrap": 6},
+	"weapon_shotgun": {"scrap": 5, "planks": 2},
+	"weapon_hunting": {"scrap": 3, "planks": 3},
+	"weapon_ar": {"scrap": 7, "planks": 1},
+	"medkit": {"scrap": 1},
+}
+## Ammo is broken down in bundles of this many rounds per unit of yield (default 10, yield scrap 1).
+const DECONSTRUCT_UNIT := {"ammo_12ga": 4}
+
+
+static func footprint(id: String) -> Vector2i:
+	var cid: String = canonical(id)
+	var d: Dictionary = get_item(cid)
+	var c = d.get("cells", FOOTPRINTS.get(cid, null))
+	if c is Array and (c as Array).size() == 2:
+		return Vector2i(maxi(1, int(c[0])), maxi(1, int(c[1])))
+	return Vector2i(4, 2) if str(d.get("type", "")) == "weapon" else Vector2i(1, 1)
+
+
+## {material: n} per unit, empty when the item cannot be deconstructed. Items that feed the building stock
+## (KayKit wood / metal) break down into what they feed.
+static func deconstruct_yield(id: String) -> Dictionary:
+	var cid: String = canonical(id)
+	var d: Dictionary = get_item(cid)
+	if d.is_empty() or cid == "planks" or cid == "scrap":
+		return {}
+	if d.has("deconstruct"):
+		return (d["deconstruct"] as Dictionary).duplicate()
+	if DECONSTRUCT.has(cid):
+		return (DECONSTRUCT[cid] as Dictionary).duplicate()
+	var feed: Array = KayKitRes.feed_for(cid)
+	if not feed.is_empty():
+		return {str(feed[0]): int(feed[1])}
+	match str(d.get("type", "")):
+		"weapon":
+			return {"scrap": 5, "planks": 1}
+		"ammo":
+			return {"scrap": 1}
+	return {}
+
+
+## Items consumed per unit of deconstruct_yield (ammo comes in bundles, everything else is 1).
+static func deconstruct_unit(id: String) -> int:
+	var cid: String = canonical(id)
+	var d: Dictionary = get_item(cid)
+	if str(d.get("type", "")) != "ammo":
+		return 1
+	return int(DECONSTRUCT_UNIT.get(cid, 10))

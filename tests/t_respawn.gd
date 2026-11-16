@@ -20,6 +20,15 @@ func check(cond: bool, label: String) -> void:
 		print("FAIL  ", label)
 
 
+## The headless DisplayServer ignores Input.mouse_mode writes (it stays VISIBLE; see tests/t_qa_mouse_probe.gd), so a
+## CAPTURED assertion cannot hold there. Skip it explicitly instead of failing; it is real on a windowed run.
+func check_captured(label: String) -> void:
+	if DisplayServer.get_name() == "headless":
+		print("SKIP  (headless cannot hold mouse_mode CAPTURED) ", label)
+	else:
+		check(Input.mouse_mode == Input.MOUSE_MODE_CAPTURED, label)
+
+
 func _initialize() -> void:
 	_run.call_deferred()
 
@@ -88,7 +97,7 @@ func _run() -> void:
 	check(not player.is_dead and player.health == player.max_health, "Respawn button revives the player at full health")
 	check(player.global_position.distance_to(Vector3(30.0, 4.0, -20.0)) < 0.01, "player is placed on the world spawn point")
 	check(not ui.visible and not ui.is_in_group("ui_open"), "death screen closes")
-	check(Input.mouse_mode == Input.MOUSE_MODE_CAPTURED, "mouse is recaptured after respawn")
+	check_captured("mouse is recaptured after respawn")
 	check(player.inventory == inv_before, "inventory is kept on death")
 	check(player.weapons.weapon_ids() == weapons_before, "weapons are kept on death")
 	await _frames(2)
@@ -102,7 +111,7 @@ func _run() -> void:
 	check(player.is_dead, "other keys do not respawn")
 	ui._input(_key(KEY_R))
 	check(not player.is_dead and not ui.visible, "R respawns")
-	check(Input.mouse_mode == Input.MOUSE_MODE_CAPTURED, "mouse recaptured after R respawn")
+	check_captured("mouse recaptured after R respawn")
 
 	ui.queue_free()
 	inv_ui.queue_free()
@@ -153,7 +162,8 @@ func _real_session() -> void:
 	check(p.global_position.distance_to(spawn) < 0.01, "respawn lands on the world spawn point %s" % str(spawn))
 	check(p.inventory == inv_before, "inventory kept in the real session")
 	await _frames(2)
-	check(not ui.visible and not hud.is_ui_open() and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED, "screen closed, mouse recaptured")
+	check(not ui.visible and not hud.is_ui_open(), "screen closed")
+	check_captured("mouse recaptured")
 	# Esc while dead opens the pause menu on top, and the mouse stays free for it
 	p._hurt(1000.0)
 	await _frames(2)
@@ -164,4 +174,5 @@ func _real_session() -> void:
 	check(ui.visible and Input.mouse_mode == Input.MOUSE_MODE_VISIBLE, "closing pause while dead keeps the mouse free")
 	ui.respawn()
 	await _frames(2)
-	check(not p.is_dead and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED, "final respawn recaptures the mouse")
+	check(not p.is_dead, "final respawn revives")
+	check_captured("final respawn recaptures the mouse")

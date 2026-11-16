@@ -110,11 +110,29 @@ func _run() -> void:
 	for y in 32:
 		for x in 32:
 			distinct[img.get_pixel(x, y).to_html()] = true
-	check(img.get_width() == 32 and distinct.size() > 3, "terrain texture is built from heights (%d distinct tints)" % distinct.size())
+	check(img.get_width() == 32 and distinct.size() > 3, "terrain texture is built from the world (%d distinct tints)" % distinct.size())
+	var img2: Image = MapUI.make_height_texture(world, 32).get_image()
+	check(img2.get_data() == img.get_data(), "terrain texture is deterministic (same world, same pixels)")
+	var big: Image = MapUI.make_height_texture(world).get_image()
+	check(big.get_width() == MapUI.TEX_SIZE and MapUI.TEX_SIZE >= 256, "default ground texture is high resolution (%d px)" % big.get_width())
+	var spawn_px: Color = big.get_pixelv(Vector2i(int((world.spawn_center.x + t.HALF) / (t.HALF * 2.0) * MapUI.TEX_SIZE), int((world.spawn_center.y + t.HALF) / (t.HALF * 2.0) * MapUI.TEX_SIZE)))
+	var big_distinct := {}
+	for yy in range(0, MapUI.TEX_SIZE, 4):
+		for xx in range(0, MapUI.TEX_SIZE, 4):
+			big_distinct[big.get_pixel(xx, yy).to_html()] = true
+	check(big_distinct.size() > 40, "ground texture has real detail (%d distinct colours sampled)" % big_distinct.size())
+	var loc0: Dictionary = world.locations[0]
+	var lp: Vector2 = loc0["pos2"]
+	var roof: Color = MapUI.FOOTPRINTS[str(loc0["type"])][0][4]
+	var roof_px: Color = big.get_pixelv(Vector2i(int((lp.x + t.HALF) / (t.HALF * 2.0) * MapUI.TEX_SIZE), int((lp.y + t.HALF) / (t.HALF * 2.0) * MapUI.TEX_SIZE)))
+	var roof_err: float = maxf(absf(roof_px.r - roof.r), maxf(absf(roof_px.g - roof.g), absf(roof_px.b - roof.b)))
+	check(roof_err < 0.01, "building footprint is stamped at the first location (%s, 8-bit error %.4f)" % [str(loc0["type"]), roof_err])
+	check(spawn_px.a == 1.0, "ground texture is opaque at the spawn pad")
 
 	# ---- minimap is on and follows the player while the full map is closed
 	await _frames(3)
 	check(map.mini.visible and not map.is_open(), "minimap shows during play, full map closed")
+	check(map.mini.texture != null and map.mini.texture == map.full.texture, "minimap has the ground texture (shared with the full map) before the full map is first opened")
 	check(map.mini.view_center.distance_to(Vector2(pp.x, pp.z)) < 0.5, "minimap is centred on the player")
 	map.mini.size = Vector2(MapUI.MINI_SIZE, MapUI.MINI_SIZE)
 	check(map.mini.world_to_map(map.mini.view_center).distance_to(map.mini.size * 0.5) < 0.01, "minimap centres the view point")
@@ -149,6 +167,37 @@ func _run() -> void:
 	await _frames(2)
 	var d2: Dictionary = map.data()
 	check((d2["player"] as Vector2).distance_to(Vector2(pp.x + 7.0, pp.z - 9.0)) < 0.5, "player marker follows movement")
+
+	# ---- driving: the arrow follows the CAR's heading, not the hidden body's yaw
+	var cars: Array = get_nodes_in_group("vehicles")
+	check(cars.size() > 0, "world has drivable cars (%d)" % cars.size())
+	if cars.size() > 0:
+		var car: Node3D = cars[0]
+		var body_yaw: float = p.global_rotation.y
+		var on_foot: Dictionary = map.data()
+		check(not bool(on_foot.get("in_vehicle", true)), "on foot: in_vehicle is false")
+		check((on_foot["heading"] as Vector2).distance_to(MapUI.heading_vec(body_yaw)) < 0.001, "on foot: arrow = body yaw")
+		var old_yaw: float = car.rotation.y
+		car.rotation.y = body_yaw + 2.0
+		p.set("vehicle", car)
+		await _frames(2)
+		var in_car: Dictionary = map.data()
+		var want: Vector2 = MapUI.heading_vec(car.global_rotation.y)
+		check(bool(in_car.get("in_vehicle", false)), "in car: in_vehicle is true")
+		check((in_car["heading"] as Vector2).distance_to(want) < 0.001, "in car: arrow = car heading, not the body's")
+		check((in_car["heading"] as Vector2).distance_to(MapUI.heading_vec(body_yaw)) > 0.5, "in car: arrow differs from the body yaw")
+		check(MapUI.MapCanvas.car_heading(car).distance_to(want) < 0.001, "car_heading matches the car's -Z axis")
+		car.rotation.y = body_yaw + 2.0 + PI * 0.5
+		var turned: Vector2 = map.data()["heading"]
+		check(turned.distance_to(MapUI.heading_vec(car.global_rotation.y)) < 0.001, "in car: arrow turns with the car")
+		map.mini.queue_redraw()
+		map.full.queue_redraw()
+		await _frames(2)
+		check(map.mini.draw_count > 0 and map.full.draw_count > 0, "both maps draw while driving")
+		p.set("vehicle", null)
+		car.rotation.y = old_yaw
+		await _frames(2)
+		check(not bool(map.data().get("in_vehicle", true)), "after exit: arrow back to body yaw")
 
 	# ---- Esc closes without opening the pause menu; M toggles
 	map._input(_action("ui_cancel"))

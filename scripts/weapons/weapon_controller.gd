@@ -41,7 +41,6 @@ var _reload_phase: int = 0            # 0 loading, 1 chambering (tube guns)
 var _switch_timer: float = 0.0
 var _shot_index: int = 0
 var _shot_idle: float = 0.0
-var _bloom: float = 0.0
 var _recoil_target: Vector2 = Vector2.ZERO
 var _recoil_cur: Vector2 = Vector2.ZERO
 var _ads: float = 0.0
@@ -52,6 +51,7 @@ var _bob_t: float = 0.0
 var _time: float = 0.0
 var _vm: Node3D
 var _gun: Node3D
+var _hands: Node3D   ## first-person hands + reload animation (scripts/weapons/viewmodel.gd); null on remote peers
 var _muzzle: Node3D
 var _flash_light: OmniLight3D
 var _flash_mesh: MeshInstance3D
@@ -204,10 +204,14 @@ func start_reload() -> bool:
 		_reload_total = wd.reload_tactical if bool(s["chambered"]) else wd.reload_empty
 	_reload_timer = _reload_total
 	reload_started.emit(wd.id, _reload_total)
+	if _hands != null:
+		_hands.play_reload(wd, not bool(s["chambered"]), wd.mag_size - int(s["mag"]))
 	return true
 
 
 func cancel_reload() -> void:
+	if _hands != null:
+		_hands.cancel()
 	if state == State.RELOADING:
 		state = State.READY
 		_reload_timer = 0.0
@@ -251,7 +255,6 @@ func _update_timers(delta: float, wd: WeaponData) -> void:
 	_shot_idle += delta
 	if _shot_idle > 0.3:
 		_shot_index = 0
-	_bloom = maxf(0.0, _bloom - 1.6 * delta)
 	if state == State.SWITCHING:
 		_switch_timer -= delta
 		if _switch_timer <= 0.0:
@@ -311,6 +314,8 @@ func _try_fire(wd: WeaponData) -> void:
 				_reload_total = wd.chamber_time
 				_reload_timer = wd.chamber_time
 				reload_started.emit(wd.id, _reload_total)
+				if _hands != null:
+					_hands.play_rack(wd)
 			else:
 				_chamber(s)
 				ammo_changed.emit()
@@ -349,8 +354,8 @@ func _fire_shot(wd: WeaponData) -> void:
 	_recoil_target += kick * (1.0 - PERMANENT_RECOIL)
 	_shot_index += 1
 	_shot_idle = 0.0
-	_bloom += wd.bloom_per_shot
-	_kickback = minf(_kickback + 0.03 + wd.recoil_pitch * 0.004, 0.12)
+	# viewmodel slams back and pitches up with every shot (scaled by the weapon's recoil_scale)
+	_kickback = minf(_kickback + (0.045 + wd.recoil_pitch * 0.006) * wd.recoil_scale, 0.2)
 	_flash()
 	player.emit_noise(player.global_position, wd.noise_radius)
 	player.broadcast_shot(muzzle_pos, tracer_end)
@@ -367,7 +372,7 @@ func _current_spread(wd: WeaponData) -> float:
 	s += wd.move_spread_deg * player.speed_ratio()
 	if not player.is_on_floor():
 		s += 3.0
-	return s + _bloom
+	return s
 
 
 static func _spread_dir(basis: Basis, cone_deg: float) -> Vector3:
@@ -422,9 +427,14 @@ func _simulate_bullet(origin: Vector3, dir: Vector3, wd: WeaponData, hits: Dicti
 			var head := col.has_method("is_head_hit") and bool(col.call("is_head_hit", hit_pos))
 			if head:
 				d *= wd.headshot_mult
-			var entry: Array = hits.get(col, [0.0, false])
+			# entry: [damage, headshot, hit position of the strongest pellet, its direction, its damage]
+			var entry: Array = hits.get(col, [0.0, false, hit_pos, dir, 0.0])
 			entry[0] = float(entry[0]) + d
 			entry[1] = bool(entry[1]) or head
+			if d > float(entry[4]):
+				entry[2] = hit_pos
+				entry[3] = dir
+				entry[4] = d
 			hits[col] = entry
 			_impact(hit_pos, Color(0.55, 0.05, 0.05))
 			exclude.append((col as CollisionObject3D).get_rid())
@@ -452,7 +462,11 @@ func _apply_hits(hits: Dictionary) -> void:
 			continue
 		var entry: Array = hits[col]
 		var head := bool(entry[1])
-		col.call("request_damage", float(entry[0]), head, player.get_multiplayer_authority())
+		if col.has_method("request_hit"):
+			# zombies also get the hit point (dismemberment regions) and shot direction (blood/knockback)
+			col.call("request_hit", float(entry[0]), head, player.get_multiplayer_authority(), entry[2], entry[3])
+		else:
+			col.call("request_damage", float(entry[0]), head, player.get_multiplayer_authority())
 		hit_confirmed.emit(head)
 
 
@@ -494,6 +508,8 @@ func _chamber(s: Dictionary) -> void:
 
 
 func _finish_reload() -> void:
+	if _hands != null:
+		_hands.cancel()
 	state = State.READY
 	_reload_timer = 0.0
 	ammo_changed.emit()
@@ -534,7 +550,7 @@ func _update_viewmodel(delta: float, wd: WeaponData) -> void:
 	pos.x += cos(_bob_t) * 0.008 * spd * (1.0 - 0.85 * ease_ads)
 	pos.y += sin(_time * 1.3) * 0.0012 * sway_mult
 	pos.z += _kickback
-	var rot := Vector3(_kickback * 2.5 + _sway.y * 0.6, _sway.x * 0.6, _sway.x * 1.2)
+	var rot := Vector3(_kickback * 4.0 + _sway.y * 0.6, _sway.x * 0.6, _sway.x * 1.2)
 	# lower the gun while reloading or switching
 	var lower := 0.0
 	if state == State.RELOADING and _reload_total > 0.0:
@@ -565,6 +581,8 @@ func _build_viewmodel() -> void:
 	_gun = GunMesh.build(wd.model)
 	_vm.add_child(_gun)
 	_muzzle = GunMesh.muzzle_of(_gun)
+	if _enabled:
+		_hands = load("res://scripts/weapons/viewmodel.gd").attach(_gun, wd)
 	if _muzzle != null:
 		_flash_light = OmniLight3D.new()
 		_flash_light.light_color = Color(1.0, 0.75, 0.4)
@@ -594,6 +612,7 @@ func _clear_viewmodel() -> void:
 	if _gun != null and is_instance_valid(_gun):
 		_gun.queue_free()
 	_gun = null
+	_hands = null
 	_muzzle = null
 	_flash_light = null
 	_flash_mesh = null

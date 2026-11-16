@@ -2,6 +2,10 @@ class_name WeaponData
 extends Resource
 ## Data-driven description of one firearm. Instances are built in WeaponDB.
 ## Units: metres, seconds, degrees, damage in hit points (zombie = 100 hp).
+## There is no bloom: the cone is base spread + move/ADS/air terms only. Recoil is the
+## feedback for sustained fire.
+
+const RECOIL_GAIN := 1.5   ## global feel multiplier on every kick; tune a weapon with recoil_scale
 
 @export var id: String = ""
 @export var display_name: String = ""
@@ -39,7 +43,7 @@ extends Resource
 @export var spread_deg: float = 1.0       ## hip-fire cone half angle, standing still
 @export var ads_spread_mult: float = 0.35
 @export var move_spread_deg: float = 2.0  ## added at full sprint speed
-@export var bloom_per_shot: float = 0.2   ## extra cone per consecutive shot
+@export var recoil_scale: float = 1.0     ## per-weapon recoil tuning knob: multiplies every kick (and the viewmodel kickback)
 @export var recoil_pitch: float = 1.0     ## degrees up per shot (base)
 @export var recoil_yaw: float = 0.3       ## degrees sideways random per shot
 ## Per-shot kick in a burst: Vector2(yaw_deg, pitch_deg). Last entry repeats.
@@ -107,4 +111,4 @@ func kick_for_shot(index: int) -> Vector2:
 		base = recoil_pattern[mini(index, recoil_pattern.size() - 1)]
 	else:
 		base = Vector2(0.0, recoil_pitch)
-	return Vector2(base.x + randf_range(-recoil_yaw, recoil_yaw) * 0.5, base.y)
+	return Vector2(base.x + randf_range(-recoil_yaw, recoil_yaw) * 0.5, base.y) * (recoil_scale * RECOIL_GAIN)

@@ -39,6 +39,9 @@ static func _ensure() -> void:
 	_cache["shotgun"] = _shotgun()
 	_cache["hunting"] = _hunting()
 	_cache["ar"] = _ar()
+	_cache["ar_t1"] = _ar_tier(1)
+	_cache["ar_t2"] = _ar_tier(2)
+	_cache["ar_t3"] = _ar_tier(3)
 
 
 static func _pistol() -> WeaponData:
@@ -63,9 +66,9 @@ static func _pistol() -> WeaponData:
 	w.reload_empty = 2.1
 	w.spread_deg = 1.1
 	w.move_spread_deg = 2.2
-	w.bloom_per_shot = 0.35
 	w.recoil_pitch = 1.3
 	w.recoil_yaw = 0.5
+	w.recoil_scale = 0.5   # halved: pistol kick was too strong
 	# snappy muzzle flip that stacks a little, with slight alternating yaw
 	w.recoil_pattern = PackedVector2Array([
 		Vector2(0.0, 1.7), Vector2(0.25, 1.5), Vector2(-0.3, 1.4), Vector2(0.2, 1.3),
@@ -103,9 +106,9 @@ static func _ak() -> WeaponData:
 	w.reload_empty = 3.0
 	w.spread_deg = 1.6
 	w.move_spread_deg = 3.0
-	w.bloom_per_shot = 0.22
 	w.recoil_pitch = 1.1
 	w.recoil_yaw = 0.8
+	w.recoil_scale = 0.5   # halved: rifle kick was too strong
 	w.recoil_pattern = PackedVector2Array([
 		Vector2(0.0, 1.9), Vector2(0.1, 1.6), Vector2(-0.1, 1.4), Vector2(0.3, 1.2),
 		Vector2(0.5, 1.0), Vector2(0.6, 0.9), Vector2(0.3, 0.8), Vector2(-0.4, 0.8),
@@ -144,9 +147,9 @@ static func _m4() -> WeaponData:
 	w.reload_empty = 2.7
 	w.spread_deg = 1.2
 	w.move_spread_deg = 2.6
-	w.bloom_per_shot = 0.15
 	w.recoil_pitch = 0.9
 	w.recoil_yaw = 0.45
+	w.recoil_scale = 0.5   # halved: rifle kick was too strong
 	w.recoil_pattern = PackedVector2Array([
 		Vector2(0.0, 1.3), Vector2(0.05, 1.1), Vector2(-0.1, 0.95), Vector2(0.2, 0.85),
 		Vector2(0.3, 0.75), Vector2(0.25, 0.7), Vector2(-0.2, 0.65), Vector2(-0.35, 0.6),
@@ -190,7 +193,6 @@ static func _shotgun() -> WeaponData:
 	w.spread_deg = 3.8
 	w.ads_spread_mult = 0.75
 	w.move_spread_deg = 1.5
-	w.bloom_per_shot = 0.0
 	w.recoil_pitch = 6.0
 	w.recoil_yaw = 1.2
 	# one heavy kick per pump cycle, drifting right
@@ -230,7 +232,6 @@ static func _hunting() -> WeaponData:
 	w.spread_deg = 0.9
 	w.ads_spread_mult = 0.08
 	w.move_spread_deg = 3.5
-	w.bloom_per_shot = 0.0
 	w.recoil_pitch = 3.4
 	w.recoil_yaw = 0.5
 	# bolt gun: one big, slow kick with a rolling yaw
@@ -271,9 +272,9 @@ static func _ar() -> WeaponData:
 	w.spread_deg = 1.0
 	w.ads_spread_mult = 0.3
 	w.move_spread_deg = 2.8
-	w.bloom_per_shot = 0.2
 	w.recoil_pitch = 1.4
 	w.recoil_yaw = 0.55
+	w.recoil_scale = 0.5   # halved: rifle kick was too strong (AR tiers inherit)
 	# firm climb that settles into a slow left/right drift
 	w.recoil_pattern = PackedVector2Array([
 		Vector2(0.0, 1.8), Vector2(0.1, 1.5), Vector2(-0.15, 1.3), Vector2(0.25, 1.15),
@@ -287,4 +288,44 @@ static func _ar() -> WeaponData:
 	w.sight_height = 0.1
 	w.noise_radius = 95.0
 	w.weight = 3.8
+	return w
+
+
+## Workbench-crafted assault rifles. Each tier is the base "ar" retuned: more damage, faster fire,
+## bigger magazine, and its own ammo type (545 / 68 / 300) that is crafted at the workbench.
+static func _ar_tier(tier: int) -> WeaponData:
+	var w := _ar()
+	w.id = "ar_t%d" % tier
+	w.model = w.id
+	match tier:
+		1:
+			w.display_name = "Scrapper AR (Mk1)"
+			w.caliber = "545"
+			w.damage = 44.0
+			w.fire_rate_rpm = 560.0
+			w.mag_size = 24
+			w.weight = 3.6
+		2:
+			w.display_name = "Marauder AR (Mk2)"
+			w.caliber = "68"
+			w.damage = 56.0
+			w.penetration = 0.7
+			w.fire_rate_rpm = 640.0
+			w.mag_size = 30
+			w.muzzle_velocity = 960.0
+			w.reload_tactical = 2.2
+			w.reload_empty = 2.9
+			w.weight = 3.9
+		_:
+			w.display_name = "Reaper AR (Mk3)"
+			w.caliber = "300"
+			w.damage = 68.0
+			w.penetration = 0.75
+			w.max_penetrations = 3
+			w.fire_rate_rpm = 720.0
+			w.mag_size = 40
+			w.muzzle_velocity = 1000.0
+			w.reload_tactical = 2.1
+			w.reload_empty = 2.8
+			w.weight = 4.2
 	return w

@@ -169,6 +169,49 @@ func is_head_hit(world_pos: Vector3) -> bool:
 	return world_pos.y > global_position.y + _head_line
 
 
+## Dismemberment regions follow the skeleton's own scale (see Zombie._part_at). Skeletons
+## lose bones the same way zombies lose limbs, but never crawl (their clips drive the pose).
+func _head_y() -> float:
+	return _head_line
+
+
+func _leg_y() -> float:
+	return _head_line * 0.45
+
+
+func _arm_x() -> float:
+	return 0.28
+
+
+func _stump_color() -> Color:
+	return Color(0.8, 0.78, 0.7)
+
+
+func _gib_color(_part: int) -> Color:
+	return Color(0.85, 0.84, 0.78)
+
+
+func _supports_crawl() -> bool:
+	return false
+
+
+const SEVER_BONES := {
+	Zombie.PART_HEAD: "head", Zombie.PART_ARM_L: "upperarm.l", Zombie.PART_ARM_R: "upperarm.r",
+	Zombie.PART_LEG_L: "upperleg.l", Zombie.PART_LEG_R: "upperleg.r",
+}
+
+
+## Hides severed bones by scaling them away; clips rewrite bone poses, so _process reapplies.
+func _apply_sever_pose() -> void:
+	if _sk == null:
+		return
+	for part in SEVER_BONES:
+		if (severed & int(part)) != 0:
+			var b := _sk.find_bone(str(SEVER_BONES[part]))
+			if b >= 0:
+				_sk.set_bone_pose_scale(b, Vector3(0.001, 0.001, 0.001))
+
+
 # ================================================================== mage AI
 
 func _do_attack(delta: float) -> void:
@@ -345,7 +388,10 @@ func _process(delta: float) -> void:
 		_hit_flash = 0.15
 	_prev_health = health
 	_hit_anim = maxf(0.0, _hit_anim - delta)
+	if _sev_applied != severed:
+		_apply_severed(false)
 	_update_clip(delta)
+	_apply_sever_pose()
 	_update_flash()
 
 

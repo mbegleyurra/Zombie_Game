@@ -130,7 +130,6 @@ func _run() -> void:
 	await _frames(3)
 	ar.spread_deg = 0.0
 	ar.move_spread_deg = 0.0
-	ar.bloom_per_shot = 0.0
 	player.look_pitch = 0.0
 	player.head.rotation_degrees.x = 0.0
 	player.rotation.y = 0.0

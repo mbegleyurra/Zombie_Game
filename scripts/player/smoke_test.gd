@@ -65,7 +65,6 @@ func _run() -> void:
 	# near the zombie's crown (1.7 m capsule), so ~37% of random cones miss at 14 m (measured 63/100 hits).
 	wd2.spread_deg = 0.0
 	wd2.move_spread_deg = 0.0
-	wd2.bloom_per_shot = 0.0
 	w._try_fire(wd2)
 	await _frames(2)
 	var s0: Dictionary = w.status()
@@ -77,7 +76,6 @@ func _run() -> void:
 	# ---- deterministic ballistics: zero spread, headshot, penetration, drop
 	wd2.spread_deg = 0.0
 	wd2.move_spread_deg = 0.0
-	wd2.bloom_per_shot = 0.0
 	await _frames(40)
 	var za = (load("res://scenes/zombies/zombie.tscn") as PackedScene).instantiate()
 	var zb = (load("res://scenes/zombies/zombie.tscn") as PackedScene).instantiate()

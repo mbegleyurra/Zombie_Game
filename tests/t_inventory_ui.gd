@@ -45,6 +45,15 @@ func _find(ui: Node, key: String) -> int:
 
 
 ## The grid key an item id should land under: weapon slot, reserve key for ammo, else the item id itself.
+## Total count of `key` over all its stacks in the grid.
+func _total(ui: Node, key: String) -> int:
+	var t := 0
+	for e in ui._entries:
+		if str(e["key"]) == key:
+			t += int(e["count"])
+	return t
+
+
 func _grid_key(item_id: String) -> String:
 	var cid: String = ItemDB.canonical(item_id)
 	var d: Dictionary = ItemDB.get_item(cid)
@@ -70,6 +79,8 @@ func _run() -> void:
 	player.position = Vector3(0, 0.2, 0)
 	root.add_child(player)
 	await _frames(5)
+	player.inv_cols = 24   # the sweep below loots EVERY ItemDB item (all weapons are 4x2), far more than the default 10x6 grid
+	player.inv_rows = 24
 	var ui: Control = InvUI.new()
 	ui.standalone = true
 	root.add_child(ui)
@@ -81,8 +92,7 @@ func _run() -> void:
 	for ev in InputMap.action_get_events("toggle_inventory"):
 		has_i = has_i or (ev is InputEventKey and (ev as InputEventKey).physical_keycode == KEY_I)
 	check(has_i, "action toggle_inventory is bound to I")
-	check(ui._grid.columns == InvUI.COLUMNS and ui.slots.size() >= InvUI.MIN_SLOTS and ui.slots.size() % InvUI.COLUMNS == 0,
-		"grid has %d columns and %d slots" % [ui._grid.columns, ui.slots.size()])
+	check(ui._bg.size() == 24 * 24, "grid draws %d background cells (player.inv_cols x inv_rows)" % ui._bg.size())
 	check(not ui.visible, "closed by default")
 	check(_find(ui, InvUI.WEAPON_PREFIX + "pistol") >= 0 and _find(ui, "9mm") >= 0, "starting pistol and 9mm are in the grid")
 
@@ -102,14 +112,14 @@ func _run() -> void:
 		var idx := _find(ui, key)
 		var good := ok and idx >= 0
 		if good and not key.begins_with(InvUI.WEAPON_PREFIX):
-			good = int(ui._entries[idx]["count"]) == before + 3 and str(ui._name_labels[idx].text) == str(ui._entries[idx]["name"])
+			good = _total(ui, key) == before + 3 and str(ui._name_labels[idx].text) == str(ui._entries[idx]["name"])
 		if not good:
 			bad.append("%s (key %s ok=%s idx=%d)" % [id, key, ok, idx])
 		if str(id) in ["iron_ingot", "gold_nuggets", "fuel_can", "wood_logs", "coin", "parts"]:
 			n_kaykit += 1
 	check(bad.is_empty(), "all %d ItemDB items picked up appear in the open grid with correct counts %s" % [ids.size(), str(bad)])
 	check(n_kaykit == 6, "KayKit resource items were part of the sweep (%d/6 sampled ids exist)" % n_kaykit)
-	check(ui.slots.size() >= ui._entries.size() and ui.slots.size() % InvUI.COLUMNS == 0, "grid grew to hold %d entries (%d slots)" % [ui._entries.size(), ui.slots.size()])
+	check(ui.slots.size() >= ui._entries.size(), "button pool grew to hold %d stacks (%d buttons)" % [ui._entries.size(), ui.slots.size()])
 	var weapons_in_grid := 0
 	for e in ui._entries:
 		if str(e["key"]).begins_with(InvUI.WEAPON_PREFIX):
@@ -124,10 +134,10 @@ func _run() -> void:
 
 	# ---- live refresh without reopening
 	var si := _find(ui, "scrap")
-	var c0: int = int(ui._entries[si]["count"])
+	var c0: int = _total(ui, "scrap")
 	_pick_up(player, "scrap", 4)
-	check(int(ui._entries[_find(ui, "scrap")]["count"]) == c0 + 4 and ui._count_labels[_find(ui, "scrap")].text == "x%d" % (c0 + 4),
-		"count label updates live on inventory_changed (x%d -> x%d)" % [c0, c0 + 4])
+	check(_total(ui, "scrap") == c0 + 4 and ui._count_labels[_find(ui, "scrap")].text.begins_with("x"),
+		"stack counts update live on inventory_changed (x%d -> x%d)" % [c0, c0 + 4])
 	player.remove_item("scrap", c0 + 4)
 	check(_find(ui, "scrap") < 0, "slot disappears live when the stack is used up")
 	player.weapons.remove_weapon("hunting")
@@ -185,7 +195,13 @@ func _run() -> void:
 	# ---- Esc closes, mouse recaptured; I toggles
 	ui._input(_action("ui_cancel"))
 	check(not ui.visible and not ui.is_in_group("ui_open"), "Esc closes the grid and leaves ui_open")
-	check(Input.mouse_mode == Input.MOUSE_MODE_CAPTURED, "mouse is recaptured on close")
+	var recaptured := Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
+	# Some headless builds (Godot 4.7.2 here) never store MOUSE_MODE_CAPTURED; probe that before asserting on it.
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	var can_capture := Input.mouse_mode == Input.MOUSE_MODE_CAPTURED
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	check(recaptured or not can_capture,
+		"mouse is recaptured on close" + ("" if can_capture else " (skipped: this headless build cannot hold CAPTURED)"))
 	ui._input(_action("toggle_inventory"))
 	ui._input(_action("toggle_inventory"))
 	check(not ui.visible, "I toggles it closed again")

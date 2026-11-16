@@ -22,6 +22,7 @@ signal selection_changed(kind: String)
 signal stock_changed(stock: Dictionary)
 signal build_rejected(reason: String)
 signal prompt_changed(text: String)
+signal crafted(recipe_id: String)
 
 const CELL := 2.0
 const WALL_H := 2.5
@@ -31,14 +32,19 @@ const USE_REACH := 4.0
 const SLOT_FLOOR := 0
 const SLOT_EDGE_X := 1
 const SLOT_EDGE_Z := 2
+const SLOT_BENCH := 3   ## workbench on the cell centre; shares the cell with a floor piece
 
-const KINDS: Array[String] = ["wall", "floor", "door", "window", "barricade"]
+const Recipes := preload("res://scripts/world/recipes.gd")
+const CraftingUI := preload("res://scripts/ui/crafting_ui.gd")
+
+const KINDS: Array[String] = ["wall", "floor", "door", "window", "barricade", "workbench"]
 const DEFS := {
 	"wall": {"cost": {"planks": 4}, "hp": 200.0, "slot": "edge"},
 	"floor": {"cost": {"planks": 3}, "hp": 150.0, "slot": "floor"},
 	"door": {"cost": {"planks": 4, "scrap": 2}, "hp": 120.0, "slot": "edge"},
 	"window": {"cost": {"planks": 3, "scrap": 1}, "hp": 150.0, "slot": "edge"},
 	"barricade": {"cost": {"planks": 2, "scrap": 1}, "hp": 80.0, "slot": "edge"},
+	"workbench": {"cost": {"planks": 8, "scrap": 6}, "hp": 250.0, "slot": "bench"},
 }
 
 const COL_WOOD := Color(0.55, 0.38, 0.2)
@@ -73,6 +79,7 @@ var _ghost_ok_mat: StandardMaterial3D
 var _ghost_bad_mat: StandardMaterial3D
 var _mats := {}
 var _prompt := ""
+var _craft_ui: Control = null
 
 
 func _ready() -> void:
@@ -117,7 +124,7 @@ func cycle(dir: int) -> void:
 func key_position(key: Vector4i) -> Vector3:
 	var y := key.y * YSTEP
 	match key.w:
-		SLOT_FLOOR:
+		SLOT_FLOOR, SLOT_BENCH:
 			return Vector3((key.x + 0.5) * CELL, y, (key.z + 0.5) * CELL)
 		SLOT_EDGE_X:
 			return Vector3((key.x + 0.5) * CELL, y, key.z * CELL)
@@ -212,6 +219,8 @@ func clear_all() -> void:
 		_ghost = null
 		_ghost_kind = ""
 	build_mode = false
+	if _craft_ui != null:
+		_craft_ui.close(false)
 	_set_prompt("")
 
 
@@ -228,6 +237,8 @@ func _input(event: InputEvent) -> void:
 			set_build_mode(not build_mode)
 		elif ke.physical_keycode == KEY_F:
 			_try_toggle_door()
+		elif ke.physical_keycode == KEY_E:
+			_try_use_bench()
 		elif build_mode and ke.physical_keycode == KEY_X:
 			_try_remove()
 		elif build_mode:
@@ -289,6 +300,78 @@ func _try_remove() -> void:
 		request_remove(id)
 
 
+func _try_use_bench() -> void:
+	var id := _aimed_piece_id(USE_REACH)
+	if id != 0 and pieces.has(id) and pieces[id]["kind"] == "workbench":
+		open_crafting()
+
+
+## Opens the workbench crafting overlay (scripts/ui/crafting_ui.gd), creating it on first use.
+func open_crafting() -> void:
+	if _craft_ui == null:
+		var layer := CanvasLayer.new()
+		layer.layer = 60
+		add_child(layer)
+		_craft_ui = CraftingUI.new()
+		layer.add_child(_craft_ui)
+	_craft_ui.open()
+
+
+## True when this peer's own stock (or the external take_hook) can pay `cost`.
+func can_afford_cost(cost: Dictionary) -> bool:
+	if take_hook.is_valid():
+		return true
+	for item in cost:
+		if int(local_stock.get(item, 0)) < int(cost[item]):
+			return false
+	return true
+
+
+func request_craft(recipe_id: String) -> void:
+	if not _in_game():
+		return
+	if _server():
+		_server_craft(1, recipe_id)
+	else:
+		_rpc_request_craft.rpc_id(1, recipe_id)
+
+
+## Server only: materials are taken here, then the owning peer is told to add the result.
+func _server_craft(peer: int, recipe_id: String) -> void:
+	var r := Recipes.get_recipe(recipe_id)
+	if r.is_empty():
+		_reject(peer, "Unknown recipe")
+		return
+	if not _near_bench(peer):
+		_reject(peer, "Need a workbench nearby")
+		return
+	var cost: Dictionary = r["cost"]
+	if not _take(peer, cost, false):
+		_reject(peer, "Not enough materials")
+		return
+	_take(peer, cost, true)
+	if peer == 1:
+		_deliver(recipe_id)
+	else:
+		_rpc_crafted.rpc_id(peer, recipe_id)
+
+
+func _near_bench(peer: int) -> bool:
+	for id in pieces:
+		if pieces[id]["kind"] == "workbench" and not _too_far(peer, key_position(pieces[id]["key"]), USE_REACH + 3.0):
+			return true
+	return false
+
+
+## Runs on the crafting peer: hands the result to its own player (inventory is peer-owned).
+func _deliver(recipe_id: String) -> void:
+	var r := Recipes.get_recipe(recipe_id)
+	var pl: Node = _net.get_local_player() if _net != null else null
+	if not r.is_empty() and pl != null and pl.has_method("add_item"):
+		pl.add_item(String(r["give"]), int(r["count"]))
+	crafted.emit(recipe_id)
+
+
 # ------------------------------------------------------------------- aiming
 
 func _in_game() -> bool:
@@ -347,6 +430,8 @@ func _update_prompt(hit: Dictionary) -> void:
 		var id := _piece_id_of(hit["collider"])
 		if id != 0 and pieces.has(id) and pieces[id]["kind"] == "door":
 			text = "[F] Close door" if pieces[id]["open"] else "[F] Open door"
+		elif id != 0 and pieces.has(id) and pieces[id]["kind"] == "workbench":
+			text = "[E] Use workbench"
 	_set_prompt(text)
 
 
@@ -367,6 +452,8 @@ func _compute_key(hit: Dictionary, kind: String) -> Vector4i:
 		yk = (pieces[other]["key"] as Vector4i).y
 	var gx := floori(p.x / CELL)
 	var gz := floori(p.z / CELL)
+	if DEFS[kind]["slot"] == "bench":
+		return Vector4i(gx, yk, gz, SLOT_BENCH)
 	if DEFS[kind]["slot"] == "floor":
 		return Vector4i(gx, yk, gz, SLOT_FLOOR)
 	var fx := p.x / CELL - gx
@@ -417,8 +504,15 @@ func _server_place(peer: int, kind: String, key: Vector4i) -> void:
 	if not DEFS.has(kind):
 		_reject(peer, "Unknown piece")
 		return
-	var is_floor: bool = DEFS[kind]["slot"] == "floor"
-	if (is_floor and key.w != SLOT_FLOOR) or (not is_floor and key.w == SLOT_FLOOR) or key.w < 0 or key.w > 2:
+	var slot_kind: String = DEFS[kind]["slot"]
+	var bad_slot := false
+	if slot_kind == "floor":
+		bad_slot = key.w != SLOT_FLOOR
+	elif slot_kind == "bench":
+		bad_slot = key.w != SLOT_BENCH
+	else:
+		bad_slot = key.w != SLOT_EDGE_X and key.w != SLOT_EDGE_Z
+	if bad_slot:
 		_reject(peer, "Bad slot")
 		return
 	if absi(key.x) > 4096 or absi(key.z) > 4096 or absi(key.y) > 4000:
@@ -579,6 +673,17 @@ func _rpc_reject(reason: String) -> void:
 	build_rejected.emit(reason)
 
 
+@rpc("any_peer", "call_remote", "reliable")
+func _rpc_request_craft(recipe_id: String) -> void:
+	if _server():
+		_server_craft(multiplayer.get_remote_sender_id(), recipe_id)
+
+
+@rpc("authority", "call_remote", "reliable")
+func _rpc_crafted(recipe_id: String) -> void:
+	_deliver(recipe_id)
+
+
 # --------------------------------------------------------------- piece nodes
 
 func _add_piece(id: int, kind: String, key: Vector4i, hp: float, open: bool) -> void:
@@ -587,6 +692,8 @@ func _add_piece(id: int, kind: String, key: Vector4i, hp: float, open: bool) -> 
 	var node := _make_piece(kind, false)
 	node.set_meta("piece_id", id)
 	node.add_to_group("building")
+	if kind == "workbench":
+		node.add_to_group("workbench")
 	if kind == "barricade" or kind == "wall" or kind == "door" or kind == "window":
 		node.add_to_group("breakable_" + kind)
 	add_child(node)
@@ -675,6 +782,14 @@ func _make_piece(kind: String, ghost: bool) -> Node3D:
 				cs.shape = bs
 				cs.position = Vector3(0, 0.9, 0)
 				root.add_child(cs)
+		"workbench":
+			_box(root, Vector3(1.5, 0.1, 0.8), Vector3(0, 0.9, 0), COL_WOOD_LIGHT, ghost)          # top slab
+			for sx in [-0.65, 0.65]:
+				for sz in [-0.3, 0.3]:
+					_box(root, Vector3(0.12, 0.85, 0.12), Vector3(sx, 0.425, sz), COL_WOOD_DARK, ghost)  # legs
+			_box(root, Vector3(1.4, 0.06, 0.7), Vector3(0, 0.3, 0), COL_WOOD, ghost, false)        # lower shelf
+			_box(root, Vector3(0.2, 0.14, 0.14), Vector3(-0.5, 1.02, -0.2), COL_SCRAP, ghost, false)  # vise
+			_box(root, Vector3(0.05, 0.05, 0.4), Vector3(0.3, 0.98, 0.0), COL_SCRAP, ghost, false)    # tool bar
 	return root
 
 
