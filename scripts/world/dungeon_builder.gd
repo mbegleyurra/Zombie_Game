@@ -23,6 +23,7 @@ const SELF_PATH := "res://scripts/world/dungeon_builder.gd"
 const KayKitRes = preload("res://scripts/world/kaykit_resources.gd")
 const ModelUtil = preload("res://scripts/world/model_util.gd")
 const DungeonContainer = preload("res://scripts/world/dungeon_container.gd")
+const DungeonDoor = preload("res://scripts/world/dungeon_door.gd")
 const DUN := KayKitRes.DUN
 const RES := KayKitRes.RES
 
@@ -76,6 +77,7 @@ var stats: Dictionary = {"walls": 0, "doors": 0, "props": 0, "lights": 0, "conta
 	"gold_chests": 0, "markers": 0, "pickups": 0, "missing": 0}
 var containers: Array = []
 var markers: Array = []
+var doors: Array = []
 
 var _world: Node
 var _site: Dictionary
@@ -361,11 +363,12 @@ func _edge(a: Vector2i, b: Vector2i, horiz: bool) -> void:
 		center = Vector3(gx + float(b.x) * U, F, gz + (float(b.y) + 0.5) * U)
 		yaw = PI * 0.5
 	if kind == "door":
-		_place("wall_doorway.gltf", center, yaw, 1.0, false)
-		# frame: two side pillars and a lintel; the opening is 2.0 m wide and 2.3 m high
+		var frame := _place("wall_doorway.gltf", center, yaw, 1.0, false)
+		_door(frame, center, yaw)
+		# frame: two side pillars and a lintel; the opening is 2.0 m wide and 2.8 m high (the model's arch is 2.86 m)
 		_box_local(Vector3(1.0, WALL_H, 1.0), Vector3(-1.5, WALL_H * 0.5, 0), center, yaw)
 		_box_local(Vector3(1.0, WALL_H, 1.0), Vector3(1.5, WALL_H * 0.5, 0), center, yaw)
-		_box_local(Vector3(2.0, WALL_H - 2.3, 1.0), Vector3(0, 2.3 + (WALL_H - 2.3) * 0.5, 0), center, yaw)
+		_box_local(Vector3(2.0, WALL_H - 2.8, 1.0), Vector3(0, 2.8 + (WALL_H - 2.8) * 0.5, 0), center, yaw)
 		_count("doors")
 		return
 	var key: String = "%s,%d,%d" % ["H" if horiz else "V", b.x, b.y]
@@ -374,6 +377,21 @@ func _edge(a: Vector2i, b: Vector2i, horiz: bool) -> void:
 		file = "wall_cracked.gltf" if _rng.randf() < 0.2 else "wall.gltf"
 	_place(file, center, yaw, 1.0, true)
 	_count("walls")
+
+
+## An openable door in a doorway: takes the leaf mesh out of the placed doorway model and adds the collider.
+## Named Door_N in build order, so the node path is the same on every peer (the RPCs need that).
+func _door(frame: Node3D, center: Vector3, yaw: float) -> void:
+	var d := DungeonDoor.new()
+	d.name = "Door_%d" % int(stats["doors"])
+	d.position = center
+	d.rotation.y = yaw
+	_root.add_child(d)
+	var leaf: Node3D = null
+	if frame != null:
+		leaf = frame.find_child("wall_doorway_door", true, false) as Node3D
+	d.setup(leaf)
+	doors.append(d)
 
 
 # ------------------------------------------------------------------ stairs and surface ruin
@@ -516,7 +534,6 @@ func _room_antechamber() -> void:
 	_container("barrel", 3.4, 1.7, FACE_E, "dungeon_barrel")
 	_container("barrel_small", 5.6, 1.7, FACE_W, "dungeon_barrel")
 	_guard("minion", 3.8, 1.4)
-	_guard("minion", 5.2, 1.4)
 	_pickup("ammo_9mm", 12, 4.1, 1.3)
 
 
@@ -546,9 +563,7 @@ func _room_hall() -> void:
 	_container("barrel", 3.4, 3.4, FACE_S, "dungeon_barrel")
 	_container("crates", 5.65, 5.65, FACE_N, "dungeon_crate")
 	_guard("warrior", 3.9, 3.9)
-	_guard("warrior", 5.1, 5.1)
 	_guard("minion", 5.1, 3.9)
-	_guard("minion", 3.9, 5.1)
 	_guard("rogue", 4.5, 4.5)
 
 
@@ -562,7 +577,6 @@ func _room_armory() -> void:
 	_container("chest", 1.55, 3.35, FACE_S, "dungeon_chest")
 	_container("keg", 1.75, 3.75, FACE_W, "dungeon_barrel")
 	_guard("warrior", 1.0, 4.0)
-	_guard("warrior", 1.2, 4.6)
 
 
 func _room_library() -> void:
@@ -576,7 +590,6 @@ func _room_library() -> void:
 	_place("stool.gltf", _cp(8.2, 4.0), 0.2, 0.5, false)
 	_place("candle_lit.gltf", _cp(7.35, 4.2), 0.0, 0.4, false)
 	_guard("mage", 7.9, 3.95)
-	_guard("mage", 8.3, 4.6)
 
 
 func _room_storeroom() -> void:
@@ -597,8 +610,6 @@ func _room_storeroom() -> void:
 	_pickup("copper_ingot", 2, 1.3, 6.65)
 	_pickup("parts", 2, 0.75, 7.05)
 	_guard("rogue", 1.0, 6.9)
-	_guard("rogue", 0.9, 7.4)
-	_guard("minion", 1.4, 7.1)
 
 
 func _room_barracks() -> void:
@@ -611,8 +622,6 @@ func _room_barracks() -> void:
 	_container("barrel", 7.4, 6.4, FACE_E, "dungeon_barrel")
 	_guard("warrior", 8.0, 6.6)
 	_guard("minion", 7.7, 6.7)
-	_guard("minion", 8.3, 6.8)
-	_guard("minion", 8.0, 7.0)
 
 
 func _room_vault() -> void:
@@ -646,8 +655,5 @@ func _room_vault() -> void:
 	_pickup("coin", 25, 4.5, 8.35)
 	_guard("warrior", 4.5, 8.0, true)
 	_guard("warrior", 3.5, 7.9)
-	_guard("warrior", 5.5, 7.9)
 	_guard("mage", 2.9, 7.95)
-	_guard("mage", 6.1, 7.95)
 	_guard("rogue", 3.9, 7.35)
-	_guard("rogue", 5.1, 7.35)

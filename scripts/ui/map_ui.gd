@@ -29,6 +29,9 @@ const TREE_HI := Color(0.25, 0.46, 0.2)
 const BUSH_COL := Color(0.26, 0.42, 0.17)
 const ROCK_COL := Color(0.5, 0.47, 0.45)
 const OUTLINE_COL := Color(0.1, 0.08, 0.08)
+const HOUSE_COL := Color(0.55, 0.3, 0.24)
+const TOWER_COL := Color(0.5, 0.52, 0.58)
+const TOWER_HI := Color(0.78, 0.8, 0.86)
 ## Building footprints per location type (from building_factory.gd): [local x, local z, width, depth, roof colour].
 const FOOTPRINTS := {
 	"farm": [[0.0, 0.0, 10.6, 8.6, Color(0.36, 0.28, 0.25)], [14.0, -2.0, 8.6, 6.6, Color(0.62, 0.2, 0.16)]],
@@ -328,6 +331,15 @@ static func _stamp_buildings(img: Image, world: Node, n: int, half: float, cell:
 			var lz: float = float(r[1])
 			var centre := origin + Vector2(lx * c + lz * s, -lx * s + lz * c)   # Basis(UP, rot) * (lx, 0, lz)
 			_fill_rect(img, n, half, cell, centre, rot, Vector2(float(r[2]), float(r[3])), r[4], OUTLINE_COL)
+	# Hand-built cottages and city towers (world meta "hand_footprints": [x, z, w, d, yaw, kind, height])
+	var hand: Array = world.get_meta("hand_footprints", []) as Array
+	for f in hand:
+		var is_tower: bool = str(f[5]) == "tower"
+		var col: Color = HOUSE_COL
+		if is_tower:
+			var tint: float = clampf(float(f[6]) / 40.0, 0.0, 1.0)
+			col = TOWER_COL.lerp(TOWER_HI, tint)
+		_fill_rect(img, n, half, cell, Vector2(float(f[0]), float(f[1])), float(f[4]), Vector2(float(f[2]), float(f[3])), col, OUTLINE_COL)
 
 
 ## KayKitForest keeps every placed instance in its "sites" meta; the procedural trees (first Trunks-count entries of

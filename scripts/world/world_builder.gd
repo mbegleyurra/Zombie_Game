@@ -1,7 +1,8 @@
 extends Node3D
-## Builds the whole Dead Acres world deterministically from a seed:
-## terrain, trees/rocks, locations (farms, gas stations, hospital), loot, day/night, spawn points.
-## Same seed => identical world on every peer (all randomness comes from seeded RandomNumberGenerators).
+## Builds the whole Dead Acres world from the HANDCRAFTED layout in hand_layout.gd:
+## terrain, trees/rocks, locations (farms, gas stations, hospital, the city), loot, day/night, spawn points.
+## The layout (roads, locations, houses, city blocks) is fixed data, and the relief/decoration seed is the constant
+## HandLayout.HAND_SEED: build(seed) ignores its argument, so the world is identical on every peer and every run.
 ##
 ## Public API:
 ##   build(seed)                      build everything (call once)
@@ -29,19 +30,14 @@ const ModelUtil = preload("res://scripts/world/model_util.gd")
 const KenneyDressing = preload("res://scripts/world/kenney_dressing.gd")
 const KayKitForest = preload("res://scripts/world/kaykit_forest.gd")
 const VehicleSpawner = preload("res://scripts/vehicles/vehicle_spawner.gd")
+const HandLayout = preload("res://scripts/world/hand_layout.gd")
+const HandBuilder = preload("res://scripts/world/hand_builder.gd")
 const KENNEY_GY := "res://assets/kenney/graveyard/"
 
 const MAX_TREES := 900
 const MAX_ROCKS := 300
 const MAX_BUSHES := 380
 const MAX_GRASS := 2400
-const LINK_MAX_DIST := 150.0
-const PLACE_LIMIT := 190.0
-const MIN_LOCATION_GAP := 68.0
-
-const FARM_NAMES := ["Hartley Farm", "Miller Homestead", "Cedar Ridge Farm", "Olsen Acres", "Brandt Farm", "Willow Creek Farm", "Dunmore Farm", "Pike Orchard"]
-const GAS_NAMES := ["Route 9 Gas & Go", "Sunrise Fuel Stop"]
-const HOSPITAL_NAME := "St. Agnes Regional Hospital"
 
 var world_seed: int = 1337
 var start_hour: float = 9.0
@@ -67,7 +63,7 @@ func build(p_seed: int) -> void:
 	if _is_built:
 		return
 	_is_built = true
-	world_seed = p_seed
+	world_seed = HandLayout.HAND_SEED   # handcrafted world: the seed argument no longer changes anything
 	var t0: int = Time.get_ticks_msec()
 	material = MeshUtil.make_material()
 	terrain = TerrainGen.new()
@@ -76,11 +72,15 @@ func build(p_seed: int) -> void:
 	terrain.setup(world_seed)
 	_plan_locations()
 	load("res://scripts/world/dungeon_builder.gd").attach(self)
+	_add_dungeon_track()
 	terrain.build_chunks(material)
 	var t1: int = Time.get_ticks_msec()
 	_build_props()
 	var t2: int = Time.get_ticks_msec()
 	_build_locations()
+	var hand = HandBuilder.new(self)
+	add_child(hand.build())
+	print("[World] hand world: %s" % [str(hand.counts)])
 	var t3: int = Time.get_ticks_msec()
 	var dressing = KenneyDressing.new(self)
 	add_child(dressing.build())
@@ -191,82 +191,67 @@ func _on_container_opened(c, by) -> void:
 
 # ------------------------------------------------------------------ planning
 
+## Builds the location list, ground pads and roads from HandLayout (fixed data, no RNG).
 func _plan_locations() -> void:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = world_seed & 0x7FFFFFFF
-	var plan: Array = [["hospital", 26.0], ["gas_station", 22.0], ["gas_station", 22.0],
-		["police_station", 22.0], ["warehouse", 24.0], ["church", 22.0]]
-	for _i in 6:
-		plan.append(["farm", 26.0])
-	var farm_i := 0
-	var gas_i := 0
-	for entry in plan:
-		var type: String = entry[0]
-		var radius: float = entry[1]
-		var placed := false
-		for _attempt in 300:
-			var p := Vector2(rng.randf_range(-PLACE_LIMIT, PLACE_LIMIT), rng.randf_range(-PLACE_LIMIT, PLACE_LIMIT))
-			if p.length() < 55.0:
-				continue
-			var ok := true
-			for l in locations:
-				if (l["pos2"] as Vector2).distance_to(p) < MIN_LOCATION_GAP:
-					ok = false
-					break
-			if not ok:
-				continue
-			var nm: String
-			match type:
-				"hospital":
-					nm = HOSPITAL_NAME
-				"gas_station":
-					nm = GAS_NAMES[gas_i % GAS_NAMES.size()]
-					gas_i += 1
-				"police_station":
-					nm = "Millbrook Police Station"
-				"warehouse":
-					nm = "Harlan Freight Warehouse"
-				"church":
-					nm = "Saint Brigid Chapel"
-				_:
-					nm = FARM_NAMES[farm_i % FARM_NAMES.size()]
-					farm_i += 1
-			var loc := {
-				"id": locations.size(), "type": type, "name": nm, "pos2": p,
-				"pos": Vector3.ZERO, "rot": float(rng.randi_range(0, 3)) * PI * 0.5,
-				"radius": radius, "node": null,
-			}
-			locations.append(loc)
-			placed = true
-			break
-		if not placed:
-			push_warning("[World] could not place location type %s" % type)
-	# Flatten pads and paint roads (must happen before the terrain mesh is built).
+	spawn_center = HandLayout.SPAWN
+	for e in HandLayout.LOCATIONS:
+		locations.append({
+			"id": locations.size(), "type": str(e[0]), "name": str(e[1]),
+			"pos2": Vector2(float(e[2]), float(e[3])), "pos": Vector3.ZERO, "rot": float(e[4]),
+			"radius": float(e[5]), "node": null,
+		})
+	# Flat pads first (spawn, the city, every location, every cottage); the mesh is built after this.
 	terrain.add_flat(spawn_center, 14.0, 24.0, terrain.height_at(spawn_center.x, spawn_center.y))
+	terrain.add_flat(HandLayout.CITY_CENTER, HandLayout.CITY_FLAT_R, HandLayout.CITY_FLAT_BLEND, HandLayout.CITY_HEIGHT)
 	for l in locations:
 		var p2: Vector2 = l["pos2"]
 		terrain.add_flat(p2, float(l["radius"]), 18.0, terrain.height_at(p2.x, p2.y))
-		terrain.add_road(spawn_center, p2)
-	# Dirt tracks between neighbouring locations (each location links to its nearest other one)
-	var linked := {}
+	for h in HandLayout.HOUSES:
+		var hp := Vector2(float(h[0]), float(h[1]))
+		terrain.add_flat(hp, HandLayout.HOUSE_PAD, 6.0, terrain.height_at(hp.x, hp.y))
+	# Roads: countryside polylines, the city street grid, then a driveway for every countryside location.
+	for s in HandLayout.road_segments():
+		terrain.add_road(s[0], s[1])
+	var country: Array = []
+	for r in HandLayout.COUNTRY_ROADS:
+		var pts: Array = r[1]
+		for i in range(pts.size() - 1):
+			country.append([pts[i], pts[i + 1]])
 	for l in locations:
-		var best_j: int = -1
-		var best_d := LINK_MAX_DIST
-		var pa: Vector2 = l["pos2"]
-		for m in locations:
-			if m == l:
-				continue
-			var d: float = pa.distance_to(m["pos2"])
-			if d < best_d:
-				best_d = d
-				best_j = int(m["id"])
-		if best_j < 0:
+		var p2: Vector2 = l["pos2"]
+		if HandLayout.in_city(p2):
 			continue
-		var key: int = mini(int(l["id"]), best_j) * 1000 + maxi(int(l["id"]), best_j)
-		if linked.has(key):
-			continue
-		linked[key] = true
-		terrain.add_road(pa, locations[best_j]["pos2"])
+		var dir := Vector2(sin(float(l["rot"])), cos(float(l["rot"])))   # Basis(UP, rot) * +Z, the gate side
+		var gate: Vector2 = p2 + dir * HandLayout.GATE_DIST
+		var best: Vector2 = gate
+		var best_d := INF
+		for s in country:
+			var q: Vector2 = Geometry2D.get_closest_point_to_segment(gate, s[0], s[1])
+			if gate.distance_to(q) < best_d:
+				best_d = gate.distance_to(q)
+				best = q
+		if best_d > 1.0:
+			terrain.add_road(gate, best)
+		terrain.add_road(gate, p2 + dir * 10.0)
+
+
+## Dirt track from the nearest road to the dungeon's ruined surface gate, so the entrance is always reachable.
+## Runs after the dungeon site is picked (the site search avoids roads, so it can land far from them).
+func _add_dungeon_track() -> void:
+	var site: Dictionary = get_meta("dungeon_site", {}) as Dictionary
+	if not site.has("origin"):
+		return
+	var gate := Vector2(float((site["origin"] as Vector2).x), float(site["gz"]) - 18.0)
+	var best: Vector2 = gate
+	var best_d := INF
+	for i in terrain.road_a.size():
+		var q: Vector2 = Geometry2D.get_closest_point_to_segment(gate, terrain.road_a[i], terrain.road_b[i])
+		if gate.distance_to(q) < best_d:
+			best_d = gate.distance_to(q)
+			best = q
+	if best_d > 1.0:
+		terrain.add_road(best, gate)
+
 
 
 # ------------------------------------------------------------------ props

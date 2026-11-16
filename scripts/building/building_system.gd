@@ -36,8 +36,10 @@ const SLOT_BENCH := 3   ## workbench on the cell centre; shares the cell with a 
 
 const Recipes := preload("res://scripts/world/recipes.gd")
 const CraftingUI := preload("res://scripts/ui/crafting_ui.gd")
+const Extras := preload("res://scripts/building/building_extras.gd")
+const BaseSystem := preload("res://scripts/building/base_system.gd")
 
-const KINDS: Array[String] = ["wall", "floor", "door", "window", "barricade", "workbench"]
+const KINDS: Array[String] = ["wall", "floor", "door", "window", "barricade", "workbench", "stairs", "base_core", "chest", "assembler"]
 const DEFS := {
 	"wall": {"cost": {"planks": 4}, "hp": 200.0, "slot": "edge"},
 	"floor": {"cost": {"planks": 3}, "hp": 150.0, "slot": "floor"},
@@ -45,6 +47,10 @@ const DEFS := {
 	"window": {"cost": {"planks": 3, "scrap": 1}, "hp": 150.0, "slot": "edge"},
 	"barricade": {"cost": {"planks": 2, "scrap": 1}, "hp": 80.0, "slot": "edge"},
 	"workbench": {"cost": {"planks": 8, "scrap": 6}, "hp": 250.0, "slot": "bench"},
+	"stairs": Extras.DEFS["stairs"],
+	"base_core": Extras.DEFS["base_core"],
+	"chest": Extras.DEFS["chest"],
+	"assembler": Extras.DEFS["assembler"],
 }
 
 const COL_WOOD := Color(0.55, 0.38, 0.2)
@@ -67,6 +73,8 @@ var take_hook := Callable()
 var give_hook := Callable()
 var build_mode := false
 var selected := 0
+## Base layer (core, chests, assemblers): scripts/building/base_system.gd
+var base: Node = null
 
 var _net = null
 var _next_id := 1
@@ -86,6 +94,9 @@ func _ready() -> void:
 	_ghost_ok_mat = _make_ghost_mat(Color(0.2, 1.0, 0.3, 0.45))
 	_ghost_bad_mat = _make_ghost_mat(Color(1.0, 0.2, 0.2, 0.45))
 	_net = get_node_or_null("/root/Net")
+	base = BaseSystem.new()
+	base.name = "BaseSystem"
+	add_child(base)
 	if _net != null:
 		_net.hosted.connect(_on_hosted)
 		_net.player_connected.connect(_on_player_connected)
@@ -123,6 +134,8 @@ func cycle(dir: int) -> void:
 
 func key_position(key: Vector4i) -> Vector3:
 	var y := key.y * YSTEP
+	if Extras.is_stair_slot(key.w):
+		return Vector3((key.x + 0.5) * CELL, y, (key.z + 0.5) * CELL)
 	match key.w:
 		SLOT_FLOOR, SLOT_BENCH:
 			return Vector3((key.x + 0.5) * CELL, y, (key.z + 0.5) * CELL)
@@ -133,6 +146,8 @@ func key_position(key: Vector4i) -> Vector3:
 
 
 func key_yaw(key: Vector4i) -> float:
+	if Extras.is_stair_slot(key.w):
+		return Extras.stair_yaw(key.w - Extras.SLOT_STAIR)
 	return PI * 0.5 if key.w == SLOT_EDGE_Z else 0.0
 
 
@@ -212,6 +227,7 @@ func clear_all() -> void:
 	pieces.clear()
 	slots.clear()
 	stock.clear()
+	base.clear()
 	_next_id = 1
 	_set_local_stock({"planks": 0, "scrap": 0})
 	if _ghost != null:
@@ -242,7 +258,7 @@ func _input(event: InputEvent) -> void:
 		elif build_mode and ke.physical_keycode == KEY_X:
 			_try_remove()
 		elif build_mode:
-			var idx: int = ke.physical_keycode - KEY_1
+			var idx: int = 9 if ke.physical_keycode == KEY_0 else ke.physical_keycode - KEY_1   # KEY_0 picks the 10th kind
 			if idx >= 0 and idx < KINDS.size():
 				select_kind(KINDS[idx])
 	elif build_mode and event is InputEventMouseButton:
@@ -302,8 +318,12 @@ func _try_remove() -> void:
 
 func _try_use_bench() -> void:
 	var id := _aimed_piece_id(USE_REACH)
-	if id != 0 and pieces.has(id) and pieces[id]["kind"] == "workbench":
+	if id == 0 or not pieces.has(id):
+		return
+	if pieces[id]["kind"] == "workbench":
 		open_crafting()
+	else:
+		base.use_piece(id)
 
 
 ## Opens the workbench crafting overlay (scripts/ui/crafting_ui.gd), creating it on first use.
@@ -432,7 +452,9 @@ func _update_prompt(hit: Dictionary) -> void:
 			text = "[F] Close door" if pieces[id]["open"] else "[F] Open door"
 		elif id != 0 and pieces.has(id) and pieces[id]["kind"] == "workbench":
 			text = "[E] Use workbench"
-	_set_prompt(text)
+		elif id != 0 and pieces.has(id):
+			text = base.prompt_for(String(pieces[id]["kind"]))
+		_set_prompt(text)
 
 
 func _set_prompt(text: String) -> void:
@@ -452,6 +474,11 @@ func _compute_key(hit: Dictionary, kind: String) -> Vector4i:
 		yk = (pieces[other]["key"] as Vector4i).y
 	var gx := floori(p.x / CELL)
 	var gz := floori(p.z / CELL)
+	if other != 0 and pieces.has(other) and pieces[other]["kind"] == "stairs" and (kind == "floor" or kind == "stairs"):
+		var sk: Vector4i = pieces[other]["key"]
+		return Extras.landing_key(sk) if kind == "floor" else Extras.chain_key(sk)
+	if DEFS[kind]["slot"] == "stair":
+		return Extras.stair_key(gx, yk, gz, hit["from"], hit["position"])
 	if DEFS[kind]["slot"] == "bench":
 		return Vector4i(gx, yk, gz, SLOT_BENCH)
 	if DEFS[kind]["slot"] == "floor":
@@ -510,6 +537,8 @@ func _server_place(peer: int, kind: String, key: Vector4i) -> void:
 		bad_slot = key.w != SLOT_FLOOR
 	elif slot_kind == "bench":
 		bad_slot = key.w != SLOT_BENCH
+	elif slot_kind == "stair":
+		bad_slot = not Extras.is_stair_slot(key.w)
 	else:
 		bad_slot = key.w != SLOT_EDGE_X and key.w != SLOT_EDGE_Z
 	if bad_slot:
@@ -520,6 +549,10 @@ func _server_place(peer: int, kind: String, key: Vector4i) -> void:
 		return
 	if slots.has(key):
 		_reject(peer, "Occupied")
+		return
+	var why := Extras.validate(self, kind, key)
+	if why != "":
+		_reject(peer, why)
 		return
 	if _too_far(peer, key_position(key), REACH + 4.0):
 		_reject(peer, "Too far")
@@ -540,6 +573,10 @@ func _server_remove(peer: int, id: int) -> void:
 	var info: Dictionary = pieces[id]
 	if _too_far(peer, key_position(info["key"]), REACH + 4.0):
 		_reject(peer, "Too far")
+		return
+	var blocked: String = base.remove_blocked(id)
+	if blocked != "":
+		_reject(peer, blocked)
 		return
 	var cost: Dictionary = DEFS[info["kind"]]["cost"]
 	for item in cost:
@@ -790,6 +827,8 @@ func _make_piece(kind: String, ghost: bool) -> Node3D:
 			_box(root, Vector3(1.4, 0.06, 0.7), Vector3(0, 0.3, 0), COL_WOOD, ghost, false)        # lower shelf
 			_box(root, Vector3(0.2, 0.14, 0.14), Vector3(-0.5, 1.02, -0.2), COL_SCRAP, ghost, false)  # vise
 			_box(root, Vector3(0.05, 0.05, 0.4), Vector3(0.3, 0.98, 0.0), COL_SCRAP, ghost, false)    # tool bar
+		"stairs", "base_core", "chest", "assembler":
+			Extras.build_piece(self, root, kind, ghost)
 	return root
 
 

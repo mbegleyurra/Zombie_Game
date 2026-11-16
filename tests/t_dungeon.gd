@@ -153,14 +153,14 @@ func _run() -> void:
 			types[str(m.get_meta("type"))] = int(types.get(str(m.get_meta("type")), 0)) + 1
 			if m.has_meta("boss"):
 				boss += 1
-	check(markers.size() >= 20, "guard markers present (%d)" % markers.size())
+	check(markers.size() >= 10 and markers.size() <= 13, "guard markers present, about half the old 25 (%d)" % markers.size())
 	check(types.has("warrior") and types.has("minion") and types.has("rogue") and types.has("mage"), "all four skeleton types placed %s" % str(types))
 	check(boss == 1, "exactly one boss marker (%d)" % boss)
 	var vault_n := 0
 	for m in markers:
 		if str(m.get_meta("room")) == "vault":
 			vault_n += 1
-	check(vault_n >= 5, "boss room has several guards (%d)" % vault_n)
+	check(vault_n >= 3, "boss room has several guards (%d)" % vault_n)
 
 	# nothing overlaps: container footprints (XZ) pairwise, markers off containers
 	var clash := 0

@@ -260,7 +260,11 @@ func _refresh_build() -> void:
 	var mats := "PLANKS %d     SCRAP %d" % [int(s.get("planks", 0)), int(s.get("scrap", 0))]
 	if _building.build_mode:
 		var kind: String = _building.current_kind()
-		_build_label.text = "BUILD MODE: %s\n1-5 / Wheel - Select     LMB - Place\nX / RMB - Remove     B - Exit\n%s" % [kind.to_upper(), mats]
+		var opts: Array[String] = []
+		for i in _building.KINDS.size():
+			var nm: String = _building.KINDS[i].replace("_", " ")
+			opts.append("[%s]" % nm.to_upper() if i == _building.selected else nm)
+		_build_label.text = "BUILD MODE: %s\n%s\n1-9, 0 / Wheel - Select     LMB - Place\nX / RMB - Remove     B - Exit\n%s" % [kind.to_upper(), "  ".join(opts), mats]
 	else:
 		_build_label.text = "B - Build mode     " + mats
 
