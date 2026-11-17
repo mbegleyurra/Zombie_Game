@@ -61,6 +61,27 @@ func _find(parent: PackedInt32Array, i: int) -> int:
 	return r
 
 
+## Is p inside the (x, z, w, d, yaw) footprint rectangle grown by `margin` metres?
+func _in_rect(p: Vector2, f: Array, margin: float) -> bool:
+	var d: Vector2 = p - Vector2(float(f[0]), float(f[1]))
+	var yaw: float = float(f[4])
+	var lx: float = d.x * cos(yaw) - d.y * sin(yaw)
+	var lz: float = d.x * sin(yaw) + d.y * cos(yaw)
+	return absf(lx) <= float(f[2]) * 0.5 + margin and absf(lz) <= float(f[3]) * 0.5 + margin
+
+
+## Indices of the footprints a road segment passes through (sampled every 0.25 m, far finer than any building).
+func _crossed_footprints(a: Vector2, b: Vector2, fps: Array, margin: float) -> Array:
+	var out: Array = []
+	var n: int = maxi(int(a.distance_to(b) / 0.25), 1)
+	for k in n + 1:
+		var p: Vector2 = a.lerp(b, float(k) / float(n))
+		for fi in fps.size():
+			if not out.has(fi) and _in_rect(p, fps[fi], margin):
+				out.append(fi)
+	return out
+
+
 func _run() -> void:
 	var w1: Node3D = _make(1)
 	for _i in 3:
@@ -159,6 +180,19 @@ func _run() -> void:
 	check(towers >= 20, "city has dense tower blocks (%d towers)" % towers)
 	check(tall >= 30.0, "city has tall buildings (tallest %.0f m)" % tall)
 	check(houses >= 15, "countryside has cottages along the roads (%d)" % houses)
+	# No road, driveway or track (terrain.road_a/b holds all of them) may cross a building footprint. The self-test
+	# proves the checker is not vacuous: a segment laid through the first footprint must be flagged.
+	if fps.size() > 0:
+		var f0: Array = fps[0]
+		var c0 := Vector2(float(f0[0]), float(f0[1]))
+		check(_crossed_footprints(c0 - Vector2(40, 0), c0 + Vector2(40, 0), fps, 0.0).size() >= 1, "road/footprint checker flags a road laid through a building (self-test)")
+	var crossings: Array = []
+	for i in n:
+		for fi in _crossed_footprints(terrain.road_a[i], terrain.road_b[i], fps, 1.0):
+			crossings.append("road#%d %s>%s through %s" % [i, str(terrain.road_a[i]), str(terrain.road_b[i]), str(fps[fi])])
+	for s in crossings:
+		print("  crossing: ", s)
+	check(crossings.is_empty(), "no road, driveway or track crosses a building footprint (%d crossings)" % crossings.size())
 	var in_city_types := 0
 	for t in ["hospital", "police_station", "church"]:
 		for l in w1.get_locations(t):

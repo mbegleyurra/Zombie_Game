@@ -8,6 +8,8 @@ extends RefCounted
 const MeshUtil = preload("res://scripts/world/mesh_util.gd")
 const HandLayout = preload("res://scripts/world/hand_layout.gd")
 const PropFactory = preload("res://scripts/world/prop_factory.gd")
+const CityKit = preload("res://scripts/world/city_kit.gd")
+const RoadKit = preload("res://scripts/world/road_kit.gd")
 
 const WALLS := [Color(0.82, 0.78, 0.66), Color(0.66, 0.3, 0.22), Color(0.38, 0.5, 0.6), Color(0.85, 0.68, 0.4), Color(0.7, 0.72, 0.68)]
 const ROOFS := [Color(0.3, 0.22, 0.2), Color(0.36, 0.2, 0.18), Color(0.25, 0.27, 0.3)]
@@ -20,7 +22,7 @@ const FLOOR_H := 3.2
 var world
 var node: Node3D
 var footprints: Array = []
-var counts := {"houses": 0, "towers": 0, "lamps": 0, "cars": 0}
+var counts := {"houses": 0, "towers": 0, "lamps": 0, "cars": 0, "road_tiles": 0}
 var _mu
 var _body: StaticBody3D
 
@@ -40,12 +42,16 @@ func build() -> Node3D:
 	for h in HandLayout.HOUSES:
 		_house(i, float(h[0]), float(h[1]), float(h[2]))
 		i += 1
-	for blk in HandLayout.CITY_BLOCKS:
-		for t in blk[2]:
-			_tower(float(blk[0]) + float(t[0]), float(blk[1]) + float(t[1]), float(t[2]), float(t[3]), float(t[4]), int(t[5]))
-	for x in HandLayout.CITY_X:
-		for z in HandLayout.CITY_Z:
-			_lamp(float(x) + 3.8, float(z) + 3.8)
+	# City district: Kenney commercial / industrial / suburban buildings, storefront props, road kit tiles and street props.
+	var kit := CityKit.new(world, node, _body, footprints, counts)
+	kit.build()
+	var roads := RoadKit.new(world, kit)
+	roads.build()
+	counts["road_tiles"] = int(roads.counts["tiles"])
+	var info := {"buildings": kit.buildings, "props": kit.props, "models": kit.models, "tiles": roads.tile_kinds,
+		"missing": kit.missing, "junctions": roads.counts["junctions"]}
+	node.set_meta("citykit", info)
+	world.set_meta("citykit", info)
 	_street_cars()
 	var mi := MeshInstance3D.new()
 	mi.name = "Mesh"
@@ -98,44 +104,6 @@ func _house(i: int, x: float, z: float, yaw: float) -> void:
 	_mu.add_box_xf(xf, Vector3(w * 0.28, wall_h + rise * 0.75, -d * 0.18), Vector3(0.7, rise * 1.2, 0.7), Color(0.45, 0.3, 0.25))
 	footprints.append([x, z, w + 0.6, d + 0.6, yaw, "house", wall_h + rise])
 	counts["houses"] = int(counts["houses"]) + 1
-
-
-## Solid tower: coloured shaft, dark window bands every floor, roof slab and a rooftop unit.
-func _tower(x: float, z: float, w: float, d: float, h: float, col_i: int) -> void:
-	var y: float = world.get_height(x, z)
-	var col: Color = TOWERS[col_i % TOWERS.size()]
-	var centre := Vector3(x, y + h * 0.5 - 0.5, z)
-	var size := Vector3(w, h + 1.0, d)
-	_mu.add_box(centre, size, col)
-	var cs := CollisionShape3D.new()
-	var bs := BoxShape3D.new()
-	bs.size = size
-	cs.shape = bs
-	cs.position = centre
-	_body.add_child(cs)
-	var yy: float = y + 1.8
-	while yy + 0.6 < y + h - 0.8:
-		_mu.add_box(Vector3(x, yy, z), Vector3(w + 0.08, 1.2, d + 0.08), GLASS)
-		yy += FLOOR_H
-	_mu.add_box(Vector3(x, y + h + 0.25, z), Vector3(w + 0.5, 0.5, d + 0.5), col.darkened(0.35))
-	_mu.add_box(Vector3(x + w * 0.15, y + h + 1.3, z - d * 0.15), Vector3(w * 0.3, 1.6, d * 0.3), col.darkened(0.2))
-	footprints.append([x, z, w, d, 0.0, "tower", h])
-	counts["towers"] = int(counts["towers"]) + 1
-
-
-func _lamp(x: float, z: float) -> void:
-	var y: float = world.get_height(x, z)
-	_mu.add_box(Vector3(x, y + 2.6, z), Vector3(0.16, 5.2, 0.16), DARK)
-	_mu.add_box(Vector3(x - 0.45, y + 5.25, z), Vector3(1.0, 0.16, 0.16), DARK)
-	_mu.add_box(Vector3(x - 0.9, y + 5.12, z), Vector3(0.45, 0.14, 0.3), LAMP_LIGHT)
-	var cs := CollisionShape3D.new()
-	var sh := CylinderShape3D.new()
-	sh.radius = 0.2
-	sh.height = 5.2
-	cs.shape = sh
-	cs.position = Vector3(x, y + 2.6, z)
-	_body.add_child(cs)
-	counts["lamps"] = int(counts["lamps"]) + 1
 
 
 func _street_cars() -> void:

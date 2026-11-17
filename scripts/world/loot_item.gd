@@ -74,6 +74,13 @@ func _build_visual() -> void:
 		var pick: Array = variants[absi(loot_id) % variants.size()] as Array
 		model_path = str(pick[0])
 		model_height = float(pick[1])
+	# Weapons lie on the ground as their Blaster Kit model (GunMesh); falls through to the old box gun if absent.
+	if shape_kind == "gun" and model_path == "" and WeaponDB.has_weapon(str(info.get("weapon_id", ""))):
+		var gm: Node3D = GunMesh.world_pickup(WeaponDB.get_weapon(str(info["weapon_id"])).model)
+		if gm != null:
+			_visual.add_child(gm)
+			_add_box_collision(gm.get_meta("size") as Vector3)
+			return
 	if model_path != "":
 		var m: Node3D = ModelUtil.load_fit(model_path, model_height)
 		if m != null:

@@ -39,8 +39,11 @@ func _run() -> void:
 	current_scene = main
 	for _i in 30:
 		await physics_frame
+	# The handcrafted world ignores the seed by design (world_builder.build sets world_seed = HandLayout.HAND_SEED),
+	# so the host's Net seed must NOT change it: every peer builds the identical map.
+	var hand_seed: int = (load("res://scripts/world/hand_layout.gd") as GDScript).HAND_SEED
 	var ws: int = main.world.world_seed
-	check(ws == host_seed, "world built from Net.world_seed (main world seed=%d, Net seed=%d)" % [ws, host_seed])
+	check(ws == hand_seed, "world built from the fixed hand seed regardless of Net.world_seed (main world seed=%d, hand seed=%d, Net seed=%d)" % [ws, hand_seed, host_seed])
 	var in_group := get_nodes_in_group("players")
 	var names := []
 	for p in in_group:

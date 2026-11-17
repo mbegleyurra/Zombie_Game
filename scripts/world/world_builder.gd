@@ -212,11 +212,9 @@ func _plan_locations() -> void:
 	# Roads: countryside polylines, the city street grid, then a driveway for every countryside location.
 	for s in HandLayout.road_segments():
 		terrain.add_road(s[0], s[1])
-	var country: Array = []
-	for r in HandLayout.COUNTRY_ROADS:
-		var pts: Array = r[1]
-		for i in range(pts.size() - 1):
-			country.append([pts[i], pts[i + 1]])
+	# Driveways snap to the nearest road of ANY kind. Country roads alone sent the Harlan Freight driveway across the
+	# whole city (through three towers) to City Link; its gate stands 0.5 m from the city's east street instead.
+	var country: Array = HandLayout.road_segments()
 	for l in locations:
 		var p2: Vector2 = l["pos2"]
 		if HandLayout.in_city(p2):

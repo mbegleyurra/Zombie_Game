@@ -280,6 +280,14 @@ func _profile_for(wd: WeaponData, gun: Node3D) -> Dictionary:
 		p = (TUNING[key] as Dictionary).duplicate()
 	var style_name: String = str(p.get("style", style_of(wd)))
 	p["style"] = style_name
+	# Blaster Kit guns are one fused mesh: no box parts to capture, and hand/mag points come from the
+	# model's own geometry (GunMesh meta "vm_profile") instead of the hand-tuned procedural numbers.
+	if gun.has_meta("vm_profile"):
+		for k in ["mag_region", "slide_region", "charge_region", "bolt_region", "pump_region", "proxy"]:
+			p.erase(k)
+		var vp: Dictionary = gun.get_meta("vm_profile")
+		for k in vp:
+			p[k] = vp[k]
 	var mz := -0.5
 	var marker := GunMesh.muzzle_of(gun)
 	if marker != null:
@@ -325,11 +333,33 @@ func _capture(region: AABB, boxes_only: bool, pivot: Node3D) -> int:
 
 
 func _make_proxy_mag(pivot: Node3D) -> void:
+	if _p.has("clip_file") and _make_clip_proxy(pivot):
+		return
 	var sz: Vector3 = _p["proxy_size"]
 	var c: Vector3 = _p["proxy_center"]
 	var tilt: float = _p["proxy_tilt"]
 	var mi := _box(pivot, sz, c, MAG_COLOR, Vector3(tilt, 0.0, 0.0))
 	mi.name = "ProxyMag"
+
+
+## Blaster Kit magazine: the kit clip .glb hangs below the pivot (its origin is the clip base).
+## The fused mesh keeps its own magazine, so this clip is only shown while the hand handles it.
+func _make_clip_proxy(pivot: Node3D) -> bool:
+	var path: String = GunMesh.blaster_dir + str(_p["clip_file"]) + ".glb"
+	if not ResourceLoader.exists(path):
+		return false
+	var ps := load(path) as PackedScene
+	if ps == null:
+		return false
+	var inst := ps.instantiate() as Node3D
+	if inst == null:
+		return false
+	var cs: float = _p["clip_scale"]
+	inst.name = "ProxyMag"
+	inst.scale = Vector3.ONE * cs
+	inst.position = Vector3(0.0, -float(_p["clip_h"]) * cs, 0.0)
+	pivot.add_child(inst)
+	return true
 
 
 func _make_prop(is_shell: bool) -> MeshInstance3D:
@@ -523,6 +553,8 @@ func _pose_mag(p: float, cant: float, ts: Array, lift: float) -> void:
 	_mag_vis = vis or (_mag_baked and p >= t_seat)
 	if not _mag_baked:
 		_mag_vis = p >= t_new and p < t_seat + 0.05
+		if _p.has("clip_file"):
+			_mag_vis = _mag_vis or (p >= t_grab and p < t_gone)   # the clip the hand pulls out of the fused mesh
 	# after seating: charge handle / slide rack when nothing was chambered, else just return
 	var hand_pos: Vector3 = _p["slide_pos"] if _style == "pistol" else _p["charge_pos"]
 	var travel: float = _p["slide_travel"]

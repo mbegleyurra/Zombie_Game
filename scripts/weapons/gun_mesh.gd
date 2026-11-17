@@ -17,6 +17,9 @@ static var _mat_cache: Dictionary = {}
 static func build(model: String) -> Node3D:
 	var root := Node3D.new()
 	root.name = "Gun_" + model
+	if BLASTERS.has(model) and _build_blaster(root, model):
+		return root
+	# fallback: the procedural primitive gun (model missing / failed to load / unknown key)
 	match model:
 		"pistol":
 			_pistol(root)
@@ -39,6 +42,274 @@ static func build(model: String) -> Node3D:
 
 static func muzzle_of(gun: Node3D) -> Node3D:
 	return gun.get_node_or_null("Muzzle") as Node3D
+
+
+# ---------------------------------------------------------------- Kenney Blaster Kit (CC0)
+# Visual-only skin for every WeaponDB model key. The .glb is fitted to the same convention as the
+# procedural guns (points down -Z, right-hand grip near z = GRIP_Z, barrel axis at y = MUZZLE_Y, a
+# Marker3D "Muzzle" at the barrel tip). Hand grips, magazine and charging points are derived from the
+# model's own geometry and stored on the root as meta "vm_profile" for viewmodel.gd. If the file is
+# missing or fails to load, build() silently returns the procedural gun instead.
+
+## Folder of the imported kit; a static var so a test can point it at nothing to exercise the fallback.
+static var blaster_dir: String = "res://assets/kenney/blaster-kit/"
+
+const GRIP_Z := -0.03        ## gun-local z of the right-hand grip (same as the procedural guns)
+const MUZZLE_Y := 0.02       ## gun-local height of the barrel axis
+const BLASTER_MAX_SCALE := 1.3
+
+## model key -> blaster file, in-hand length (muzzle to butt, metres) and the magazine clip used in reloads.
+const BLASTERS := {
+	"pistol": {"file": "blaster-b", "len": 0.28, "clip": "clip-small"},
+	"ak": {"file": "blaster-n", "len": 0.72, "clip": "clip-large"},
+	"m4": {"file": "blaster-d", "len": 0.82, "clip": "clip-large"},
+	"shotgun": {"file": "blaster-g", "len": 0.8, "clip": "clip-large"},
+	"hunting": {"file": "blaster-e", "len": 1.0, "clip": "clip-large"},
+	"ar": {"file": "blaster-p", "len": 0.82, "clip": "clip-large"},
+	"ar_t1": {"file": "blaster-i", "len": 0.62, "clip": "clip-large"},
+	"ar_t2": {"file": "blaster-o", "len": 0.56, "clip": "clip-large"},
+	"ar_t3": {"file": "blaster-f", "len": 0.98, "clip": "clip-large"},
+}
+
+static var _blaster_cache: Dictionary = {}
+
+
+static func has_blaster(model: String) -> bool:
+	return BLASTERS.has(model)
+
+
+## True when `gun` (from build) is a Blaster Kit model rather than the procedural fallback.
+static func is_blaster(gun: Node3D) -> bool:
+	return gun != null and gun.has_meta("blaster")
+
+
+static func reset_blaster_cache() -> void:
+	_blaster_cache.clear()
+
+
+## A lying-down copy for a dropped pickup: length along X, resting on y = 0, centred on x/z.
+## meta "size" = bounding size. Returns null when the model is not a blaster (caller keeps its own mesh).
+static func world_pickup(model: String) -> Node3D:
+	var g := build(model)
+	if not is_blaster(g):
+		g.free()
+		return null
+	var vp: Dictionary = g.get_meta("vm_profile")
+	var ext: Dictionary = vp["extent"]
+	var lo: Vector3 = ext["lo"]
+	var hi: Vector3 = ext["hi"]
+	var zc := (lo.z + hi.z) * 0.5
+	var basis := Basis(Vector3.UP, PI * 0.5)
+	g.rotation.y = PI * 0.5
+	g.position = -(basis * Vector3(0.0, lo.y, zc))
+	var wrap := Node3D.new()
+	wrap.name = "Pickup_" + model
+	wrap.add_child(g)
+	wrap.set_meta("size", Vector3(hi.z - lo.z, hi.y - lo.y, hi.x - lo.x))
+	return wrap
+
+
+static func _build_blaster(root: Node3D, model: String) -> bool:
+	var spec: Dictionary = BLASTERS[model]
+	var file: String = spec["file"]
+	var info := _blaster_info(file)
+	if info.is_empty():
+		return false
+	var ps := load(blaster_dir + file + ".glb") as PackedScene
+	if ps == null:
+		return false
+	var inst := ps.instantiate() as Node3D
+	if inst == null:
+		return false
+	var lo: Vector3 = info["lo"]
+	var hi: Vector3 = info["hi"]
+	var size: Vector3 = hi - lo
+	var s := minf(float(spec["len"]) / maxf(size.z, 0.01), BLASTER_MAX_SCALE)
+	var off := Vector3(-float(info["cx"]) * s, MUZZLE_Y - float(info["muzzle_y"]) * s, GRIP_Z - float(info["grip_z"]) * s)
+	inst.name = "Model"
+	inst.scale = Vector3.ONE * s
+	inst.position = off
+	_no_shadow(inst)
+	root.add_child(inst)
+	var mk := Marker3D.new()
+	mk.name = "Muzzle"
+	mk.position = Vector3(0.0, MUZZLE_Y, lo.z * s + off.z)
+	root.add_child(mk)
+	root.set_meta("blaster", file)
+
+	# ---- viewmodel profile, in final gun-local metres
+	var f_lo_y := lo.y * s + off.y
+	var f_hi_y := hi.y * s + off.y
+	var palm_y := minf(float(info["grip_ymin"]) * s + off.y + 0.06, MUZZLE_Y - 0.03)
+	var xr := clampf(float(info["halfw"]) * s * 0.85, 0.0, 0.06)
+	var pistol := model == "pistol"
+	var p: Dictionary = {}
+	p["grip_r"] = Vector3(xr, palm_y, GRIP_Z)
+	if pistol:
+		p["grip_l"] = Vector3(-xr, palm_y - 0.02, GRIP_Z - 0.02)
+	else:
+		var fz := float(info["fore_z"]) * s + off.z
+		p["grip_l"] = Vector3(0.0, float(info["fore_under"]) * s + off.y - 0.012, fz)
+	var mag_top := lerpf(f_lo_y, MUZZLE_Y, 0.55)
+	var hang := maxf(mag_top - (float(info["mag_ymin"]) * s + off.y), 0.05)
+	p["mag_pos"] = Vector3(0.0, mag_top, float(info["mag_z"]) * s + off.z)
+	p["grab_off"] = Vector3(0.0, -hang * 0.7, 0.0)
+	var clip_file: String = spec["clip"]
+	var cinfo := _blaster_info(clip_file)
+	if not cinfo.is_empty():
+		var csize: Vector3 = (cinfo["hi"] as Vector3) - (cinfo["lo"] as Vector3)
+		p["clip_file"] = clip_file
+		p["clip_h"] = csize.y
+		p["clip_scale"] = hang / maxf(csize.y, 0.01)
+	p["slide_pos"] = Vector3(0.0, MUZZLE_Y + 0.035, GRIP_Z - 0.02)
+	p["charge_pos"] = Vector3(0.0, f_hi_y + 0.02, GRIP_Z - 0.03)
+	p["port"] = Vector3(0.0, lerpf(f_lo_y, MUZZLE_Y, 0.45), GRIP_Z - 0.06)
+	p["bolt_hand"] = Vector3(xr + 0.05, MUZZLE_Y + 0.02, GRIP_Z - 0.03)
+	if model == "hunting":
+		p["port"] = Vector3(0.0, MUZZLE_Y + 0.05, GRIP_Z - 0.1)
+	p["extent"] = {
+		"lo": Vector3(-size.x * s * 0.5, f_lo_y, lo.z * s + off.z),
+		"hi": Vector3(size.x * s * 0.5, f_hi_y, hi.z * s + off.z),
+	}
+	root.set_meta("vm_profile", p)
+	return true
+
+
+static func _no_shadow(n: Node) -> void:
+	var gi := n as GeometryInstance3D
+	if gi != null:
+		gi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	for c in n.get_children():
+		_no_shadow(c)
+
+
+static func _collect_verts(n: Node, xf: Transform3D, out: PackedVector3Array) -> void:
+	var t := xf
+	if n is Node3D:
+		t = xf * (n as Node3D).transform
+	var mi := n as MeshInstance3D
+	if mi != null and mi.mesh != null:
+		for si in range(mi.mesh.get_surface_count()):
+			var arr := mi.mesh.surface_get_arrays(si)
+			var vs: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+			for v in vs:
+				out.append(t * v)
+	for c in n.get_children():
+		_collect_verts(c, t, out)
+
+
+## Cached geometry analysis of one kit .glb in its native units ({} when it cannot be loaded).
+static func _blaster_info(file: String) -> Dictionary:
+	var key := blaster_dir + file
+	if _blaster_cache.has(key):
+		return _blaster_cache[key]
+	var info: Dictionary = {}
+	var path := blaster_dir + file + ".glb"
+	if ResourceLoader.exists(path):
+		var ps := load(path) as PackedScene
+		if ps != null:
+			var inst := ps.instantiate() as Node3D
+			if inst != null:
+				var vs := PackedVector3Array()
+				_collect_verts(inst, Transform3D.IDENTITY, vs)
+				inst.free()
+				if vs.size() >= 12:
+					info = _analyze(vs)
+	_blaster_cache[key] = info
+	return info
+
+
+## Finds the barrel axis, the rear grip and the magazine from the shape: the magazine is the lowest-hanging
+## lump, the grip is the rearmost low lump behind it (the stock end is ignored). Native units, muzzle at -Z.
+static func _analyze(vs: PackedVector3Array) -> Dictionary:
+	var lo := vs[0]
+	var hi := vs[0]
+	for v in vs:
+		lo = Vector3(minf(lo.x, v.x), minf(lo.y, v.y), minf(lo.z, v.z))
+		hi = Vector3(maxf(hi.x, v.x), maxf(hi.y, v.y), maxf(hi.z, v.z))
+	var size := hi - lo
+	var my_lo := 1e9
+	var my_hi := -1e9
+	for v in vs:
+		if v.z < lo.z + size.z * 0.05:
+			my_lo = minf(my_lo, v.y)
+			my_hi = maxf(my_hi, v.y)
+	var muzzle_y := (my_lo + my_hi) * 0.5 if my_lo < 1e8 else lo.y + size.y * 0.6
+	# bin the low-hanging vertices along z
+	var bin := 0.02
+	var nb := int(size.z / bin) + 1
+	var bmin := PackedFloat32Array()
+	bmin.resize(nb)
+	bmin.fill(1e9)
+	var bcnt := PackedInt32Array()
+	bcnt.resize(nb)
+	var low_y := lo.y + size.y * 0.4
+	for v in vs:
+		if v.y < low_y:
+			var bi := clampi(int((v.z - lo.z) / bin), 0, nb - 1)
+			bmin[bi] = minf(bmin[bi], v.y)
+			bcnt[bi] += 1
+	for b in range(nb):
+		var bz := lo.z + (float(b) + 0.5) * bin
+		if bz < lo.z + size.z * 0.06 or bz > lo.z + size.z * 0.88:
+			bcnt[b] = 0
+	var clusters: Array = []
+	var i := 0
+	while i < nb:
+		if bcnt[i] == 0:
+			i += 1
+			continue
+		var last := i
+		var j := i
+		while j < nb and j - last <= 2:
+			if bcnt[j] > 0:
+				last = j
+			j += 1
+		var cn := 0
+		var zsum := 0.0
+		var ymin := 1e9
+		for b in range(i, last + 1):
+			cn += bcnt[b]
+			zsum += (lo.z + (float(b) + 0.5) * bin) * float(bcnt[b])
+			ymin = minf(ymin, bmin[b])
+		clusters.append({"z": zsum / float(cn), "ymin": ymin})
+		i = last + 1
+	var mag_z := lo.z + size.z * 0.5
+	var mag_ymin := lo.y
+	var grip_z := lo.z + size.z * 0.6
+	var grip_ymin := lo.y
+	if not clusters.is_empty():
+		var mc: Dictionary = clusters[0]
+		for c in clusters:
+			if float((c as Dictionary)["ymin"]) < float(mc["ymin"]) - 0.005:
+				mc = c
+		mag_z = float(mc["z"])
+		mag_ymin = float(mc["ymin"])
+		grip_z = mag_z
+		grip_ymin = mag_ymin
+		for c in clusters:
+			var cd := c as Dictionary
+			if float(cd["z"]) > mag_z + 0.04 and float(cd["ymin"]) < lo.y + size.y * 0.3:
+				grip_z = float(cd["z"])
+				grip_ymin = float(cd["ymin"])
+	var cx := (lo.x + hi.x) * 0.5
+	var halfw := 0.0
+	# front hand: ahead of the magazine (not on its bottom), but not past the muzzle end
+	var fore_z := minf(lerpf(grip_z, lo.z, 0.55), mag_z - 0.07)
+	fore_z = maxf(fore_z, lo.z + size.z * 0.12)
+	var fore_under := 1e9
+	for v in vs:
+		if absf(v.z - grip_z) < 0.04:
+			halfw = maxf(halfw, absf(v.x - cx))
+		if absf(v.z - fore_z) < 0.03:
+			fore_under = minf(fore_under, v.y)
+	if fore_under > 1e8:
+		fore_under = muzzle_y - 0.06
+	return {
+		"lo": lo, "hi": hi, "cx": cx, "muzzle_y": muzzle_y,
+		"mag_z": mag_z, "mag_ymin": mag_ymin, "grip_z": grip_z, "grip_ymin": grip_ymin,
+		"halfw": halfw, "fore_z": fore_z, "fore_under": fore_under,
+	}
 
 
 ## Returns a copy of `src` with one flat normal per triangle (faceted low-poly

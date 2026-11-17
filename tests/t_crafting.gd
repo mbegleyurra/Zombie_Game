@@ -61,7 +61,7 @@ func _test_data() -> void:
 		check(not cals.has(wd.caliber) and not ["9mm", "556", "762", "12ga"].has(wd.caliber), "%s has its own ammo type (%s)" % [id, wd.caliber])
 		cals[wd.caliber] = true
 		var gun := GunMesh.build(wd.model)
-		check(GunMesh.muzzle_of(gun) != null and gun.get_child_count() > 20, "%s gun model builds with a muzzle" % id)
+		check(GunMesh.muzzle_of(gun) != null and (GunMesh.is_blaster(gun) or gun.get_child_count() > 20), "%s gun model builds with a muzzle" % id)
 		gun.free()
 		if prev != null:
 			var pw: WeaponData = prev["wd"]

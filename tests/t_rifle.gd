@@ -56,7 +56,9 @@ func _run() -> void:
 				var idx = arr[Mesh.ARRAY_INDEX]
 				tris += (idx.size() if idx != null else (arr[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()) / 3
 	check(g.name == "Gun_ar" and muz != null, "mesh builds as Gun_ar with a Muzzle marker")
-	check(tris >= 300 and boxes >= 25, "mesh is detailed like the other guns (%d parts, %d tris)" % [boxes, tris])
+	# a Blaster Kit skin is one fused glb under "Model"; the procedural fallback is many box parts
+	var detailed: bool = (GunMesh.is_blaster(g) and g.get_node_or_null("Model") != null) or (tris >= 300 and boxes >= 25)
+	check(detailed, "mesh is detailed like the other guns (%s, %d parts, %d tris)" % ["blaster" if GunMesh.is_blaster(g) else "procedural", boxes, tris])
 	check(muz != null and muz.position.z < -0.5 and muz.position.z > -1.2, "muzzle sits at the barrel tip (z=%.2f)" % (muz.position.z if muz != null else 0.0))
 	g.free()
 	var pg := GunMesh.build("pistol")

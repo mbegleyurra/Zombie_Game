@@ -30,6 +30,18 @@ static func load_fit(path: String, target_height: float) -> Node3D:
 	return wrap
 
 
+## Merged bounding box of every mesh under `n`, in n's own space (zero-size AABB when it has no mesh).
+static func bounds(n: Node3D) -> AABB:
+	var boxes: Array = []
+	_collect(n, Transform3D.IDENTITY, boxes)
+	if boxes.is_empty():
+		return AABB()
+	var bb: AABB = boxes[0]
+	for i in range(1, boxes.size()):
+		bb = bb.merge(boxes[i])
+	return bb
+
+
 static func _collect(n: Node, xf: Transform3D, out: Array) -> void:
 	var t := xf
 	if n is Node3D:

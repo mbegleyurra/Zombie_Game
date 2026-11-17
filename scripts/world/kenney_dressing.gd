@@ -23,6 +23,7 @@ const TREE_COUNT := 36
 const ROCK_COUNT := 40
 const EDGE := 45.0   # keep clear of the border mountains
 const ROAD_CLEAR := 1.0   # min distance from any road centreline to any point of a car footprint (player capsule r 0.35 + margin)
+const SPAWN_CLEAR := 22.0   # trees and rocks keep this far from the player spawn centre
 const GAS_CRATE_ROAD := 3.0   # gas-station crate spots closer than this to a road are skipped
 
 var world
@@ -273,6 +274,8 @@ func _signposts() -> void:
 		var p: Vector2 = lp + dir * (float(l["radius"]) + 7.0) - side * 4.0
 		if terrain.normal_at(p.x, p.y).y < 0.88:
 			continue
+		if terrain.road_distance(p.x, p.y) < 3.5:
+			continue   # city streets can pass the usual spot (hospital): never stand a sign on a road
 		var yaw: float = atan2(dir.x, dir.y)   # board faces the traveller coming from the spawn
 		if _put(SURV, "signpost", 2.2, p.x, p.y, yaw, 2) != null:
 			counts["signposts"] += 1
@@ -341,6 +344,8 @@ func _terrain_breakers() -> void:
 		var yaw: float = rng.randf() * TAU
 		if terrain.forest_density(x, z) >= -0.15:
 			continue   # only open ground: the procedural trees already fill the forests
+		if Vector2(x, z).distance_to(world.spawn_center) < SPAWN_CLEAR:
+			continue   # draws above stay unconditional so the RNG stream (and every later pick) is unchanged
 		if not terrain.is_clear(x, z, 6.0) or terrain.normal_at(x, z).y < 0.9 or not _room(x, z, 3.5):
 			continue
 		var y: float = terrain.height_at(x, z)
@@ -360,6 +365,8 @@ func _terrain_breakers() -> void:
 		var h2: float = rng.randf_range(0.7, 1.7)
 		var yaw2: float = rng.randf() * TAU
 		if not terrain.is_clear(x2, z2, 5.0) or terrain.normal_at(x2, z2).y < 0.85 or not _room(x2, z2, 3.0):
+			continue
+		if Vector2(x2, z2).distance_to(world.spawn_center) < SPAWN_CLEAR:
 			continue
 		var y2: float = terrain.height_at(x2, z2)
 		if y2 < -1.5 or y2 > 16.0:

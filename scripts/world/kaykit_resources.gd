@@ -243,9 +243,16 @@ static func _spot_ok(world: Node, terrain, p: Vector2, clear_margin: float, plac
 	return not blocked_by_dressing(world, p, 0.7)
 
 
-## True if (x, z) lies inside (or within `pad` of) any Kenney-dressing collider.
+## True if (x, z) lies inside (or within `pad` of) any Kenney-dressing or KayKit-forest collider. The scatter runs on
+## `built`, after both exist, so deposits are rejected here instead of the forest having to dodge them.
 static func blocked_by_dressing(world: Node, p: Vector2, pad: float) -> bool:
-	var body: Node = world.get_node_or_null("KenneyDressing/Collision")
+	for path in ["KenneyDressing/Collision", "KayKitForest/Collision"]:
+		if _blocked_by_body(world.get_node_or_null(path), p, pad):
+			return true
+	return false
+
+
+static func _blocked_by_body(body: Node, p: Vector2, pad: float) -> bool:
 	if body == null:
 		return false
 	for c in body.get_children():
