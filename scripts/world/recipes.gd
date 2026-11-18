@@ -18,16 +18,16 @@ const RIFLES := [
 
 ## caliber -> {count, cost} for one batch of ammo.
 const AMMO := {
-	"9mm": {"count": 30, "cost": {"planks": 1, "scrap": 2}},
-	"556": {"count": 30, "cost": {"planks": 1, "scrap": 3}},
-	"762": {"count": 20, "cost": {"planks": 1, "scrap": 4}},
-	"12ga": {"count": 12, "cost": {"planks": 2, "scrap": 2}},
-	"545": {"count": 30, "cost": {"planks": 1, "scrap": 3}},
-	"68": {"count": 30, "cost": {"planks": 2, "scrap": 4}},
-	"300": {"count": 30, "cost": {"planks": 2, "scrap": 6}},
+	"9mm": {"count": 60, "cost": {"planks": 1, "scrap": 2}},
+	"556": {"count": 60, "cost": {"planks": 1, "scrap": 3}},
+	"762": {"count": 40, "cost": {"planks": 1, "scrap": 4}},
+	"12ga": {"count": 24, "cost": {"planks": 2, "scrap": 2}},
+	"545": {"count": 60, "cost": {"planks": 1, "scrap": 3}},
+	"68": {"count": 60, "cost": {"planks": 2, "scrap": 4}},
+	"300": {"count": 60, "cost": {"planks": 2, "scrap": 6}},
 }
 ## Used for a caliber that has no AMMO row, so a new gun is never left without ammo.
-const AMMO_DEFAULT := {"count": 20, "cost": {"planks": 2, "scrap": 4}}
+const AMMO_DEFAULT := {"count": 40, "cost": {"planks": 2, "scrap": 4}}
 
 static var _cache: Array = []
 

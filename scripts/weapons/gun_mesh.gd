@@ -44,31 +44,37 @@ static func muzzle_of(gun: Node3D) -> Node3D:
 	return gun.get_node_or_null("Muzzle") as Node3D
 
 
-# ---------------------------------------------------------------- Kenney Blaster Kit (CC0)
-# Visual-only skin for every WeaponDB model key. The .glb is fitted to the same convention as the
-# procedural guns (points down -Z, right-hand grip near z = GRIP_Z, barrel axis at y = MUZZLE_Y, a
+# ---------------------------------------------------------------- ITHappy Weapons Free skin
+# Visual-only skin for every WeaponDB model key (the names BLASTERS / is_blaster / blaster_dir are kept
+# from the old Kenney Blaster Kit so callers did not change; the kit itself is no longer used for guns).
+# The ITHappy .glb files point down +X; they are turned MODEL_YAW about Y so they match the convention of
+# the procedural guns (points down -Z, right-hand grip near z = GRIP_Z, barrel axis at y = MUZZLE_Y, a
 # Marker3D "Muzzle" at the barrel tip). Hand grips, magazine and charging points are derived from the
 # model's own geometry and stored on the root as meta "vm_profile" for viewmodel.gd. If the file is
 # missing or fails to load, build() silently returns the procedural gun instead.
+# Swapping a model = editing one BLASTERS row: file, in-hand length (m), optional magazine mesh ("clip").
 
-## Folder of the imported kit; a static var so a test can point it at nothing to exercise the fallback.
-static var blaster_dir: String = "res://assets/kenney/blaster-kit/"
+## Folder of the imported pack; a static var so a test can point it at nothing to exercise the fallback.
+static var blaster_dir: String = "res://assets/ithappy_weapons/Meshes/Assets/"
 
 const GRIP_Z := -0.03        ## gun-local z of the right-hand grip (same as the procedural guns)
 const MUZZLE_Y := 0.02       ## gun-local height of the barrel axis
 const BLASTER_MAX_SCALE := 1.3
+const MODEL_YAW := PI * 0.5  ## turns the pack's +X muzzle direction onto -Z
 
-## model key -> blaster file, in-hand length (muzzle to butt, metres) and the magazine clip used in reloads.
+## model key -> pack file, in-hand length (muzzle to butt, metres) and the magazine mesh shown in reloads.
+## Only four guns ship in the pack: every rifle-class key shares rifle_001, the bolt gun and the heavy
+## tier-3 rifle use sniper_rifle_001, the pump shotgun uses shotgun_001. Lengths tell them apart.
 const BLASTERS := {
-	"pistol": {"file": "blaster-b", "len": 0.28, "clip": "clip-small"},
-	"ak": {"file": "blaster-n", "len": 0.72, "clip": "clip-large"},
-	"m4": {"file": "blaster-d", "len": 0.82, "clip": "clip-large"},
-	"shotgun": {"file": "blaster-g", "len": 0.8, "clip": "clip-large"},
-	"hunting": {"file": "blaster-e", "len": 1.0, "clip": "clip-large"},
-	"ar": {"file": "blaster-p", "len": 0.82, "clip": "clip-large"},
-	"ar_t1": {"file": "blaster-i", "len": 0.62, "clip": "clip-large"},
-	"ar_t2": {"file": "blaster-o", "len": 0.56, "clip": "clip-large"},
-	"ar_t3": {"file": "blaster-f", "len": 0.98, "clip": "clip-large"},
+	"pistol": {"file": "pistol_001", "len": 0.28, "clip": "pistol_drum_001"},
+	"ak": {"file": "rifle_001", "len": 0.78, "clip": "rifle_magazine_001"},
+	"m4": {"file": "rifle_001", "len": 0.86, "clip": "rifle_magazine_001"},
+	"shotgun": {"file": "shotgun_001", "len": 0.84, "clip": ""},
+	"hunting": {"file": "sniper_rifle_001", "len": 1.0, "clip": "rifle_magazine_001"},
+	"ar": {"file": "rifle_001", "len": 0.82, "clip": "rifle_magazine_001"},
+	"ar_t1": {"file": "rifle_001", "len": 0.7, "clip": "rifle_magazine_001"},
+	"ar_t2": {"file": "rifle_001", "len": 0.74, "clip": "rifle_magazine_001"},
+	"ar_t3": {"file": "sniper_rifle_001", "len": 0.98, "clip": "rifle_magazine_001"},
 }
 
 static var _blaster_cache: Dictionary = {}
@@ -78,7 +84,7 @@ static func has_blaster(model: String) -> bool:
 	return BLASTERS.has(model)
 
 
-## True when `gun` (from build) is a Blaster Kit model rather than the procedural fallback.
+## True when `gun` (from build) is an ITHappy pack model rather than the procedural fallback.
 static func is_blaster(gun: Node3D) -> bool:
 	return gun != null and gun.has_meta("blaster")
 
@@ -121,6 +127,7 @@ static func _build_blaster(root: Node3D, model: String) -> bool:
 	var inst := ps.instantiate() as Node3D
 	if inst == null:
 		return false
+	inst.rotation.y = MODEL_YAW
 	var lo: Vector3 = info["lo"]
 	var hi: Vector3 = info["hi"]
 	var size: Vector3 = hi - lo
@@ -130,6 +137,7 @@ static func _build_blaster(root: Node3D, model: String) -> bool:
 	inst.scale = Vector3.ONE * s
 	inst.position = off
 	_no_shadow(inst)
+	apply_pack_material(inst)
 	root.add_child(inst)
 	var mk := Marker3D.new()
 	mk.name = "Muzzle"
@@ -146,7 +154,9 @@ static func _build_blaster(root: Node3D, model: String) -> bool:
 	var p: Dictionary = {}
 	p["grip_r"] = Vector3(xr, palm_y, GRIP_Z)
 	if pistol:
-		p["grip_l"] = Vector3(-xr, palm_y - 0.02, GRIP_Z - 0.02)
+		# Palm behind and below the slide so the slide stays visible and the fingers curl round the grip front.
+		p["grip_r"] = Vector3(0.0, MUZZLE_Y - 0.085, GRIP_Z + 0.035)
+		p["grip_l"] = Vector3(-0.02, MUZZLE_Y - 0.1, GRIP_Z + 0.01)
 	else:
 		var fz := float(info["fore_z"]) * s + off.z
 		p["grip_l"] = Vector3(0.0, float(info["fore_under"]) * s + off.y - 0.012, fz)
@@ -154,13 +164,15 @@ static func _build_blaster(root: Node3D, model: String) -> bool:
 	var hang := maxf(mag_top - (float(info["mag_ymin"]) * s + off.y), 0.05)
 	p["mag_pos"] = Vector3(0.0, mag_top, float(info["mag_z"]) * s + off.z)
 	p["grab_off"] = Vector3(0.0, -hang * 0.7, 0.0)
-	var clip_file: String = spec["clip"]
-	var cinfo := _blaster_info(clip_file)
+	var clip_file: String = str(spec.get("clip", ""))
+	var cinfo := _blaster_info(clip_file) if clip_file != "" else {}
 	if not cinfo.is_empty():
-		var csize: Vector3 = (cinfo["hi"] as Vector3) - (cinfo["lo"] as Vector3)
+		var clo: Vector3 = cinfo["lo"]
+		var chi: Vector3 = cinfo["hi"]
 		p["clip_file"] = clip_file
-		p["clip_h"] = csize.y
-		p["clip_scale"] = hang / maxf(csize.y, 0.01)
+		p["clip_h"] = chi.y                  ## top of the clip above its origin: the proxy hangs from it
+		p["clip_yaw"] = MODEL_YAW
+		p["clip_scale"] = hang / maxf(chi.y - clo.y, 0.01)
 	p["slide_pos"] = Vector3(0.0, MUZZLE_Y + 0.035, GRIP_Z - 0.02)
 	p["charge_pos"] = Vector3(0.0, f_hi_y + 0.02, GRIP_Z - 0.03)
 	p["port"] = Vector3(0.0, lerpf(f_lo_y, MUZZLE_Y, 0.45), GRIP_Z - 0.06)
@@ -173,6 +185,91 @@ static func _build_blaster(root: Node3D, model: String) -> bool:
 	}
 	root.set_meta("vm_profile", p)
 	return true
+
+
+## The pack's .glb files embed a plain untextured grey material (it renders as white blobs); the real colours
+## live in the atlas that WeaponsMaterial.tres wraps. Every pack mesh (gun and magazine) gets that material.
+const PACK_MATERIAL := "res://assets/ithappy_weapons/Materials/WeaponsMaterial.tres"
+static var _pack_mat: Material
+
+
+static func apply_pack_material(n: Node) -> void:
+	if _pack_mat == null and ResourceLoader.exists(PACK_MATERIAL):
+		var base := load(PACK_MATERIAL) as StandardMaterial3D
+		if base != null:
+			# Runtime copy so the pack's .tres stays untouched: matte, low specular, so the flat-shaded
+			# pack meshes do not blow out to white under a directional light.
+			_pack_mat = base.duplicate() as StandardMaterial3D
+			(_pack_mat as StandardMaterial3D).roughness = 0.85
+			(_pack_mat as StandardMaterial3D).metallic_specular = 0.2
+			(_pack_mat as StandardMaterial3D).albedo_color = Color(0.82, 0.82, 0.82)
+	if _pack_mat == null:
+		return
+	var mi := n as MeshInstance3D
+	if mi != null:
+		_darken_bright_uvs(mi)
+		mi.material_override = _pack_mat
+	for c in n.get_children():
+		apply_pack_material(c)
+
+
+const PACK_TEX := "res://assets/ithappy_weapons/Textures/Demonstration_Texture_1.png"
+static var _atlas: Image
+static var _fixed_meshes: Dictionary = {}
+
+
+static func _atlas_image() -> Image:
+	if _atlas == null:
+		var t := load(PACK_TEX) as Texture2D
+		if t != null:
+			_atlas = t.get_image()
+			if _atlas != null and _atlas.is_compressed():
+				_atlas.decompress()
+	return _atlas
+
+
+static func _atlas_px(img: Image, uv: Vector2) -> Color:
+	return img.get_pixel(clampi(int(uv.x * img.get_width()), 0, img.get_width() - 1), clampi(int(uv.y * img.get_height()), 0, img.get_height() - 1))
+
+
+## Some pack surfaces (AK top cover, sniper bolt and rail, shotgun trim) are UV-mapped to the atlas' white
+## cells and render as blown-out white. Vertices that sample near-white are moved to the darkest cell the same
+## mesh already uses, so the shape keeps its detail and the colour matches the rest of the gun.
+static func _darken_bright_uvs(mi: MeshInstance3D) -> void:
+	var src := mi.mesh
+	if src == null:
+		return
+	var key := src.get_instance_id()
+	if _fixed_meshes.has(key):
+		mi.mesh = _fixed_meshes[key]
+		return
+	var img := _atlas_image()
+	if img == null:
+		return
+	var out := ArrayMesh.new()
+	var changed := false
+	for si in range(src.get_surface_count()):
+		var arr := src.surface_get_arrays(si)
+		if arr[Mesh.ARRAY_TEX_UV] != null:
+			var uv: PackedVector2Array = arr[Mesh.ARRAY_TEX_UV]
+			var dark_uv := Vector2(0.88, 0.3)   # mid-grey steel cell, used when the mesh has nothing darker
+			var best := 0.5
+			for u in uv:
+				var c := _atlas_px(img, u)
+				var lum := (c.r + c.g + c.b) / 3.0
+				if lum < best:
+					best = lum
+					dark_uv = u
+			for i in range(uv.size()):
+				var c2 := _atlas_px(img, uv[i])
+				if c2.r > 0.8 and c2.g > 0.8 and c2.b > 0.75:
+					uv[i] = dark_uv
+					changed = true
+			arr[Mesh.ARRAY_TEX_UV] = uv
+		out.add_surface_from_arrays(src.surface_get_primitive_type(si), arr)
+	var result: Mesh = out if changed else src
+	_fixed_meshes[key] = result
+	mi.mesh = result
 
 
 static func _no_shadow(n: Node) -> void:
@@ -211,7 +308,7 @@ static func _blaster_info(file: String) -> Dictionary:
 			var inst := ps.instantiate() as Node3D
 			if inst != null:
 				var vs := PackedVector3Array()
-				_collect_verts(inst, Transform3D.IDENTITY, vs)
+				_collect_verts(inst, Transform3D(Basis(Vector3.UP, MODEL_YAW), Vector3.ZERO), vs)
 				inst.free()
 				if vs.size() >= 12:
 					info = _analyze(vs)

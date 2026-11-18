@@ -111,7 +111,7 @@ func _run() -> void:
 	player.give_weapon("ar")
 	check(w.slots.size() == slots_before, "second pickup does not add a duplicate slot")
 	player.add_item("ar", 1)
-	check(player.count_item("556") == r556 + ar.mag_size and w.slots.size() == slots_before, "duplicate pickup gives one magazine (%d -> %d)" % [r556, player.count_item("556")])
+	check(player.count_item("556") == r556 + WeaponDB.dup_pickup_rounds(ar) and w.slots.size() == slots_before, "duplicate pickup gives %d mags (%d -> %d)" % [WeaponDB.DUP_PICKUP_MAGS, r556, player.count_item("556")])
 	check(player.count_item("ar") == 1, "inventory counts the rifle as owned")
 	await _frames(40)
 	check(w.state == WeaponController.State.READY, "rifle ready after the draw animation")

@@ -83,6 +83,9 @@ var _ghost_kind := ""
 var _ghost_key := Vector4i.ZERO
 var _ghost_valid := false
 var _tint_state := -1
+const ModelUtil = preload("res://scripts/world/model_util.gd")
+const SURV := "res://assets/kenney/survival/"
+
 var _ghost_ok_mat: StandardMaterial3D
 var _ghost_bad_mat: StandardMaterial3D
 var _mats := {}
@@ -774,23 +777,18 @@ func _make_piece(kind: String, ghost: bool) -> Node3D:
 	var half := WALL_H * 0.5
 	match kind:
 		"wall":
-			_box(root, Vector3(CELL, WALL_H, 0.2), Vector3(0, half, 0), COL_WOOD, ghost)
-			_box(root, Vector3(CELL, 0.12, 0.26), Vector3(0, 0.5, 0), COL_WOOD_DARK, ghost, false)
-			_box(root, Vector3(CELL, 0.12, 0.26), Vector3(0, 1.25, 0), COL_WOOD_DARK, ghost, false)
-			_box(root, Vector3(CELL, 0.12, 0.26), Vector3(0, 2.0, 0), COL_WOOD_DARK, ghost, false)
+			_box(root, Vector3(CELL, WALL_H, 0.2), Vector3(0, half, 0), SURV + "structure-metal-wall.glb", ghost)
 		"floor":
-			for i in 4:
-				var col := COL_WOOD_LIGHT if i % 2 == 0 else COL_WOOD
-				_box(root, Vector3(CELL, 0.15, CELL * 0.25 - 0.02), Vector3(0, -0.075, -0.75 + i * 0.5), col, ghost)
+			_box(root, Vector3(CELL, 0.15, CELL), Vector3(0, -0.075, 0), SURV + "floor.glb", ghost)
 		"window":
-			_box(root, Vector3(CELL, 0.9, 0.2), Vector3(0, 0.45, 0), COL_WOOD, ghost)
-			_box(root, Vector3(CELL, 0.5, 0.2), Vector3(0, WALL_H - 0.25, 0), COL_WOOD, ghost)
-			_box(root, Vector3(0.3, 1.1, 0.2), Vector3(-0.85, 1.45, 0), COL_WOOD_DARK, ghost)
-			_box(root, Vector3(0.3, 1.1, 0.2), Vector3(0.85, 1.45, 0), COL_WOOD_DARK, ghost)
+			_box(root, Vector3(CELL, 0.9, 0.2), Vector3(0, 0.45, 0), SURV + "structure-metal-wall.glb", ghost)
+			_box(root, Vector3(CELL, 0.5, 0.2), Vector3(0, WALL_H - 0.25, 0), SURV + "structure-metal-wall.glb", ghost)
+			_box(root, Vector3(0.3, 1.1, 0.2), Vector3(-0.85, 1.45, 0), SURV + "structure-metal-wall.glb", ghost)
+			_box(root, Vector3(0.3, 1.1, 0.2), Vector3(0.85, 1.45, 0), SURV + "structure-metal-wall.glb", ghost)
 		"door":
-			_box(root, Vector3(0.4, WALL_H, 0.2), Vector3(-0.8, half, 0), COL_WOOD_DARK, ghost)
-			_box(root, Vector3(0.4, WALL_H, 0.2), Vector3(0.8, half, 0), COL_WOOD_DARK, ghost)
-			_box(root, Vector3(1.2, 0.5, 0.2), Vector3(0, WALL_H - 0.25, 0), COL_WOOD_DARK, ghost)
+			_box(root, Vector3(0.4, WALL_H, 0.2), Vector3(-0.8, half, 0), SURV + "structure-metal-wall.glb", ghost)
+			_box(root, Vector3(0.4, WALL_H, 0.2), Vector3(0.8, half, 0), SURV + "structure-metal-wall.glb", ghost)
+			_box(root, Vector3(1.2, 0.5, 0.2), Vector3(0, WALL_H - 0.25, 0), SURV + "structure-metal-wall.glb", ghost)
 			var hinge := Node3D.new()
 			hinge.name = "Hinge"
 			hinge.position = Vector3(-0.6, 0, 0)
@@ -802,16 +800,9 @@ func _make_piece(kind: String, ghost: bool) -> Node3D:
 				leaf = StaticBody3D.new()
 			leaf.name = "Leaf"
 			hinge.add_child(leaf)
-			_box(leaf, Vector3(1.2, 2.0, 0.1), Vector3(0.6, 1.0, 0), COL_WOOD_LIGHT, ghost)
-			_box(leaf, Vector3(0.1, 0.1, 0.14), Vector3(1.0, 1.0, 0), COL_SCRAP, ghost, false)
+			_box(leaf, Vector3(1.2, 2.0, 0.1), Vector3(0.6, 1.0, 0), SURV + "metal-panel.glb", ghost)
 		"barricade":
-			var ys := [0.55, 1.05, 1.55]
-			var tilt := [0.04, -0.05, 0.03]
-			for i in 3:
-				var b := _box(root, Vector3(1.9, 0.22, 0.1), Vector3(0, ys[i], 0.03 * (i % 2 * 2 - 1)), COL_WOOD_DARK if i % 2 == 0 else COL_WOOD, ghost, false)
-				b.rotation.z = tilt[i]
-			_box(root, Vector3(0.12, 1.5, 0.12), Vector3(-0.8, 0.85, 0), COL_SCRAP, ghost, false)
-			_box(root, Vector3(0.12, 1.5, 0.12), Vector3(0.8, 0.85, 0), COL_SCRAP, ghost, false)
+			_box(root, Vector3(1.9, 1.5, 0.15), Vector3(0, 0.85, 0), SURV + "fence-fortified.glb", ghost, false)
 			if not ghost:
 				var cs := CollisionShape3D.new()
 				var bs := BoxShape3D.new()
@@ -820,29 +811,24 @@ func _make_piece(kind: String, ghost: bool) -> Node3D:
 				cs.position = Vector3(0, 0.9, 0)
 				root.add_child(cs)
 		"workbench":
-			_box(root, Vector3(1.5, 0.1, 0.8), Vector3(0, 0.9, 0), COL_WOOD_LIGHT, ghost)          # top slab
+			_box(root, Vector3(1.5, 1.0, 0.8), Vector3(0, 0.5, 0), SURV + "workbench.glb", ghost, false)   # visual only
+			_box(root, Vector3(1.5, 0.1, 0.8), Vector3(0, 0.9, 0), "", ghost)          # top slab collider
 			for sx in [-0.65, 0.65]:
 				for sz in [-0.3, 0.3]:
-					_box(root, Vector3(0.12, 0.85, 0.12), Vector3(sx, 0.425, sz), COL_WOOD_DARK, ghost)  # legs
-			_box(root, Vector3(1.4, 0.06, 0.7), Vector3(0, 0.3, 0), COL_WOOD, ghost, false)        # lower shelf
-			_box(root, Vector3(0.2, 0.14, 0.14), Vector3(-0.5, 1.02, -0.2), COL_SCRAP, ghost, false)  # vise
-			_box(root, Vector3(0.05, 0.05, 0.4), Vector3(0.3, 0.98, 0.0), COL_SCRAP, ghost, false)    # tool bar
+					_box(root, Vector3(0.12, 0.85, 0.12), Vector3(sx, 0.425, sz), "", ghost)  # leg colliders
 		"stairs", "base_core", "chest", "assembler":
 			Extras.build_piece(self, root, kind, ghost)
 	return root
 
 
-func _box(parent: Node3D, size: Vector3, pos: Vector3, color: Color, ghost: bool, collide := true) -> MeshInstance3D:
-	var mi := MeshInstance3D.new()
-	var bm := BoxMesh.new()
-	bm.size = size
-	mi.mesh = bm
-	mi.position = pos
-	if ghost:
-		mi.material_override = _ghost_ok_mat
-	else:
-		mi.material_override = _mat(color)
-	parent.add_child(mi)
+## One piece part: the downloaded `model` stretched to fill the box (visual; "" = none) plus, on a real piece, a box
+## collider of the same size. The ghost keeps the models only and is tinted by _tint.
+func _box(parent: Node3D, size: Vector3, pos: Vector3, model: String, ghost: bool, collide := true) -> void:
+	if model != "":
+		var m: Node3D = ModelUtil.fit_box(model, size)
+		if m != null:
+			m.position = pos
+			parent.add_child(m)
 	if not ghost and collide and parent is CollisionObject3D:
 		var cs := CollisionShape3D.new()
 		var bs := BoxShape3D.new()
@@ -850,7 +836,6 @@ func _box(parent: Node3D, size: Vector3, pos: Vector3, color: Color, ghost: bool
 		cs.shape = bs
 		cs.position = pos
 		parent.add_child(cs)
-	return mi
 
 
 func _mat(color: Color) -> StandardMaterial3D:

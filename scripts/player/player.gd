@@ -178,7 +178,7 @@ func _ready() -> void:
 		weapons.hit_confirmed.connect(_on_hit_confirmed)
 		if start_with_loadout:
 			give_weapon("pistol")
-			add_item("9mm", 45)
+			add_item("9mm", WeaponDB.START_RESERVE_9MM)
 			add_item("medkit", 1)
 			add_item("food", 1)
 			add_item("water", 1)
@@ -450,7 +450,7 @@ func add_item(id: String, n: int = 1) -> bool:
 	if WeaponDB.has_weapon(id):
 		if weapons.has_weapon(id):
 			var wd := WeaponDB.get_weapon(id)
-			inventory[wd.caliber] = int(inventory.get(wd.caliber, 0)) + wd.mag_size
+			inventory[wd.caliber] = int(inventory.get(wd.caliber, 0)) + WeaponDB.dup_pickup_rounds(wd)
 		else:
 			weapons.pickup_weapon(id)
 		inventory_changed.emit()
@@ -786,7 +786,10 @@ func _sync_avatar_gun() -> void:
 		_avatar_gun = null
 	if equipped_id != "" and WeaponDB.has_weapon(equipped_id):
 		_avatar_gun = GunMesh.build(WeaponDB.get_weapon(equipped_id).model)
-		_avatar_gun.position = Vector3(0.22, 1.25 if not crouching else 0.9, -0.2)
+		# The Kenney body's "holding-both" clip puts both hands at about y 0.65 m, 0.7 m ahead of the chest
+		# (the rig is scaled 2.3x), so the grip sits there; the gun is scaled up to read against the chunky body.
+		_avatar_gun.position = Vector3(0.0, 0.64 if not crouching else 0.45, -0.7)
+		_avatar_gun.scale = Vector3.ONE * 1.5
 		_avatar.add_child(_avatar_gun)
 
 

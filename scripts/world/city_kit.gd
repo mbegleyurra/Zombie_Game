@@ -11,6 +11,7 @@ extends RefCounted
 const ModelUtil = preload("res://scripts/world/model_util.gd")
 const HandLayout = preload("res://scripts/world/hand_layout.gd")
 const PropFactory = preload("res://scripts/world/prop_factory.gd")
+const CityInteriors = preload("res://scripts/world/city_interiors.gd")
 
 const DIR := {
 	"commercial": "res://assets/kenney/city-kit-commercial/",
@@ -25,6 +26,12 @@ const FILL := 0.92            ## the model fills at most this much of its lot, s
 const MAX_STRETCH := 1.4      ## a model may be stretched this much more along its looser lot axis
 const SKYSCRAPER_FROM := 24.0 ## commercial lots whose old tower was at least this tall get a skyscraper model
 const STORE_SCALE := 1.8      ## mini-shop / mini-arcade pieces are about 0.8 m; this makes them shop-fixture sized
+## Measured from the GLB meshes (not assumed): road kit tile-low is 1.0 x 1.0 m, suburban driveway-short 0.36 x 0.2 m,
+## industrial water-tower 0.85 x 0.83 m (2.14 tall), chimney-large 1.08 x 1.08 m (1.7 tall).
+const STRIP_W := 12.0           ## pavement strip width along the storefront (tile-low is 1 m, so this is metres)
+const STRIP_D := 2.2            ## pavement strip depth: the sidewalk gap between a facade and the street edge is >= 2.8 m
+const WATER_TOWER_SCALE := 3.4  ## 2.9 x 2.8 m footprint: leaves >= 1.3 m each side in the 5.5 m gap between the lots
+const CHIMNEY_SCALE := 2.6      ## 2.8 x 2.8 m footprint
 
 const COMM_LOW := ["building-a", "building-b", "building-c", "building-d", "building-e", "building-f", "building-g",
 	"building-h", "building-i", "building-j", "building-k", "building-l", "building-m", "building-n"]
@@ -41,6 +48,7 @@ var buildings := {"commercial": 0, "industrial": 0, "suburban": 0}
 var props := {"commercial": 0, "industrial": 0, "suburban": 0, "roads": 0, "mini-shop": 0, "mini-arcade": 0}
 var models: Dictionary = {}
 var missing: Array = []
+var interiors: CityInteriors
 var _body: StaticBody3D
 var _footprints: Array
 var _counts: Dictionary
@@ -55,6 +63,7 @@ func _init(p_world, p_node: Node3D, p_body: StaticBody3D, p_footprints: Array, p
 
 
 func build() -> void:
+	interiors = CityInteriors.new(self)
 	var idx := 0
 	var blk_i := 0
 	for blk in HandLayout.CITY_BLOCKS:
@@ -93,6 +102,7 @@ func _pick(district: String, idx: int, h: float) -> String:
 func _lot(district: String, idx: int, cx: float, cz: float, w: float, d: float, h: float, front_z: float) -> void:
 	var file: String = _pick(district, idx, h)
 	var yaw: float = PI if front_z < 0.0 else 0.0   # door side (local +Z) faces the nearer street
+	var box_i: int = _body.get_child_count()   # the building box collider is added at this index
 	var info: Dictionary = _building(district, file, cx, cz, w, d, yaw, h if file.contains("skyscraper") else 0.0)
 	if info.is_empty():
 		_footprints.append([cx, cz, w, d, 0.0, "tower", h])
@@ -100,7 +110,10 @@ func _lot(district: String, idx: int, cx: float, cz: float, w: float, d: float, 
 		var size: Vector3 = info["size"]
 		_footprints.append([cx, cz, size.x, size.z, 0.0, "tower", size.y])
 		buildings[district] = int(buildings[district]) + 1
-		_frontage(district, idx, cx, cz, size.z, front_z, yaw)
+		var room: String = CityInteriors.kind(district, h, idx)
+		if room != "":
+			interiors.furnish(room, box_i, idx, cx, cz, size, yaw)   # enterable ground floor + Mini Shop / Arcade props
+		_frontage(district, idx, cx, cz, size.z, front_z, yaw, room != "")
 	_counts["towers"] = int(_counts["towers"]) + 1
 
 
@@ -133,13 +146,15 @@ func _building(kit: String, file: String, cx: float, cz: float, w: float, d: flo
 
 
 ## Street-front dressing on the sidewalk side of a lot: mini-shop / mini-arcade fixtures downtown, a driveway in the suburbs.
-func _frontage(district: String, idx: int, cx: float, cz: float, depth: float, front_z: float, yaw: float) -> void:
+func _frontage(district: String, idx: int, cx: float, cz: float, depth: float, front_z: float, yaw: float, enterable: bool = false) -> void:
 	var face_z: float = cz + front_z * (depth * 0.5)
 	if district == "commercial":
 		# pavement strip under the storefront fixtures (road kit tile-low, no collision)
-		prop("roads", "tile-low", cx, face_z + front_z * 1.2, 12.0, yaw, false, 0.08)
+		prop("roads", "tile-low", cx, face_z + front_z * (STRIP_D * 0.5 + 0.2), STRIP_W, yaw, false, 0.08, STRIP_D)
 		var slots := [-3.5, 0.0, 3.5]
 		for s in 3:
+			if enterable and s == 1:
+				continue   # the middle fixture would stand in the doorway
 			var arcade: bool = s == 1
 			var list: Array = ARCADE_ITEMS if arcade else SHOP_ITEMS
 			prop("mini-arcade" if arcade else "mini-shop", str(list[(idx + s) % list.size()]),
@@ -152,10 +167,13 @@ func _frontage(district: String, idx: int, cx: float, cz: float, depth: float, f
 func _block_centre(district: String, blk_i: int, bx: float, bz: float) -> void:
 	match district:
 		"industrial":
+			var size: Vector3
 			if blk_i % 2 == 0:
-				prop("industrial", "water-tower", bx, bz, 4.5, 0.0)
+				size = prop("industrial", "water-tower", bx, bz, WATER_TOWER_SCALE, 0.0)
 			else:
-				prop("industrial", "chimney-large", bx, bz, 3.2, 0.0)
+				size = prop("industrial", "chimney-large", bx, bz, CHIMNEY_SCALE, 0.0)
+			if size != Vector3.ZERO:
+				_footprints.append([bx, bz, size.x, size.z, 0.0, "tower", size.y])   # shows on the minimap
 		"suburban":
 			prop("suburban", "tree-large", bx, bz - 1.5, 7.0, 0.0)
 			prop("suburban", "tree-small", bx, bz + 1.5, 7.0, 0.0)
@@ -164,21 +182,23 @@ func _block_centre(district: String, blk_i: int, bx: float, bz: float) -> void:
 			prop("commercial", "detail-parasol-b", bx + 1.4, bz, 6.0, 0.0)
 
 
-## A single uniformly scaled kit model, centred on x/z and sitting on the ground (+lift). Returns its scaled size.
-func prop(kit: String, file: String, x: float, z: float, scale: float, yaw: float, collide: bool = true, lift: float = 0.0) -> Vector3:
+## A single kit model scaled by `scale` (and by `depth_scale` along its local Z when given, for flat strips), centred on
+## x/z and sitting on the ground (+lift). Returns its scaled size.
+func prop(kit: String, file: String, x: float, z: float, scale: float, yaw: float, collide: bool = true, lift: float = 0.0, depth_scale: float = -1.0) -> Vector3:
 	var inst: Node3D = _instance(kit, file)
 	if inst == null:
 		return Vector3.ZERO
+	var sz: float = scale if depth_scale < 0.0 else depth_scale
 	var bb: AABB = ModelUtil.bounds(inst)
-	var size: Vector3 = bb.size * scale
+	var size := Vector3(bb.size.x * scale, bb.size.y * scale, bb.size.z * sz)
 	var y: float = world.get_height(x, z) + lift
 	var wrap := Node3D.new()
 	wrap.name = "%s_%s" % [kit, file]
 	wrap.position = Vector3(x, y, z)
 	wrap.rotation.y = yaw
-	inst.scale = Vector3(scale, scale, scale)
+	inst.scale = Vector3(scale, scale, sz)
 	var c: Vector3 = bb.get_center()
-	inst.position = Vector3(-c.x * scale, -bb.position.y * scale, -c.z * scale)
+	inst.position = Vector3(-c.x * scale, -bb.position.y * scale, -c.z * sz)
 	wrap.add_child(inst)
 	node.add_child(wrap)
 	if collide and size.y > 0.3:

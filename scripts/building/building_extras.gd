@@ -13,6 +13,7 @@ extends RefCounted
 const ItemDB := preload("res://scripts/world/item_db.gd")
 const Recipes := preload("res://scripts/world/recipes.gd")
 
+const SURV := "res://assets/kenney/survival/"
 const CELL := 2.0
 const YSTEP := 0.25
 const SLOT_FLOOR := 0
@@ -136,46 +137,32 @@ static func craft_time(r: Dictionary) -> float:
 
 ## Called by Building._make_piece for the kinds above. `b` is the Building node (its _box / colours).
 static func build_piece(b: Node, root: Node3D, kind: String, ghost: bool) -> void:
-	var wood: Color = b.COL_WOOD
-	var wood_dark: Color = b.COL_WOOD_DARK
-	var wood_light: Color = b.COL_WOOD_LIGHT
-	var scrap: Color = b.COL_SCRAP
 	match kind:
 		"stairs":
 			_build_stairs(b, root, ghost)
 		"base_core":
-			b._box(root, Vector3(1.4, 0.2, 1.4), Vector3(0, 0.1, 0), scrap, ghost)
-			b._box(root, Vector3(0.14, 2.6, 0.14), Vector3(0, 1.5, 0), wood_dark, ghost)
-			b._box(root, Vector3(0.9, 0.55, 0.05), Vector3(0.45, 2.2, 0), Color(0.75, 0.15, 0.12), ghost, false)
-			b._box(root, Vector3(0.3, 0.3, 0.3), Vector3(0.45, 0.35, 0.45), wood, ghost, false)
+			b._box(root, Vector3(1.4, 0.2, 1.4), Vector3(0, 0.1, 0), SURV + "floor.glb", ghost)
+			b._box(root, Vector3(0.5, 2.6, 0.14), Vector3(0, 1.5, 0), SURV + "signpost.glb", ghost, false)
+			b._box(root, Vector3(0.14, 2.6, 0.14), Vector3(0, 1.5, 0), "", ghost)
 		"chest":
-			b._box(root, Vector3(1.2, 0.6, 0.7), Vector3(0, 0.3, 0), wood_dark, ghost)
-			b._box(root, Vector3(1.24, 0.18, 0.74), Vector3(0, 0.69, 0), wood_light, ghost)
-			for sx in [-0.4, 0.4]:
-				b._box(root, Vector3(0.1, 0.62, 0.76), Vector3(sx, 0.31, 0), scrap, ghost, false)
-			b._box(root, Vector3(0.14, 0.16, 0.06), Vector3(0, 0.62, 0.38), scrap, ghost, false)
+			b._box(root, Vector3(1.2, 0.8, 0.74), Vector3(0, 0.4, 0), SURV + "chest.glb", ghost, false)
+			b._box(root, Vector3(1.2, 0.6, 0.7), Vector3(0, 0.3, 0), "", ghost)
+			b._box(root, Vector3(1.24, 0.18, 0.74), Vector3(0, 0.69, 0), "", ghost)
 		"assembler":
-			b._box(root, Vector3(1.5, 0.9, 1.0), Vector3(0, 0.45, 0), scrap, ghost)
-			b._box(root, Vector3(0.7, 0.3, 0.7), Vector3(-0.3, 1.05, 0), wood_dark, ghost)
-			b._box(root, Vector3(0.12, 0.12, 1.3), Vector3(0.55, 1.05, 0), wood_light, ghost, false)
-			_make_light(b, root, Vector3(0.45, 0.78, 0.52), ghost)
+			b._box(root, Vector3(1.5, 0.9, 1.0), Vector3(0, 0.45, 0), "res://assets/kenney/mini-shop/freezer.glb", ghost)
+			b._box(root, Vector3(0.7, 0.3, 0.7), Vector3(-0.3, 1.05, 0), "", ghost)
+			_make_light(root, Vector3(0.45, 0.78, 0.52), ghost)
 
 
 static func _build_stairs(b: Node, root: Node3D, ghost: bool) -> void:
 	var rise := STAIR_STEPS * YSTEP
 	var a := atan2(rise, CELL)
 	var slope_len := sqrt(CELL * CELL + rise * rise)
-	var light: Color = b.COL_WOOD_LIGHT
-	var mid: Color = b.COL_WOOD
-	var dark: Color = b.COL_WOOD_DARK
 	# Treads climb toward local -Z; tops sit on the ramp's centre line at each tread's middle.
 	for j in STAIR_STEPS:
 		var top := 0.125 + 0.25 * j
-		b._box(root, Vector3(CELL - 0.3, top, 0.4), Vector3(0.0, top * 0.5, 0.8 - 0.4 * j), light if j % 2 == 0 else mid, ghost, false)
+		b._box(root, Vector3(CELL - 0.3, top, 0.4), Vector3(0.0, top * 0.5, 0.8 - 0.4 * j), SURV + "box.glb", ghost, false)
 	var off := Vector3(0.0, rise * 0.5 - 0.1 * cos(a), -0.1 * sin(a))
-	for sx in [-0.9, 0.9]:
-		var s: MeshInstance3D = b._box(root, Vector3(0.12, 0.2, slope_len), off + Vector3(sx, 0.0, 0.0), dark, ghost, false)
-		s.rotation.x = a
 	if not ghost and root is CollisionObject3D:
 		var cs := CollisionShape3D.new()
 		var bs := BoxShape3D.new()
@@ -187,16 +174,24 @@ static func _build_stairs(b: Node, root: Node3D, ghost: bool) -> void:
 
 
 ## The assembler's status lamp. Own material so it can change colour; BaseSystem finds it by name "Light".
-static func _make_light(b: Node, root: Node3D, pos: Vector3, ghost: bool) -> void:
-	if ghost:
-		b._box(root, Vector3(0.18, 0.18, 0.1), pos, Color.WHITE, true, false)
+## The lamp's mesh is a downloaded Kenney model's own mesh (the survival bottle) scaled to a 0.18 bulb.
+static func _make_light(root: Node3D, pos: Vector3, ghost: bool) -> void:
+	var src: Node3D = (load(SURV + "bottle.glb") as PackedScene).instantiate() as Node3D
+	var bulb: MeshInstance3D = null
+	for n in src.find_children("*", "MeshInstance3D", true, false):
+		bulb = n as MeshInstance3D
+		break
+	if bulb == null or ghost:
+		src.free()
 		return
 	var mi := MeshInstance3D.new()
 	mi.name = "Light"
-	var bm := BoxMesh.new()
-	bm.size = Vector3(0.18, 0.18, 0.1)
-	mi.mesh = bm
-	mi.position = pos
+	mi.mesh = bulb.mesh
+	var bb: AABB = mi.mesh.get_aabb()
+	var k := 0.18 / maxf(bb.size.y, 0.001)
+	mi.scale = Vector3(k, k, k)
+	mi.position = pos - bb.get_center() * k
+	src.free()
 	var m := StandardMaterial3D.new()
 	m.albedo_color = Color(0.5, 0.5, 0.5)
 	m.emission_enabled = true

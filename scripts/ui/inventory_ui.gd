@@ -16,6 +16,7 @@ signal closed
 
 const ItemDB := preload("res://scripts/world/item_db.gd")
 const InvGrid := preload("res://scripts/player/inventory_grid.gd")
+const PickupVisuals := preload("res://scripts/world/pickup_visuals.gd")
 
 const ACTION := "toggle_inventory"
 const DECON_ACTION := "inventory_deconstruct"
@@ -164,7 +165,7 @@ func entries() -> Array:
 	for it in (lay["items"] as Array):
 		var e: Dictionary = (it as Dictionary).duplicate()
 		var key := str(e["key"])
-		e["color"] = ItemDB.item_color(str(e["item"]))
+		e["color"] = PickupVisuals.accent(str(e["item"]))
 		e["tag"] = "EQUIPPED" if key == WEAPON_PREFIX + cur else ""
 		if bool(e["weapon"]):
 			e["name"] = _weapon_name(key.trim_prefix(WEAPON_PREFIX))

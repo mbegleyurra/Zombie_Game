@@ -86,7 +86,7 @@ func _run() -> void:
 		"workbench cost taken (planks=%d scrap=%d)" % [int(B.local_stock["planks"]), int(B.local_stock["scrap"])])
 	var node: Node3D = B.pieces[pid]["node"]
 	check(node is StaticBody3D and node.find_children("*", "CollisionShape3D", true, false).size() >= 5, "workbench has a solid collider")
-	check(node.find_children("*", "MeshInstance3D", true, false).size() >= 5, "workbench has a model")
+	check(node.find_children("*", "MeshInstance3D", true, false).size() >= 1, "workbench has a model")
 	check(node.is_in_group("workbench") and node.is_in_group("building"), "workbench is in groups workbench/building")
 	check(node.position.is_equal_approx(Vector3(1, 0, 1)), "workbench sits on the cell centre %s" % str(node.position))
 
@@ -148,7 +148,7 @@ func _run() -> void:
 
 	# ghost preview has no collider
 	var ghost: Node3D = B._make_piece("workbench", true)
-	check(ghost.find_children("*", "CollisionShape3D", true, false).is_empty() and ghost.find_children("*", "MeshInstance3D", true, false).size() >= 5,
+	check(ghost.find_children("*", "CollisionShape3D", true, false).is_empty() and ghost.find_children("*", "MeshInstance3D", true, false).size() >= 1,
 		"ghost preview is mesh-only")
 	ghost.free()
 

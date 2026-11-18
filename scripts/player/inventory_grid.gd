@@ -173,7 +173,7 @@ static func can_add(p, id: String, n: int = 1) -> bool:
 			var wd = WeaponDB.get_weapon(key)
 			if wd == null:
 				return true
-			inv[wd.caliber] = int(inv.get(wd.caliber, 0)) + int(wd.mag_size)
+			inv[wd.caliber] = int(inv.get(wd.caliber, 0)) + WeaponDB.dup_pickup_rounds(wd)
 		else:
 			wids.append(key)
 	else:

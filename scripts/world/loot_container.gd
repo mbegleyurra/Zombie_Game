@@ -10,6 +10,25 @@ signal opened(container, by)
 
 const ItemDB = preload("res://scripts/world/item_db.gd")
 const LootItem = preload("res://scripts/world/loot_item.gd")
+const ModelFit = preload("res://scripts/world/model_util.gd")
+
+## kind -> [downloaded model]. All Kenney (mini-shop, mini-arcade, survival, graveyard).
+const K := "res://assets/kenney/"
+const MODELS := {
+	"cupboard": [K + "mini-shop/shelf-boxes.glb"],
+	"fridge": [K + "mini-arcade/vending-machine.glb"],
+	"crate": [K + "survival/box-large.glb"],
+	"shelf": [K + "mini-shop/shelf-bags.glb"],
+	"locker": [K + "mini-arcade/vending-machine.glb"],
+	"med_cabinet": [K + "mini-shop/shelf-boxes.glb"],
+	"register": [K + "mini-shop/cash-register.glb"],
+	"toolbox": [K + "survival/chest.glb"],
+	"weapon_rack": [K + "mini-shop/shelf-bags.glb"],
+	"evidence_locker": [K + "mini-arcade/vending-machine.glb"],
+	"altar_chest": [K + "graveyard/altar-stone.glb"],
+	"donation_box": [K + "graveyard/pillar-square.glb"],
+	"pallet_crate": [K + "survival/box-large.glb"],
+}
 
 const KINDS := {
 	"cupboard": {"size": Vector3(0.9, 1.8, 0.5), "color": Color(0.5, 0.33, 0.2), "label": "Cupboard"},
@@ -33,9 +52,18 @@ var table: String = "wild"
 var is_open: bool = false
 var contents: Array = []   # [{"id": String, "count": int}]
 
-var _mesh: MeshInstance3D
-var _mat: StandardMaterial3D
+var _body_model: Node3D
 var _base_color: Color = Color(0.7, 0.55, 0.3)
+static var _overlay: StandardMaterial3D
+
+
+static func _open_overlay() -> StandardMaterial3D:
+	if _overlay == null:
+		_overlay = StandardMaterial3D.new()
+		_overlay.albedo_color = Color(0, 0, 0, 0.45)
+		_overlay.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		_overlay.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	return _overlay
 
 
 ## Call BEFORE adding to the tree. Builds visuals/collision and rolls contents deterministically.
@@ -51,27 +79,15 @@ func setup(p_loot_id: int, p_kind: String, p_table: String, world_seed: int) -> 
 	rng.seed = (world_seed * 1000003 + loot_id * 7919 + 17) & 0x7FFFFFFF
 	contents = ItemDB.roll_table(table, rng)
 
-	_mat = StandardMaterial3D.new()
-	_mat.albedo_color = _base_color
-	_mat.roughness = 0.85
-	var bm := BoxMesh.new()
-	bm.size = size
-	_mesh = MeshInstance3D.new()
-	_mesh.name = "Body"
-	_mesh.mesh = bm
-	_mesh.material_override = _mat
-	_mesh.position = Vector3(0, size.y * 0.5, 0)
-	add_child(_mesh)
-	# Handle on the +Z (front) face so the opening side is readable.
-	var hm := BoxMesh.new()
-	hm.size = Vector3(0.06, minf(0.4, size.y * 0.5), 0.05)
-	var hmat := StandardMaterial3D.new()
-	hmat.albedo_color = Color(0.12, 0.12, 0.13)
-	var handle := MeshInstance3D.new()
-	handle.mesh = hm
-	handle.material_override = hmat
-	handle.position = Vector3(size.x * 0.28, size.y * 0.55, size.z * 0.5 + 0.02)
-	add_child(handle)
+	# Visual is a downloaded Kenney model fitted to the container's footprint (no primitive meshes).
+	var spec: Array = MODELS.get(kind, MODELS["crate"]) as Array
+	var model: Node3D = ModelFit.load_fit(str(spec[0]), size.y)
+	if model != null:
+		var msz: Vector3 = model.get_meta("size") as Vector3
+		model.scale = Vector3(clampf(size.x / maxf(msz.x, 0.01), 0.6, 1.8), 1.0, clampf(size.z / maxf(msz.z, 0.01), 0.6, 1.8))
+		model.name = "Body"
+		add_child(model)
+		_body_model = model
 	var cs := CollisionShape3D.new()
 	var bs := BoxShape3D.new()
 	bs.size = size
@@ -114,8 +130,11 @@ func apply_open_state(open: bool) -> void:
 
 func _set_open(open: bool) -> void:
 	is_open = open
-	if _mat:
-		_mat.albedo_color = _base_color.darkened(0.45) if open else _base_color
+	if _body_model == null:
+		return
+	# Opened containers are darkened with a translucent overlay so the model keeps its own textures.
+	for mi in _body_model.find_children("*", "MeshInstance3D", true, false):
+		(mi as MeshInstance3D).material_overlay = _open_overlay() if open else null
 
 
 func _drop(items: Array) -> void:

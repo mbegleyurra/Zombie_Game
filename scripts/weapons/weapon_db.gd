@@ -5,6 +5,16 @@ extends RefCounted
 
 static var _cache: Dictionary = {}
 
+## Picking up a gun you already own hands over this many magazines of its ammo (was 1).
+const DUP_PICKUP_MAGS := 2
+## Rounds in the reserve the player starts with for the starting pistol (was 45).
+const START_RESERVE_9MM := 90
+
+
+## Rounds granted for picking up a gun that is already owned.
+static func dup_pickup_rounds(wd: WeaponData) -> int:
+	return int(wd.mag_size) * DUP_PICKUP_MAGS
+
 
 static func ids() -> Array:
 	_ensure()

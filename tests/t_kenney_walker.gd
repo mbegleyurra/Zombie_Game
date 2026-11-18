@@ -65,7 +65,7 @@ func _run() -> void:
 
 	# ---- 1. who uses the Kenney rig
 	check(w._skel != null, "walker has Kenney skeleton")
-	check(r._skel == null and b._skel == null, "runner and bloater stay procedural (no skeleton)")
+	check(r._skel != null and b._skel != null, "runner and bloater also use the downloaded Kenney rig (no primitive bodies)")
 	if w._skel == null:
 		print("RESULT  failures=%d" % fails)
 		quit(1)

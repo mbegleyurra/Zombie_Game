@@ -234,8 +234,9 @@ func _run() -> void:
 		for t in towers:
 			var a2: Vector2 = segs[i][0]
 			var b2: Vector2 = segs[i][1]
-			for k in 9:
-				if _in_rect(a2.lerp(b2, k / 8.0), t, 0.0):
+			var steps: int = maxi(int(a2.distance_to(b2) / 0.25), 1)   # 0.25 m, finer than any tower (9 samples missed 2 of 3 towers on a 130 m segment)
+			for k in steps + 1:
+				if _in_rect(a2.lerp(b2, float(k) / float(steps)), t, 0.0):
 					tower_blocked += 1
 					print("  road %s -> %s crosses tower %s" % [str(a2), str(b2), str(t)])
 					break

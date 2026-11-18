@@ -84,7 +84,7 @@ func _run() -> void:
 	check(w.has_weapon("shotgun"), "shotgun pickup")
 	var r762: int = player.count_item("762")
 	player.add_item("ak", 1)
-	check(player.count_item("762") == r762 + 30, "duplicate ak pickup gives one mag of 762 (%d -> %d)" % [r762, player.count_item("762")])
+	check(player.count_item("762") == r762 + WeaponDB.dup_pickup_rounds(WeaponDB.get_weapon("ak")), "duplicate ak pickup gives %d mags of 762 (%d -> %d)" % [WeaponDB.DUP_PICKUP_MAGS, r762, player.count_item("762")])
 	player.add_item("planks", 3)
 	check(player.count_item("planks") == 3, "non-weapon items still stack")
 

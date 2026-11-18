@@ -23,20 +23,47 @@ extends Node3D
 ## API: static attach(gun, wd) -> Node3D, play_reload(wd, empty, missing) -> float, play_rack(wd) -> float,
 ##      cancel(), is_playing(), duration(), style(), advance(delta), set_hands_visible(v),
 ##      static style_of(wd), static tuning_key(model). Signal reload_finished (natural end only).
+##
+## SWAPPING WEAPON MODELS (e.g. the ITHappy Weapons Free pack) IS A DATA CHANGE, NOT A CODE CHANGE.
+## Grip and reload logic never read mesh names; they read per-weapon anchor data in gun-local metres
+## (gun points -Z, origin at the rear of the receiver, +Y up):
+##   grip_r / grip_l      resting palm positions of the right (trigger) and left (support) hand
+##   mag_pos / grab_off   top of the magazine, and where under it the left hand grabs
+##   slide_pos / charge_pos / bolt_hand / port   where the hand goes to rack, charge, work the bolt, load a shell
+##   slide_travel         how far the moving part slides back
+##   clip_file / clip_h / clip_scale   optional separate magazine mesh shown while the hand handles it
+## Two sources feed them: the TUNING table below (hand-tuned, per GunMesh model key) and the "vm_profile"
+## meta on the gun root, which GunMesh.build derives from a model's own geometry. To add a model, give its
+## GunMesh entry (or its TUNING entry) these anchors; nothing in this file or in WeaponController changes.
+## Hand and arm size are tied to the camera, not the gun, so they stay readable with any model.
 
 signal reload_finished
 
 const SCRIPT_PATH := "res://scripts/weapons/viewmodel.gd"
 const SKIN := Color(0.86, 0.66, 0.52)
+const SKIN_TIP := Color(0.78, 0.58, 0.45)   ## knuckles and fingertips, a shade darker so the hand reads as a hand
 const SLEEVE := Color(0.2, 0.26, 0.2)
+const SLEEVE_CUFF := Color(0.3, 0.36, 0.28)
 const MAG_COLOR := Color(0.1, 0.1, 0.11)
 const SHELL_COLOR := Color(0.72, 0.1, 0.08)
 const CLIP_COLOR := Color(0.7, 0.55, 0.2)
-const ANCHOR_R := Vector3(0.12, -0.22, 0.5)     ## gun-local shoulder points the forearms stretch to
-const ANCHOR_L := Vector3(-0.42, -0.24, 0.5)
-const ARM_W := 0.062
-const WRIST_LEN := 0.08
+const ANCHOR_R := Vector3(0.55, -0.5, 0.4)     ## gun-local shoulder points the forearms stretch to (right one angles out so it clears the stock)
+const ANCHOR_L := Vector3(-0.42, -0.4, 0.5)
+const GRIP_MIN_Y := -0.1   ## lowest gun-local y a trigger-hand palm may sit at (keeps it on screen)
+const HOLD_BELOW := 0.045    ## rifle palms sit at most this far above the bottom of the gun's bounds
+const CHARGE_SIDE := 0.07    ## rifle charging hand sits this far left of the gun's centre line
+const BOLT_SIDE := 0.11      ## bolt-gun clip loading point sits this far left of the gun's centre line
+const VIEW_MARGIN := 0.62    ## a palm may reach this share of the way from view centre to the bottom edge (leaves room for the forearm to show)
+const ARM_W_R := 0.034       ## right forearm: it runs nearer the camera, so it is thinner to read the same width as the left
+const ARM_W := 0.045         ## forearm thickness; the first-person camera sees them at 0.4-0.8 m, so they are life-size
+const HAND_SCALE := 0.8      ## palm is 0.088 * this wide, small enough that the gun stays readable between the hands
+const MIN_SEP := 0.15        ## the two palms never get closer than this (metres); a scaled palm is about 7 cm wide
+const MIN_SEP_PX := 126.0    ## the palms stay at least this far apart on screen (px at 720p; the tests demand 100)
+const PISTOL_GRIP_X := 0.04   ## gun-local x of the pistol trigger-hand palm (grip half-width plus half a rolled palm)
+const PISTOL_ROLL := -70.0    ## degrees the pistol trigger hand rolls so the palm meets the grip from the side
+const WRIST_LEN := 0.11
 const MIN_DURATION := 0.05
+const GUN_GRIP_Z := -0.03    ## gun-local z of the trigger-hand grip (same as GunMesh.GRIP_Z)
 
 ## Per-weapon tuning, keyed by GunMesh model key (ar_t1..3 reuse "ar"). Gun-local metres, gun points -Z.
 ## style, grip_r/grip_l (hand rest), mag_pos (pivot at the top of the magazine), mag_region (boxes that
@@ -109,6 +136,7 @@ var _mag: Node3D            ## magazine pivot (pistol / rifle)
 var _mag_baked: bool = false ## true when real gun meshes were captured into the pivot
 var _mag_rest: Vector3 = Vector3.ZERO
 var _slide: Node3D          ## slide / charging handle / bolt / pump forend pivot
+var _bolt_proxy: MeshInstance3D  ## visible bolt handle for a fused bolt gun
 var _prop: MeshInstance3D   ## shell or clip held in the left hand
 var _l_rest: Vector3 = Vector3.ZERO
 var _r_rest: Vector3 = Vector3.ZERO
@@ -234,10 +262,12 @@ func _setup(gun: Node3D, wd: WeaponData) -> void:
 	_r_rest = _p["grip_r"]
 	_hand_r = _build_hand(1.0)
 	_hand_l = _build_hand(-1.0)
+	if _style == "pistol":
+		_hand_r.rotation_degrees.z = PISTOL_ROLL
 	add_child(_hand_r)
 	add_child(_hand_l)
-	_arm_r = _build_arm("Arm_R")
-	_arm_l = _build_arm("Arm_L")
+	_arm_r = _build_arm("Arm_R", ARM_W_R)
+	_arm_l = _build_arm("Arm_L", ARM_W)
 	_sleeve_r = _arm_r.get_node("Sleeve") as MeshInstance3D
 	_sleeve_l = _arm_l.get_node("Sleeve") as MeshInstance3D
 	add_child(_arm_r)
@@ -268,6 +298,11 @@ func _setup(gun: Node3D, wd: WeaponData) -> void:
 		_slide.name = "Slide"
 		gun.add_child(_slide)
 		_capture(_p[slide_key], _style != "bolt", _slide)
+	if _style == "bolt" and _slide != null and _slide.get_child_count() == 0:
+		# A fused pack gun has no separate bolt: a dark handle rides the bolt hand so the cycle is visible.
+		_bolt_proxy = _box(_slide, Vector3(0.022, 0.022, 0.05), _p["bolt_hand"], MAG_COLOR, Vector3.ZERO, 2)
+		_bolt_proxy.name = "BoltProxy"
+		_bolt_proxy.visible = false
 	_rest_pose()
 	_apply()
 	set_process(false)
@@ -280,7 +315,7 @@ func _profile_for(wd: WeaponData, gun: Node3D) -> Dictionary:
 		p = (TUNING[key] as Dictionary).duplicate()
 	var style_name: String = str(p.get("style", style_of(wd)))
 	p["style"] = style_name
-	# Blaster Kit guns are one fused mesh: no box parts to capture, and hand/mag points come from the
+	# ITHappy pack guns are one fused mesh: no box parts to capture, and hand/mag points come from the
 	# model's own geometry (GunMesh meta "vm_profile") instead of the hand-tuned procedural numbers.
 	if gun.has_meta("vm_profile"):
 		for k in ["mag_region", "slide_region", "charge_region", "bolt_region", "pump_region", "proxy"]:
@@ -296,6 +331,19 @@ func _profile_for(wd: WeaponData, gun: Node3D) -> Dictionary:
 	_dflt(p, "grip_r", Vector3(0.022, -0.06, -0.03) if pistol else Vector3(0.0, -0.075, -0.03))
 	_dflt(p, "grip_l", Vector3(-0.022, -0.07, -0.045) if pistol else Vector3(0.0, -0.045, clampf(mz * 0.5, -0.6, -0.12)))
 	_dflt(p, "mag_pos", Vector3(0.0, -0.103, -0.012) if pistol else Vector3(0.0, -0.065, clampf(mz * 0.22, -0.3, -0.1)))
+	# Keep the trigger hand inside the first-person frame: a deep derived grip (long pistol grip, big
+	# magazine well) would otherwise put the palm below the bottom edge of the view.
+	var gr: Vector3 = p["grip_r"]
+	gr.y = maxf(gr.y, GRIP_MIN_Y)
+	# Both palms hold the underside of the gun, not its middle: a long bolt rifle's derived grips sit level with
+	# the receiver, so the hands (drawn over the gun) would hide it. Pistols keep their hand-tuned grip height.
+	if not pistol and p.has("extent"):
+		var low_y: float = (p["extent"]["lo"] as Vector3).y
+		gr.y = minf(gr.y, low_y + HOLD_BELOW)
+		var gl2: Vector3 = p["grip_l"]
+		gl2.y = minf(gl2.y, low_y + HOLD_BELOW + 0.015)
+		p["grip_l"] = gl2
+	p["grip_r"] = gr
 	_dflt(p, "grab_off", Vector3(0.0, -0.02, 0.0) if pistol else Vector3(0.0, -0.09, 0.0))
 	_dflt(p, "slide_pos", Vector3(0.0, 0.052, -0.03))
 	_dflt(p, "charge_pos", Vector3(0.0, 0.11, -0.03))
@@ -305,6 +353,44 @@ func _profile_for(wd: WeaponData, gun: Node3D) -> Dictionary:
 	_dflt(p, "proxy_size", Vector3(0.026, 0.095, 0.04) if pistol else Vector3(0.04, 0.13, 0.06))
 	_dflt(p, "proxy_center", Vector3(0.0, 0.058, 0.0) if pistol else Vector3(0.0, -0.07, 0.0))
 	_dflt(p, "proxy_tilt", -12.0 if pistol else 0.0)
+	# A palm is about 9 cm wide, so the support hand must work a point well clear of the trigger hand or the
+	# two merge into one mass: rifles charge forward of the grip, tube guns load forward of it, and a pistol
+	# mag is fetched from under the front of the grip with the support hand resting forward and low.
+	if style_name == "rifle":
+		var cp: Vector3 = p["charge_pos"]
+		cp.z = minf(cp.z, GUN_GRIP_Z - 0.2)
+		p["charge_pos"] = cp
+		var rgo: Vector3 = p["grab_off"]
+		p["grab_off"] = Vector3(rgo.x - 0.02, rgo.y + 0.05, rgo.z - 0.02)   ## fist on the magazine's left face, mid-height, so the hand meets the well
+	if style_name == "shell":
+		# shotgun_001's loading gate is the underside of the receiver (mesh: bottom y about -0.05, z -0.21 to -0.09);
+		# the fist cannot sit on the gate itself: the palm must stay MIN_SEP (0.15 m) from the trigger palm, which puts
+		# it at z = GUN_GRIP_Z - MIN_SEP, and the fingers (and the shell) reach the gate at z -0.13 from there
+		p["port"] = Vector3(0.0, -0.05, GUN_GRIP_Z - MIN_SEP)
+	if style_name == "bolt":
+		var bp: Vector3 = p["port"]
+		bp.z = minf(bp.z, GUN_GRIP_Z - 0.18)   ## clip goes in ahead of the bolt hand
+		bp.x = minf(bp.x, -BOLT_SIDE)           ## and from the left, so the support forearm does not lie across the receiver
+		bp.y = minf(bp.y, 0.03)                 ## low enough that the support forearm is not a tall slab over the gun
+		p["port"] = bp
+		var bh: Vector3 = p["bolt_hand"]
+		bh.x = minf(bh.x, 0.03)
+		bh.y = minf(bh.y, 0.0)                  ## the bolt hand rides the bolt, level with the receiver, not floating above it
+		p["bolt_hand"] = bh
+	if pistol:
+		if gun.has_meta("vm_profile"):
+			# The pack's drum magazine reads as a loose cylinder beside the hand; a pistol uses the small box magazine.
+			p.erase("clip_file")
+			p["proxy_center"] = Vector3(0.0, -0.048, 0.0)
+			p["pull_proxy"] = true
+		var go: Vector3 = p["grab_off"]
+		p["grab_off"] = Vector3(go.x - 0.03, go.y - 0.02, go.z - 0.04)
+		var pgr: Vector3 = p["grip_r"]
+		p["grip_r"] = Vector3(maxf(pgr.x, PISTOL_GRIP_X), pgr.y, pgr.z)   ## palm on the right face of the grip, not on top of it
+		var gl: Vector3 = p["grip_l"]
+		p["grip_l"] = Vector3(-0.045, gl.y + 0.02, -0.19)   ## two-handed at rest: the support hand cups the front of the frame under the slide
+		var sp: Vector3 = p["slide_pos"]
+		p["slide_pos"] = Vector3(sp.x, sp.y, sp.z - 0.05)   ## rack from the front of the slide, clear of the trigger hand
 	return p
 
 
@@ -342,8 +428,8 @@ func _make_proxy_mag(pivot: Node3D) -> void:
 	mi.name = "ProxyMag"
 
 
-## Blaster Kit magazine: the kit clip .glb hangs below the pivot (its origin is the clip base).
-## The fused mesh keeps its own magazine, so this clip is only shown while the hand handles it.
+## Pack magazine: the clip .glb hangs below the pivot by its top (clip_h = top y above its origin), turned
+## clip_yaw like the gun. The fused mesh keeps its own magazine, so this clip is only shown while handled.
 func _make_clip_proxy(pivot: Node3D) -> bool:
 	var path: String = GunMesh.blaster_dir + str(_p["clip_file"]) + ".glb"
 	if not ResourceLoader.exists(path):
@@ -357,9 +443,25 @@ func _make_clip_proxy(pivot: Node3D) -> bool:
 	var cs: float = _p["clip_scale"]
 	inst.name = "ProxyMag"
 	inst.scale = Vector3.ONE * cs
+	inst.rotation.y = float(_p.get("clip_yaw", 0.0))
 	inst.position = Vector3(0.0, -float(_p["clip_h"]) * cs, 0.0)
+	GunMesh.apply_pack_material(inst)
+	_draw_on_top(inst, 5)
 	pivot.add_child(inst)
 	return true
+
+
+## The hands draw over the gun (no depth test), so a magazine the hand is working would vanish behind the
+## fingers; the handled clip gets the same treatment at a higher priority so it reads as held in the palm.
+func _draw_on_top(n: Node, priority: int) -> void:
+	var mi := n as MeshInstance3D
+	if mi != null and mi.material_override is StandardMaterial3D:
+		var m := (mi.material_override as StandardMaterial3D).duplicate() as StandardMaterial3D
+		m.no_depth_test = true
+		m.render_priority = priority
+		mi.material_override = m
+	for c in n.get_children():
+		_draw_on_top(c, priority)
 
 
 func _make_prop(is_shell: bool) -> MeshInstance3D:
@@ -386,23 +488,28 @@ func _make_prop(is_shell: bool) -> MeshInstance3D:
 	return mi
 
 
-static func _mat(color: Color) -> StandardMaterial3D:
-	var key := color.to_html()
+static func _mat(color: Color, ontop_priority: int = 0) -> StandardMaterial3D:
+	var key := color.to_html() + ("" if ontop_priority == 0 else "_top%d" % ontop_priority)
 	if _mats.has(key):
 		return _mats[key]
 	var m := StandardMaterial3D.new()
 	m.albedo_color = color
 	m.roughness = 0.85
+	if ontop_priority != 0:
+		# Hands and forearms always draw over the gun: a fused gun model (stock, receiver, magazine)
+		# would otherwise hide the palm and fingers from the camera. Higher priority draws later.
+		m.no_depth_test = true
+		m.render_priority = ontop_priority
 	_mats[key] = m
 	return m
 
 
-func _box(parent: Node3D, size: Vector3, pos: Vector3, color: Color, rot_deg: Vector3 = Vector3.ZERO) -> MeshInstance3D:
+func _box(parent: Node3D, size: Vector3, pos: Vector3, color: Color, rot_deg: Vector3 = Vector3.ZERO, ontop_priority: int = 0) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
 	var mesh := BoxMesh.new()
 	mesh.size = size
 	mi.mesh = mesh
-	mi.material_override = _mat(color)
+	mi.material_override = _mat(color, ontop_priority)
 	mi.position = pos
 	mi.rotation_degrees = rot_deg
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -410,22 +517,32 @@ func _box(parent: Node3D, size: Vector3, pos: Vector3, color: Color, rot_deg: Ve
 	return mi
 
 
-## side +1 = right hand, -1 = left. Origin sits at the palm.
+## side +1 = right hand, -1 = left. Origin sits at the palm. Life-size (about 9 cm across) so it reads
+## at arm's length; fingers curl down and forward round the grip, the thumb lies along the side.
 func _build_hand(side: float) -> Node3D:
 	var h := Node3D.new()
 	h.name = "Hand_R" if side > 0.0 else "Hand_L"
-	_box(h, Vector3(0.05, 0.032, 0.07), Vector3.ZERO, SKIN).name = "Palm"
-	_box(h, Vector3(0.05, 0.022, 0.04), Vector3(0.0, -0.026, -0.04), SKIN).name = "Fingers"
-	_box(h, Vector3(0.014, 0.014, 0.05), Vector3(-side * 0.03, 0.012, -0.025), SKIN).name = "Thumb"
+	h.scale = Vector3.ONE * HAND_SCALE
+	_box(h, Vector3(0.088, 0.042, 0.095), Vector3.ZERO, SKIN, Vector3.ZERO, 3).name = "Palm"
+	# four separate fingers (index to little) that curl down and forward, each with a darker tip
+	var lengths := [0.056, 0.062, 0.058, 0.048]
+	for i in range(4):
+		var fx := (float(i) - 1.5) * 0.021
+		var fl: float = lengths[i]
+		_box(h, Vector3(0.019, 0.03, fl), Vector3(fx, -0.034, -0.032 - fl * 0.5), SKIN, Vector3(12.0, 0.0, 0.0), 3).name = "Finger%d" % i
+		_box(h, Vector3(0.018, 0.022, 0.028), Vector3(fx, -0.058, -0.034 - fl - 0.008), SKIN_TIP, Vector3(35.0, 0.0, 0.0), 4).name = "FingerTip%d" % i
+	_box(h, Vector3(0.024, 0.026, 0.075), Vector3(-side * 0.05, 0.004, -0.03), SKIN, Vector3(0.0, -side * 12.0, 0.0), 4).name = "Thumb"
+	_box(h, Vector3(0.084, 0.02, 0.022), Vector3(0.0, 0.026, -0.046), SKIN_TIP, Vector3.ZERO, 4).name = "Knuckles"
 	return h
 
 
-## Forearm: a short skin wrist plus a sleeve that stretches to the shoulder anchor (+Z of the node).
-func _build_arm(arm_name: String) -> Node3D:
+## Forearm: a skin wrist, a darker sleeve cuff, and a sleeve that stretches to the shoulder anchor (+Z of the node).
+func _build_arm(arm_name: String, w: float) -> Node3D:
 	var a := Node3D.new()
 	a.name = arm_name
-	_box(a, Vector3(0.05, 0.05, WRIST_LEN), Vector3(0.0, 0.0, WRIST_LEN * 0.5), SKIN).name = "Wrist"
-	_box(a, Vector3(ARM_W, ARM_W, 1.0), Vector3.ZERO, SLEEVE).name = "Sleeve"
+	_box(a, Vector3(w + 0.01, w + 0.01, WRIST_LEN), Vector3(0.0, 0.0, WRIST_LEN * 0.5), SKIN, Vector3.ZERO, 2).name = "Wrist"
+	_box(a, Vector3(w + 0.012, w + 0.012, 0.03), Vector3(0.0, 0.0, WRIST_LEN + 0.015), SLEEVE_CUFF, Vector3.ZERO, 2).name = "Cuff"
+	_box(a, Vector3(w, w, 1.0), Vector3.ZERO, SLEEVE, Vector3.ZERO, 1).name = "Sleeve"
 	return a
 
 
@@ -494,21 +611,95 @@ func _pose(t: float) -> void:
 	_apply()
 
 
+## Keeps a gun-local hand position above the bottom edge of the first-person view whatever the gun is
+## doing (roll, pitch, aim-down-sights). No camera in the tree (a bare unit test) = no clamp.
+func _clamp_to_view(local_pos: Vector3) -> Vector3:
+	var cam := get_viewport().get_camera_3d() if is_inside_tree() else null
+	if cam == null:
+		return local_pos
+	var gx := global_transform
+	var cx := cam.global_transform
+	var c := cx.affine_inverse() * (gx * local_pos)
+	var depth := -c.z
+	if depth <= cam.near:
+		return local_pos
+	var y_min := -depth * tan(deg_to_rad(cam.fov) * 0.5) * VIEW_MARGIN
+	if c.y >= y_min:
+		return local_pos
+	c.y = y_min
+	return gx.affine_inverse() * (cx * c)
+
+
+## Safety net: keeps the support palm at least MIN_SEP from the trigger palm by sliding it sideways (left)
+## and forward, never down, so the hands never merge and the palm stays on screen.
+func _separate(l: Vector3, r: Vector3) -> Vector3:
+	var d := l - r
+	var need_sq := MIN_SEP * MIN_SEP - d.y * d.y
+	if need_sq <= 0.0 or Vector2(d.x, d.z).length_squared() >= need_sq:
+		return l
+	var flat := Vector2(d.x, d.z)
+	var dir := flat.normalized() + Vector2(-0.7, -0.2) if flat.length() > 0.001 else Vector2(-1.0, -0.3)
+	dir = dir.normalized() * sqrt(need_sq)
+	return Vector3(r.x + dir.x, l.y, r.z + dir.y)
+
+
+## Screen-space twin of _separate: a gun that points along the view axis folds a forward gap into a few pixels,
+## so the support palm slides sideways (camera-left) until the two palms are MIN_SEP_PX apart in the frame.
+## No camera in the tree (a bare unit test) = unchanged. Scales with the viewport height so it holds at any size.
+func _separate_px(l: Vector3, r: Vector3) -> Vector3:
+	var cam := get_viewport().get_camera_3d() if is_inside_tree() else null
+	if cam == null or get_viewport().get_visible_rect().size.y <= 0.0:
+		return l
+	var need := MIN_SEP_PX * get_viewport().get_visible_rect().size.y / 720.0
+	var gx := global_transform
+	var cx := cam.global_transform
+	var pr := cam.unproject_position(gx * r)
+	var c := cx.affine_inverse() * (gx * l)
+	if -c.z <= cam.near:
+		return l
+	if cam.unproject_position(cx * c).distance_to(pr) >= need:
+		return l
+	# walk left in 1 cm steps until far enough, then bisect the last step so the result is continuous in the
+	# gun's position (a quantised step let sub-millimetre sway change where the palm came to rest)
+	var hi := c.x
+	var lo := c.x
+	for _i in range(40):
+		lo = hi
+		hi -= 0.01
+		c.x = hi
+		if cam.unproject_position(cx * c).distance_to(pr) >= need:
+			break
+	for _j in range(10):
+		c.x = (lo + hi) * 0.5
+		if cam.unproject_position(cx * c).distance_to(pr) >= need:
+			hi = c.x
+		else:
+			lo = c.x
+	c.x = hi
+	return gx.affine_inverse() * (cx * c)
+
+
 func _apply() -> void:
 	_gun.position = _g_pos
 	_gun.rotation = _g_rot
-	_hand_l.position = _l
-	_hand_r.position = _r
-	_place_arm(_arm_l, _sleeve_l, _l, ANCHOR_L)
-	_place_arm(_arm_r, _sleeve_r, _r, ANCHOR_R)
+	# A hand never dips below the bottom of the frame: magazine, shell and clip trips are limited in view space.
+	var hr := _clamp_to_view(_r)
+	var hl := _separate_px(_separate(_clamp_to_view(_separate(_l, hr)), hr), hr)
+	var lift := hl - _l   ## what a held magazine / shell / clip is moved with the hand
+	_hand_l.position = hl
+	_hand_r.position = hr
+	_place_arm(_arm_l, _sleeve_l, hl, ANCHOR_L)
+	_place_arm(_arm_r, _sleeve_r, hr, ANCHOR_R)
 	if _mag != null:
-		_mag.position = _mag_rest + _mag_off
+		_mag.position = _mag_rest + _mag_off + (lift if _mag_off != Vector3.ZERO else Vector3.ZERO)
 		_mag.visible = _mag_vis
 	if _slide != null:
 		_slide.position = Vector3(0.0, 0.0, _slide_z)
+	if _bolt_proxy != null:
+		_bolt_proxy.visible = _playing and _slide_z > 0.002
 	if _prop != null:
 		_prop.visible = _prop_vis
-		_prop.position = _prop_pos
+		_prop.position = _prop_pos + lift
 
 
 # ------------------------------------------------------------------ reload poses
@@ -516,9 +707,10 @@ func _apply() -> void:
 ## Magazine swap. `ts` = [grab done, mag out, mag gone, new mag in hand, seated] as progress values.
 func _pose_mag(p: float, cant: float, ts: Array, lift: float) -> void:
 	var grab := _mag_rest + (_p["grab_off"] as Vector3)
-	var out := grab + Vector3(0.0, -0.13, 0.03)
-	var pouch := grab + Vector3(-0.13, -0.24, 0.14)
-	var under := grab + Vector3(0.0, -0.15, 0.02)
+	var out := grab + Vector3(-0.015, -0.045, -0.01)   ## the old mag comes out a short way, the hand stays at the well
+	var pouch := grab + Vector3(-0.012, -0.02, -0.005)   ## fetching the new mag stays by the mag well, never back toward the trigger hand
+	var hold := (_p["grab_off"] as Vector3) + Vector3(0.0, 0.06, 0.0)   ## a held mag sits in the palm, not offset from it
+	var under := grab + Vector3(-0.01, -0.04, 0.0)
 	var t_grab: float = ts[0]
 	var t_out: float = ts[1]
 	var t_gone: float = ts[2]
@@ -534,36 +726,47 @@ func _pose_mag(p: float, cant: float, ts: Array, lift: float) -> void:
 	_g_rot.z = cant * (smoothstep(0.0, t_grab, p) - smoothstep(0.8, 0.95, p))
 	_g_rot.x = lift * (smoothstep(0.0, t_grab, p) - smoothstep(0.8, 0.95, p))
 	_g_rot.x -= 0.06 * sin(PI * clampf((p - (t_seat - 0.04)) / 0.08, 0.0, 1.0))
+	# the trigger hand stays on the grip for the whole reload (small settle, under 3 cm); the support hand is
+	# what keeps clear of it (_separate), so the gun is never held off its grip
+	var at_well := smoothstep(0.0, t_grab, p) - smoothstep(0.78, 0.95, p)
+	var settle := sin(PI * smoothstep(t_out, t_seat, p))   ## tightens round the grip while the new mag goes in
+	var out_x := 0.0 if _style == "pistol" else 0.035   ## a rifle grip hand eases a little right so the support hand can reach the well without sliding off it
+	_r = _r_rest + Vector3(out_x, -0.012, 0.012) * at_well + Vector3(0.0, 0.008, -0.012) * settle
+	_g_pos.y = (0.045 if _style == "pistol" else 0.03) * at_well   ## the gun rises a little so the well stays above the bottom-of-view limit on the support palm
 	# magazine: follows the hand out, falls away, reappears in the hand, rides it up and seats
 	var vis := true
 	var off := Vector3.ZERO
 	if p < t_grab:
 		off = Vector3.ZERO
 	elif p < t_out:
-		off = l - grab
+		off = l - grab + hold * smoothstep(t_grab, t_out, p)
 	elif p < t_gone:
 		var f := (p - t_out) / (t_gone - t_out)
-		off = (out - grab) + Vector3(0.0, -1.2 * f * f, 0.25 * f)
+		off = (out - grab) + hold + Vector3(0.0, -1.2 * f * f, 0.25 * f)
 		vis = f < 1.0 and _mag_baked
 	elif p < t_new:
 		vis = false
 	elif p < t_seat:
-		off = l - grab
+		off = l - grab + hold * (1.0 - smoothstep(t_seat - 0.12, t_seat, p))
 	_mag_off = off
 	_mag_vis = vis or (_mag_baked and p >= t_seat)
 	if not _mag_baked:
 		_mag_vis = p >= t_new and p < t_seat + 0.05
-		if _p.has("clip_file"):
-			_mag_vis = _mag_vis or (p >= t_grab and p < t_gone)   # the clip the hand pulls out of the fused mesh
+		if _p.has("clip_file") or _p.has("pull_proxy"):
+			_mag_vis = _mag_vis or (p >= t_grab and p < t_gone)   # the magazine the hand pulls out of the fused mesh
 	# after seating: charge handle / slide rack when nothing was chambered, else just return
 	var hand_pos: Vector3 = _p["slide_pos"] if _style == "pistol" else _p["charge_pos"]
 	var travel: float = _p["slide_travel"]
 	if _rack:
-		l = l.lerp(hand_pos, smoothstep(0.76, 0.84, p))
-		l = l.lerp(hand_pos + Vector3(0.0, 0.0, travel), smoothstep(0.84, 0.9, p))
-		l = l.lerp(hand_pos, smoothstep(0.9, 0.93, p))
-		l = l.lerp(_l_rest, smoothstep(0.93, 1.0, p))
-		_slide_z = travel * (smoothstep(0.84, 0.9, p) - smoothstep(0.9, 0.93, p))
+		# the charging hand works from the left side, just above the receiver, so the forearm never lies across it
+		var hp := hand_pos
+		if _style != "pistol":
+			hp = Vector3(-CHARGE_SIDE, hand_pos.y - 0.025, hand_pos.z)
+		l = l.lerp(hp, smoothstep(0.72, 0.84, p))
+		l = l.lerp(hp + Vector3(0.0, 0.0, travel), smoothstep(0.84, 0.89, p))
+		l = l.lerp(hp, smoothstep(0.89, 0.92, p))
+		l = l.lerp(_l_rest, smoothstep(0.92, 1.0, p))
+		_slide_z = travel * (smoothstep(0.84, 0.89, p) - smoothstep(0.89, 0.92, p))
 	else:
 		l = l.lerp(_l_rest, smoothstep(0.78, 1.0, p))
 	_l = l
@@ -573,15 +776,15 @@ func _pose_bolt(p: float) -> void:
 	var bolt: Vector3 = _p["bolt_hand"]
 	var port: Vector3 = _p["port"]
 	var travel: float = _p["slide_travel"]
-	var pouch := port + Vector3(-0.14, -0.25, 0.12)
-	var above := port + Vector3(0.0, 0.06, 0.0)
-	var hover := port + Vector3(-0.02, 0.08, 0.02)
-	_g_rot.z = 0.15 * (smoothstep(0.0, 0.15, p) - smoothstep(0.85, 1.0, p))
+	var pouch := port + Vector3(-0.015, -0.04, 0.02)   ## the clip is fetched close under the loading port, not off to one side
+	var above := port + Vector3(0.0, 0.035, 0.0)
+	var hover := port + Vector3(-0.02, 0.045, -0.02)
+	_g_rot.z = 0.08 * (smoothstep(0.0, 0.15, p) - smoothstep(0.85, 1.0, p))
 	var r := _r_rest
 	r = r.lerp(bolt, smoothstep(0.0, 0.1, p))
-	r = r.lerp(bolt + Vector3(0.0, 0.025, 0.0), smoothstep(0.1, 0.18, p))
-	r = r.lerp(bolt + Vector3(0.0, 0.025, travel), smoothstep(0.18, 0.32, p))
-	r = r.lerp(bolt + Vector3(0.0, 0.025, 0.0), smoothstep(0.7, 0.82, p))
+	r = r.lerp(bolt + Vector3(0.0, 0.015, 0.0), smoothstep(0.1, 0.18, p))
+	r = r.lerp(bolt + Vector3(0.0, 0.015, travel), smoothstep(0.18, 0.32, p))
+	r = r.lerp(bolt + Vector3(0.0, 0.015, 0.0), smoothstep(0.7, 0.82, p))
 	r = r.lerp(bolt, smoothstep(0.82, 0.86, p))
 	r = r.lerp(_r_rest, smoothstep(0.88, 1.0, p))
 	_r = r
@@ -590,8 +793,8 @@ func _pose_bolt(p: float) -> void:
 	l = l.lerp(pouch, smoothstep(0.1, 0.3, p))
 	l = l.lerp(above, smoothstep(0.3, 0.52, p))
 	l = l.lerp(port + Vector3(0.0, 0.02, 0.0), smoothstep(0.52, 0.62, p))
-	l = l.lerp(hover, smoothstep(0.62, 0.72, p))
-	l = l.lerp(_l_rest, smoothstep(0.8, 0.97, p))
+	l = l.lerp(hover, smoothstep(0.62, 0.66, p))
+	l = l.lerp(_l_rest, smoothstep(0.84, 1.0, p))   ## stays at the port through 75 percent, then returns to the forend
 	_l = l
 	_prop_vis = p >= 0.3 and p < 0.6
 	_prop_pos = l + Vector3(0.0, 0.025, 0.0)
@@ -602,11 +805,11 @@ func _pose_shell(t: float) -> void:
 	var port: Vector3 = _p["port"]
 	var pump: float = _p["slide_travel"]
 	var rt := maxf(_wd.round_time, 0.05)
-	var hover := port + Vector3(-0.03, -0.11, 0.06)
-	var pouch := port + Vector3(-0.16, -0.12, 0.2)
+	var hover := port + Vector3(-0.03, -0.05, -0.01)
+	var pouch := port + Vector3(-0.06, -0.06, 0.04)
 	var roll := smoothstep(0.0, 0.2, t) - smoothstep(_dur - 0.2, _dur, t)
-	_g_rot.z = 0.35 * roll
-	_g_rot.x = 0.1 * roll
+	_g_rot.z = 0.12 * roll   ## small cant: a big roll made the shotgun jump in angle and size against its rest frame
+	_g_rot.x = 0.03 * roll
 	var load_end := float(_rounds) * rt
 	var l := _l_rest
 	if _rounds > 0 and t < load_end:

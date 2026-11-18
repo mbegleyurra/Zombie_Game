@@ -29,9 +29,10 @@ func setup_dungeon(p_loot_id: int, p_dkind: String, p_table: String, world_seed:
 	setup(p_loot_id, "crate", p_table, world_seed)
 	# drop the plain box body and handle that loot_container builds; keep its collision shape
 	for ch in get_children():
-		if ch is MeshInstance3D:
+		if ch is MeshInstance3D or ch.name == "Body":
 			remove_child(ch)
 			ch.free()
+	_body_model = null
 	var def: Dictionary = DKINDS[dkind]
 	var sc: float = float(def["scale"])
 	var ps := load(DUN + str(def["model"])) as PackedScene

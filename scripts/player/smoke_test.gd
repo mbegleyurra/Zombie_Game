@@ -41,7 +41,7 @@ func _run() -> void:
 	check(player.is_multiplayer_authority(), "player owns authority for peer 1")
 	check(player.camera.current, "authority camera is current")
 	check(player.weapons.has_weapon("pistol"), "starting pistol present")
-	check(player.count_item("9mm") == 45, "starting 9mm reserve = 45")
+	check(player.count_item("9mm") == 90, "starting 9mm reserve = 90")
 	check(InputMap.has_action("fire") and InputMap.has_action("move_forward") and InputMap.has_action("slot_5"), "input actions registered in code")
 
 	# ---- weapon data

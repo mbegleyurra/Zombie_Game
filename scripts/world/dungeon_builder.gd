@@ -206,9 +206,10 @@ static func plan_site(world: Node) -> Dictionary:
 	}
 	terrain.add_flat(best, PLATEAU_R, PLATEAU_BLEND, h)
 	# crater: flat at dungeon-floor level around the whole footprint (centre = footprint centre)
-	terrain.add_flat(Vector2(best.x, float(site["gz"]) + 18.0), CRATER_R, CRATER_BLEND, h - DEPTH)
+	terrain.add_flat(Vector2(best.x, float(site["gz"]) + 18.0), CRATER_R, CRATER_BLEND, h - DEPTH, Rect2(), true, true)
 	# support under the upper stair piece (its base sits 4 m below the rim)
-	terrain.add_flat(Vector2(best.x, float(site["gz"]) - 12.5), 3.6, 2.0, h - 4.0)
+	# solid: the gate road's flat end disc (6.2 m) would otherwise bury this pad and the stair treads in a plateau
+	terrain.add_flat(Vector2(best.x, float(site["gz"]) - 12.5), 3.6, 2.0, h - 4.0, Rect2(), true, true)
 	return site
 
 
@@ -534,7 +535,7 @@ func _room_antechamber() -> void:
 	_container("barrel", 3.4, 1.7, FACE_E, "dungeon_barrel")
 	_container("barrel_small", 5.6, 1.7, FACE_W, "dungeon_barrel")
 	_guard("minion", 3.8, 1.4)
-	_pickup("ammo_9mm", 12, 4.1, 1.3)
+	_pickup("ammo_9mm", 24, 4.1, 1.3)
 
 
 func _room_corridors() -> void:
@@ -637,7 +638,7 @@ func _room_vault() -> void:
 	_hang("sword_shield_gold.gltf", 4.5, 9.0, FACE_N, 2.4, 0.8, true)
 	# the first gold chest always holds the rifle and a serious haul; the rest roll dungeon_gold
 	var prize: Array = [
-		{"id": "weapon_ar", "count": 1}, {"id": "ammo_556", "count": 60}, {"id": "ammo_762", "count": 30},
+		{"id": "weapon_ar", "count": 1}, {"id": "ammo_556", "count": 120}, {"id": "ammo_762", "count": 60},
 		{"id": "medkit", "count": 3}, {"id": "gold_ingot", "count": 3}, {"id": "coin", "count": 40},
 	]
 	_container("gold_chest", 4.5, 8.7, FACE_N, "dungeon_gold", prize)

@@ -17,7 +17,8 @@ enum State { READY, RELOADING, SWITCHING }
 ## Flip to true for the later PVP mode: bullets then also hit other players.
 static var pvp_enabled: bool = false
 
-const HIP_POS := Vector3(0.2, -0.21, -0.4)
+const HIP_POS := Vector3(0.13, -0.11, -0.4)
+const HIP_YAW := 0.3   ## radians the hip-held gun turns toward the screen centre
 const WORLD_MASK := 1
 const PLAYER_MASK := 2
 const ZOMBIE_MASK := 4
@@ -550,7 +551,8 @@ func _update_viewmodel(delta: float, wd: WeaponData) -> void:
 	pos.x += cos(_bob_t) * 0.008 * spd * (1.0 - 0.85 * ease_ads)
 	pos.y += sin(_time * 1.3) * 0.0012 * sway_mult
 	pos.z += _kickback
-	var rot := Vector3(_kickback * 4.0 + _sway.y * 0.6, _sway.x * 0.6, _sway.x * 1.2)
+	# hip: the gun angles in toward the crosshair so its side is on show; a gun aimed dead along the view axis is a sliver
+	var rot := Vector3(_kickback * 4.0 + _sway.y * 0.6, _sway.x * 0.6 + HIP_YAW * (1.0 - ease_ads), _sway.x * 1.2)
 	# lower the gun while reloading or switching
 	var lower := 0.0
 	if state == State.RELOADING and _reload_total > 0.0:
@@ -559,9 +561,11 @@ func _update_viewmodel(delta: float, wd: WeaponData) -> void:
 	elif state == State.SWITCHING:
 		var prog2 := 1.0 - clampf(_switch_timer / SWITCH_TIME, 0.0, 1.0)
 		lower = 1.0 - prog2
-	pos.y -= lower * 0.18
-	rot.x -= lower * 0.5
-	rot.z += lower * 0.3
+	# With hands attached the gun only dips a little: the hands do the reload work and must stay on screen.
+	var dip := 0.05 if _hands != null else 0.18
+	pos.y -= lower * dip
+	rot.x -= lower * (0.15 if _hands != null else 0.5)
+	rot.z += lower * (0.1 if _hands != null else 0.3)
 	if player.is_sprinting and not aiming:
 		pos += Vector3(-0.05, -0.04, 0.0)
 		rot.y += 0.5

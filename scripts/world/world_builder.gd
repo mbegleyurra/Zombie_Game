@@ -34,10 +34,8 @@ const HandLayout = preload("res://scripts/world/hand_layout.gd")
 const HandBuilder = preload("res://scripts/world/hand_builder.gd")
 const KENNEY_GY := "res://assets/kenney/graveyard/"
 
-const MAX_TREES := 900
-const MAX_ROCKS := 300
-const MAX_BUSHES := 380
-const MAX_GRASS := 2400
+const ROADSIDE_MODEL := "res://assets/kenney/city-kit-roads/light-square.glb"
+const ROADSIDE_H := 6.0
 
 var world_seed: int = 1337
 var start_hour: float = 9.0
@@ -200,15 +198,15 @@ func _plan_locations() -> void:
 			"pos2": Vector2(float(e[2]), float(e[3])), "pos": Vector3.ZERO, "rot": float(e[4]),
 			"radius": float(e[5]), "node": null,
 		})
-	# Flat pads first (spawn, the city, every location, every cottage); the mesh is built after this.
+	# Flat pads first (spawn, the city, every location); cottage pads follow the roads (below); the mesh is built after this.
 	terrain.add_flat(spawn_center, 14.0, 24.0, terrain.height_at(spawn_center.x, spawn_center.y))
-	terrain.add_flat(HandLayout.CITY_CENTER, HandLayout.CITY_FLAT_R, HandLayout.CITY_FLAT_BLEND, HandLayout.CITY_HEIGHT)
+	# The street grid (plus a margin for the verge) is the city pad's exact-height core: the round pad also reaches
+	# countryside such as the Hartley Farm gate, which must keep its own height.
+	var city_core := Rect2(HandLayout.CITY_MIN - Vector2(8.0, 8.0), (HandLayout.CITY_MAX - HandLayout.CITY_MIN) + Vector2(16.0, 16.0))
+	terrain.add_flat(HandLayout.CITY_CENTER, HandLayout.CITY_FLAT_R, HandLayout.CITY_FLAT_BLEND, HandLayout.CITY_HEIGHT, city_core)
 	for l in locations:
 		var p2: Vector2 = l["pos2"]
 		terrain.add_flat(p2, float(l["radius"]), 18.0, terrain.height_at(p2.x, p2.y))
-	for h in HandLayout.HOUSES:
-		var hp := Vector2(float(h[0]), float(h[1]))
-		terrain.add_flat(hp, HandLayout.HOUSE_PAD, 6.0, terrain.height_at(hp.x, hp.y))
 	# Roads: countryside polylines, the city street grid, then a driveway for every countryside location.
 	for s in HandLayout.road_segments():
 		terrain.add_road(s[0], s[1])
@@ -231,6 +229,14 @@ func _plan_locations() -> void:
 		if best_d > 1.0:
 			terrain.add_road(gate, best)
 		terrain.add_road(gate, p2 + dir * 10.0)
+	# Cottage pads last, at the level of the road bed in front of the house (natural height when no road reaches it):
+	# the pad and the road then agree, so the footprint stays level and the road stays level beside it.
+	for h in HandLayout.HOUSES:
+		var hp := Vector2(float(h[0]), float(h[1]))
+		var hh: float = terrain.road_bed_height(hp.x, hp.y)
+		if is_nan(hh):
+			hh = terrain.height_at(hp.x, hp.y)
+		terrain.add_flat(hp, HandLayout.HOUSE_PAD, 6.0, hh, Rect2(), false)
 
 
 ## Dirt track from the nearest road to the dungeon's ruined surface gate, so the entrance is always reachable.
@@ -254,202 +260,19 @@ func _add_dungeon_track() -> void:
 
 # ------------------------------------------------------------------ props
 
+## Everything in the wild (trees, rocks, bushes, grass) comes from the KayKit forest; the only thing built here is the
+## roadside: downloaded Kenney street lights along each long road, each with a thin collider.
 func _build_props() -> void:
 	_props = Node3D.new()
 	_props.name = "Props"
 	add_child(_props)
-	var rng := RandomNumberGenerator.new()
-	rng.seed = (world_seed ^ 0x51ED) & 0x7FFFFFFF
 	var body := StaticBody3D.new()
 	body.name = "PropCollision"
 	_props.add_child(body)
-	var limit: float = TerrainGen.HALF - 20.0
-
-	var tree_xf: Array = []
-	var canopy_cols: Array = []
-	var trunk_shape := CylinderShape3D.new()
-	trunk_shape.radius = 0.4
-	trunk_shape.height = 3.0
-	var palette: Array = [Color(0.3, 0.55, 0.22), Color(0.38, 0.6, 0.25), Color(0.25, 0.46, 0.3), Color(0.7, 0.55, 0.2), Color(0.75, 0.4, 0.18)]
-	for _a in 4000:
-		if tree_xf.size() >= MAX_TREES:
-			break
-		var x: float = rng.randf_range(-limit, limit)
-		var z: float = rng.randf_range(-limit, limit)
-		var gate: float = rng.randf()
-		var s: float = rng.randf_range(0.8, 1.6)
-		var rot: float = rng.randf() * TAU
-		var pal_i: int = rng.randi_range(0, palette.size() - 1)
-		if not terrain.is_clear(x, z, 5.0):
-			continue
-		if terrain.forest_density(x, z) < -0.15 and gate > 0.06:
-			continue
-		if terrain.normal_at(x, z).y < 0.8:
-			continue
-		var y: float = terrain.height_at(x, z)
-		tree_xf.append(Transform3D(Basis(Vector3.UP, rot).scaled(Vector3(s, s, s)), Vector3(x, y, z)))
-		prop_points.append(Vector2(x, z))
-		canopy_cols.append(palette[pal_i] if gate < 0.8 else palette[(pal_i + 2) % palette.size()])
-		var cs := CollisionShape3D.new()
-		cs.shape = trunk_shape
-		cs.position = Vector3(x, y + 1.5 * s, z)
-		body.add_child(cs)
-	var trunk_mu = MeshUtil.new()
-	trunk_mu.add_frustum(Vector3.ZERO, 0.38, 0.2, 2.6, 8, Color(0.4, 0.28, 0.18))
-	trunk_mu.add_beam(Vector3(0, 1.4, 0), Vector3(0.7, 2.0, 0.2), 0.1, Color(0.36, 0.25, 0.16))
-	trunk_mu.add_beam(Vector3(0, 1.1, 0), Vector3(-0.6, 1.7, -0.3), 0.1, Color(0.36, 0.25, 0.16))
-	var canopy_mu = MeshUtil.new()
-	canopy_mu.add_frustum(Vector3(0, 1.2, 0), 1.9, 0.0, 2.2, 9, Color.WHITE)
-	canopy_mu.add_frustum(Vector3(0, 2.4, 0), 1.5, 0.0, 2.2, 9, Color.WHITE, 0.35)
-	canopy_mu.add_frustum(Vector3(0, 3.6, 0), 1.0, 0.0, 2.0, 9, Color.WHITE, 0.7)
-	var white: Array = []
-	for _t in tree_xf.size():
-		white.append(Color.WHITE)
-	_add_multimesh("Trunks", trunk_mu.to_mesh(), tree_xf, white)
-	_add_multimesh("Canopies", canopy_mu.to_mesh(), tree_xf, canopy_cols)
-
-	_build_rocks(rng, body, limit)
-	_build_bushes(body, limit)
-	_build_grass(limit)
 	_build_roadside(body)
 
 
-## Four rock silhouettes (boulder, tall spire, flat slab, jagged chunk), each its own MultiMesh.
-## Some rocks get one or two smaller companions so they read as outcrops. Rocks collide (sphere per rock).
-func _build_rocks(rng: RandomNumberGenerator, body: StaticBody3D, limit: float) -> void:
-	var rock_rng := RandomNumberGenerator.new()
-	rock_rng.seed = (world_seed ^ 0x0C0C) & 0x7FFFFFFF
-	# per shape: radius vector, segs, rings, jitter, collision radius factor, collision centre height factor
-	var defs: Array = [
-		[Vector3(1.0, 0.8, 1.0), 6, 3, 0.25, 0.85, 0.3],
-		[Vector3(0.7, 1.35, 0.8), 5, 3, 0.3, 0.7, 0.6],
-		[Vector3(1.35, 0.5, 1.1), 7, 2, 0.2, 0.95, 0.15],
-		[Vector3(0.9, 1.0, 0.9), 5, 4, 0.4, 0.8, 0.35],
-	]
-	var xfs: Array = [[], [], [], []]
-	var cols: Array = [[], [], [], []]
-	var count := 0
-	for _b in 3000:
-		if count >= MAX_ROCKS:
-			break
-		var rx: float = rng.randf_range(-limit, limit)
-		var rz: float = rng.randf_range(-limit, limit)
-		var shape_i: int = rng.randi_range(0, 3)
-		var rs: float = rng.randf_range(0.6, 2.2)
-		var cluster: int = 0
-		if rng.randf() < 0.3:
-			cluster = rng.randi_range(1, 2)
-		var base_rot: float = rng.randf() * TAU
-		if not terrain.is_clear(rx, rz, 4.0):
-			continue
-		for k in cluster + 1:
-			var px: float = rx
-			var pz: float = rz
-			var ps: float = rs
-			var si: int = shape_i
-			if k > 0:
-				var ang: float = rng.randf() * TAU
-				var dist: float = rs * rng.randf_range(1.1, 1.8)
-				px += cos(ang) * dist
-				pz += sin(ang) * dist
-				ps = rs * rng.randf_range(0.35, 0.65)
-				si = rng.randi_range(0, 3)
-				if not terrain.is_clear(px, pz, 4.0):
-					continue
-			var shade: float = rng.randf_range(0.7, 1.1)
-			var warm: float = rng.randf_range(-0.05, 0.05)
-			var tilt: float = rng.randf_range(-0.15, 0.15)
-			var py: float = terrain.height_at(px, pz)
-			var d: Array = defs[si]
-			var basis := Basis(Vector3.UP, base_rot + float(k) * 1.3) * Basis(Vector3.RIGHT, tilt) * Basis.from_scale(Vector3(ps, ps * rng.randf_range(0.8, 1.15), ps))
-			(xfs[si] as Array).append(Transform3D(basis, Vector3(px, py, pz)))
-			(cols[si] as Array).append(Color(0.55 * shade + warm, 0.5 * shade, 0.46 * shade - warm))
-			var rcs := CollisionShape3D.new()
-			var sph := SphereShape3D.new()
-			sph.radius = ps * float(d[4])
-			rcs.shape = sph
-			rcs.position = Vector3(px, py + float(d[5]) * ps, pz)
-			body.add_child(rcs)
-			prop_points.append(Vector2(px, pz))
-			count += 1
-	for si in 4:
-		var d: Array = defs[si]
-		var mu = MeshUtil.new()
-		mu.add_blob(Vector3(0, 0.3, 0), d[0] as Vector3, int(d[1]), int(d[2]), Color.WHITE, rock_rng, float(d[3]))
-		_add_multimesh("Rocks%d" % si, mu.to_mesh(), xfs[si], cols[si])
-
-
-## Low bushes: two overlapping jittered blobs, tinted per instance. Visual only (no collision).
-func _build_bushes(_body: StaticBody3D, limit: float) -> void:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = (world_seed ^ 0x0B05) & 0x7FFFFFFF
-	var mesh_rng := RandomNumberGenerator.new()
-	mesh_rng.seed = (world_seed ^ 0x0B06) & 0x7FFFFFFF
-	var mu = MeshUtil.new()
-	mu.add_blob(Vector3(0, 0.3, 0), Vector3(0.7, 0.5, 0.7), 5, 3, Color.WHITE, mesh_rng, 0.2)
-	mu.add_blob(Vector3(0.45, 0.2, 0.2), Vector3(0.5, 0.4, 0.5), 5, 3, Color.WHITE.darkened(0.08), mesh_rng, 0.2)
-	var pal: Array = [Color(0.24, 0.42, 0.16), Color(0.3, 0.5, 0.2), Color(0.34, 0.46, 0.14), Color(0.45, 0.4, 0.15), Color(0.2, 0.36, 0.2)]
-	var xf: Array = []
-	var cols: Array = []
-	for _a in 4000:
-		if xf.size() >= MAX_BUSHES:
-			break
-		var x: float = rng.randf_range(-limit, limit)
-		var z: float = rng.randf_range(-limit, limit)
-		var gate: float = rng.randf()
-		var s: float = rng.randf_range(0.8, 1.7)
-		var rot: float = rng.randf() * TAU
-		var pi_: int = rng.randi_range(0, pal.size() - 1)
-		if not terrain.is_clear(x, z, 2.5):
-			continue
-		if terrain.forest_density(x, z) < -0.3 and gate > 0.15:
-			continue
-		if terrain.normal_at(x, z).y < 0.85:
-			continue
-		xf.append(Transform3D(Basis(Vector3.UP, rot).scaled(Vector3(s, s * rng.randf_range(0.8, 1.2), s)), Vector3(x, terrain.height_at(x, z), z)))
-		cols.append(pal[pi_])
-	_add_multimesh("Bushes", mu.to_mesh(), xf, cols)
-
-
-## Grass tufts: four crossed blades (4 triangles) per tuft. Visual only.
-func _build_grass(limit: float) -> void:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = (world_seed ^ 0x6A55) & 0x7FFFFFFF
-	var mu = MeshUtil.new()
-	for k in 4:
-		var a: float = float(k) * PI * 0.5 + 0.4
-		var dir := Vector3(cos(a), 0.0, sin(a))
-		var side := Vector3(-dir.z, 0.0, dir.x)
-		var base: Vector3 = dir * 0.06
-		var tip: Vector3 = base + dir * (0.1 + 0.04 * float(k % 2)) + Vector3(0, 0.55 + 0.12 * float(k % 3), 0)
-		mu.add_tri(base - side * 0.07, base + side * 0.07, tip, Color.WHITE, side.cross(Vector3.UP) + Vector3(0, 0.1, 0))
-	var pal: Array = [Color(0.34, 0.52, 0.2), Color(0.45, 0.58, 0.22), Color(0.58, 0.58, 0.26), Color(0.28, 0.46, 0.18), Color(0.62, 0.52, 0.28)]
-	var xf: Array = []
-	var cols: Array = []
-	for _a in 8000:
-		if xf.size() >= MAX_GRASS:
-			break
-		var x: float = rng.randf_range(-limit, limit)
-		var z: float = rng.randf_range(-limit, limit)
-		var s: float = rng.randf_range(0.7, 1.6)
-		var rot: float = rng.randf() * TAU
-		var pi_: int = rng.randi_range(0, pal.size() - 1)
-		if not terrain.is_clear(x, z, 1.0):
-			continue
-		var y: float = terrain.height_at(x, z)
-		if y > 16.0 or y < -2.5 or terrain.normal_at(x, z).y < 0.88:
-			continue
-		xf.append(Transform3D(Basis(Vector3.UP, rot).scaled(Vector3(s, s, s)), Vector3(x, y, z)))
-		cols.append(pal[pi_])
-	_add_multimesh("Grass", mu.to_mesh(), xf, cols)
-
-
-## Wooden power poles and sagging wires along each road, plus a few wrecked cars on the verges.
-## Deterministic: its own rng seeded from the world seed.
 func _build_roadside(body: StaticBody3D) -> void:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = (world_seed ^ 0x7013) & 0x7FFFFFFF
-	var mu = MeshUtil.new()
 	for i in terrain.road_a.size():
 		var a: Vector2 = terrain.road_a[i]
 		var b: Vector2 = terrain.road_b[i]
@@ -460,52 +283,24 @@ func _build_roadside(body: StaticBody3D) -> void:
 		var dir: Vector2 = d / length
 		var side := Vector2(-dir.y, dir.x)
 		var yaw: float = atan2(-dir.y, dir.x)
-		var prev: Array = []
 		var s: float = 30.0
 		while s < length - 30.0:
 			var p: Vector2 = a + dir * s + side * 4.5
-			var y: float = terrain.height_at(p.x, p.y)
-			var xf := Transform3D(Basis(Vector3.UP, yaw), Vector3(p.x, y, p.y))
-			var pts: Array = PropFactory.add_pole(mu, body, xf)
-			if not prev.is_empty():
-				for k in 3:
-					PropFactory.add_wire(mu, prev[k], pts[k], 0.8)
-			prev = pts
 			s += 36.0
-		# Wrecked car on the verge of long roads
-		if length > 90.0:
-			var cs: float = rng.randf_range(0.3, 0.7) * length
-			var cp: Vector2 = a + dir * cs + side * rng.randf_range(-3.5, 3.5)
-			if terrain.normal_at(cp.x, cp.y).y > 0.9:
-				var kinds: Array = ["sedan", "pickup", "van"]
-				var cxf := Transform3D(Basis(Vector3.UP, rng.randf_range(0.0, TAU)), Vector3(cp.x, terrain.height_at(cp.x, cp.y), cp.y))
-				prop_points.append(cp)
-				PropFactory.add_car(mu, body, cxf, str(kinds[rng.randi_range(0, 2)]), PropFactory.random_car_color(rng), rng.randi_range(1, 2), rng)
-	if mu.is_empty():
-		return
-	var mi := MeshInstance3D.new()
-	mi.name = "Roadside"
-	mi.mesh = mu.to_mesh()
-	mi.material_override = material
-	_props.add_child(mi)
-
-
-func _add_multimesh(node_name: String, mesh: Mesh, xforms: Array, colors: Array) -> void:
-	if xforms.is_empty():
-		return
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.use_colors = true
-	mm.mesh = mesh
-	mm.instance_count = xforms.size()
-	for i in xforms.size():
-		mm.set_instance_transform(i, xforms[i])
-		mm.set_instance_color(i, colors[i])
-	var mmi := MultiMeshInstance3D.new()
-	mmi.name = node_name
-	mmi.multimesh = mm
-	mmi.material_override = material
-	_props.add_child(mmi)
+			var m: Node3D = ModelUtil.load_fit(ROADSIDE_MODEL, ROADSIDE_H)
+			if m == null:
+				continue
+			var y: float = terrain.height_at(p.x, p.y)
+			m.position = Vector3(p.x, y, p.y)
+			m.rotation.y = yaw
+			_props.add_child(m)
+			var cs := CollisionShape3D.new()
+			var sh := CylinderShape3D.new()
+			sh.radius = 0.2
+			sh.height = ROADSIDE_H
+			cs.shape = sh
+			cs.position = Vector3(p.x, y + ROADSIDE_H * 0.5, p.y)
+			body.add_child(cs)
 
 
 # ------------------------------------------------------------------ locations

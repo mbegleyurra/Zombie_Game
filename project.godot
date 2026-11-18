@@ -11,6 +11,7 @@ config/features=PackedStringArray("4.7")
 Net="*res://scripts/net/network.gd"
 Building="*res://scripts/building/building_system.gd"
 Hud="*res://scenes/ui/hud.tscn"
+MouseGuard="*res://scripts/ui/mouse_guard.gd"
 
 [display]
 window/size/viewport_width=1280

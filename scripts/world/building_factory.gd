@@ -3,13 +3,20 @@ extends RefCounted
 ## Each location is one flat-shaded vertex-coloured mesh plus box collision shapes, with doors/windows cut
 ## as real openings in the walls so interiors are walkable. Local origin = pad centre at ground level.
 
-const MeshUtil = preload("res://scripts/world/mesh_util.gd")
 const LootContainer = preload("res://scripts/world/loot_container.gd")
 const LootItem = preload("res://scripts/world/loot_item.gd")
 const ItemDB = preload("res://scripts/world/item_db.gd")
 const PropFactory = preload("res://scripts/world/prop_factory.gd")
 const ModelUtil = preload("res://scripts/world/model_util.gd")
 const KENNEY_FOOD := "res://assets/kenney/food/"
+const SURV := "res://assets/kenney/survival/"
+const GY := "res://assets/kenney/graveyard/"
+const CARS := "res://assets/kenney/cars/"
+const WALL_PANEL := SURV + "metal-panel.glb"   # solid 0.5 x 0.5 m panel; structure-metal-wall.glb is an open frame
+const WALL_CELL := 2.5   # target tile height (m) for wall panels
+const SLAB_CELL := 2.0   # target tile edge (m) for floor and roof slabs
+const CAR_MODEL := {"sedan": "sedan", "pickup": "suv", "van": "van", "police": "police", "truck": "delivery"}
+const CAR_H := {"sedan": 1.45, "suv": 1.75, "van": 2.1, "police": 1.5, "delivery": 2.5, "tractor": 2.0}
 
 const F := 0.06   # floor top height above ground (small enough to step over)
 const T := 0.3    # default wall thickness
@@ -31,7 +38,6 @@ const FARM_WALLS := [Color(0.66, 0.3, 0.22), Color(0.82, 0.78, 0.66), Color(0.38
 
 var world
 var material: Material
-var _mu
 var _body: StaticBody3D
 var _root: Node3D
 var _rng: RandomNumberGenerator
@@ -51,7 +57,6 @@ func _init(p_world, p_material: Material) -> void:
 func _begin(root: Node3D, rng: RandomNumberGenerator) -> void:
 	_root = root
 	_rng = rng
-	_mu = MeshUtil.new()
 	_body = StaticBody3D.new()
 	_body.name = "Collision"
 	_foot = []
@@ -60,11 +65,6 @@ func _begin(root: Node3D, rng: RandomNumberGenerator) -> void:
 
 func _finish() -> void:
 	_flush_scatter()
-	var mi := MeshInstance3D.new()
-	mi.name = "Mesh"
-	mi.mesh = _mu.to_mesh()
-	mi.material_override = material
-	_root.add_child(mi)
 	_root.add_child(_body)
 
 
@@ -75,7 +75,20 @@ func _note_foot(pos: Vector3, size: Vector3) -> void:
 
 
 func _box(pos: Vector3, size: Vector3, col: Color, collide: bool = true) -> void:
-	_mu.add_box(pos, size, col)
+	var model := _box_model(size)
+	if model == WALL_PANEL:
+		# Solid panels tiled along the segment (about 2.5 m square), never one stretched piece.
+		var rot: bool = size.x < size.z
+		var sz: Vector3 = Vector3(size.z, size.y, size.x) if rot else size
+		var ch: float = sz.y / float(maxi(1, roundi(sz.y / WALL_CELL)))
+		var xf := Transform3D(Basis(Vector3.UP, PI * 0.5) if rot else Basis(), pos)
+		_tiled_at(model, xf, sz, Vector3(ch, ch, 0.0))
+	elif model.ends_with("/floor.glb"):
+		_tiled_at(model, Transform3D.IDENTITY, size, Vector3(SLAB_CELL, 0.0, SLAB_CELL), pos)
+	elif model.ends_with("box-large.glb") and maxf(size.x, maxf(size.y, size.z)) > 2.0:
+		_tiled_at(model, Transform3D.IDENTITY, size, Vector3(1.0, 1.0, 1.0), pos)
+	else:
+		_model_box(model, pos, size)
 	if collide:
 		_note_foot(pos, size)
 		var cs := CollisionShape3D.new()
@@ -87,7 +100,7 @@ func _box(pos: Vector3, size: Vector3, col: Color, collide: bool = true) -> void
 
 
 func _cyl(base: Vector3, r: float, h: float, segs: int, col: Color) -> void:
-	_mu.add_frustum(base, r, r, h, segs, col, 0.0)
+	_model_box(SURV + ("barrel.glb" if r >= 1.0 else "signpost.glb"), base + Vector3(0, h * 0.5, 0), Vector3(r * 2.0, h, r * 2.0))
 	_note_foot(base + Vector3(0, h * 0.5, 0), Vector3(r * 2.0, h, r * 2.0))
 	var cs := CollisionShape3D.new()
 	var sh := CylinderShape3D.new()
@@ -96,6 +109,48 @@ func _cyl(base: Vector3, r: float, h: float, segs: int, col: Color) -> void:
 	cs.shape = sh
 	cs.position = base + Vector3(0, h * 0.5, 0)
 	_body.add_child(cs)
+
+
+## Visual stand-in for a primitive: a downloaded model stretched over `size`, centred at `center` in frame `xf`.
+func _model_at(file: String, xf: Transform3D, center: Vector3, size: Vector3) -> void:
+	var m: Node3D = ModelUtil.fit_box(file, size)
+	if m == null:
+		return
+	m.transform = xf * Transform3D(Basis(), center)
+	_root.add_child(m)
+
+
+## Like _model_at, but the model is repeated on a grid (cell per axis, <= 0 = one tile) so it keeps its proportions.
+func _tiled_at(file: String, xf: Transform3D, size: Vector3, cell: Vector3, center: Vector3 = Vector3.ZERO) -> void:
+	var m: Node3D = ModelUtil.tile_box(file, size, cell)
+	if m == null:
+		return
+	m.transform = xf * Transform3D(Basis(), center)
+	_root.add_child(m)
+
+
+func _model_box(file: String, center: Vector3, size: Vector3) -> void:
+	_model_at(file, Transform3D.IDENTITY, center, size)
+
+
+## Which Kenney survival piece stands in for a box of this size.
+func _box_model(size: Vector3) -> String:
+	if size.y <= 0.6 and size.x >= 1.5 and size.z >= 1.5:
+		return SURV + "floor.glb"
+	if size.y >= 1.2 and minf(size.x, size.z) <= 0.5:
+		return WALL_PANEL
+	return SURV + "box-large.glb"
+
+
+## A Kenney vehicle model (cars/<name>.glb) on xf, with a box collider of its size.
+func _vehicle(model_name: String, xf: Transform3D) -> void:
+	var m: Node3D = ModelUtil.load_fit(CARS + model_name + ".glb", float(CAR_H.get(model_name, 1.6)))
+	if m == null:
+		return
+	var sz: Vector3 = m.get_meta("size") as Vector3
+	m.transform = xf
+	_root.add_child(m)
+	PropFactory.add_collision(_body, xf, Vector3(0, sz.y * 0.5, 0), sz)
 
 
 func _door(c: float, w: float = 1.6, h: float = 2.4) -> Dictionary:
@@ -157,10 +212,7 @@ func _gable_roof(cx: float, cz: float, hx: float, hz: float, y_eave: float, rise
 	var e_fl := Vector3(cx - hx, y_eave, cz + hz)
 	var r_l := Vector3(cx - hx, y_eave + rise, cz)
 	var r_r := Vector3(cx + hx, y_eave + rise, cz)
-	_mu.add_quad(e_bl, e_br, r_r, r_l, roof, Vector3(0, 1, -1))
-	_mu.add_quad(e_fl, e_fr, r_r, r_l, roof, Vector3(0, 1, 1))
-	_mu.add_tri(e_bl, e_fl, r_l, gable, Vector3(-1, 0, 0))
-	_mu.add_tri(e_br, e_fr, r_r, gable, Vector3(1, 0, 0))
+	_model_box(SURV + "structure-roof.glb", Vector3(cx, y_eave + rise * 0.5, cz), Vector3(hx * 2.0, rise, hz * 2.0))
 	var cs := CollisionShape3D.new()
 	var sh := ConvexPolygonShape3D.new()
 	sh.points = PackedVector3Array([e_bl, e_br, e_fr, e_fl, r_l, r_r])
@@ -213,11 +265,22 @@ func _flush_scatter() -> void:
 				continue
 			var id: int = world.next_loot_id()
 			var item = LootItem.create(str(pick["id"]), int(pick["count"]), id)
-			item.position = Vector3(px, F + 0.02, pz)
+			item.position = Vector3(px, _scatter_y(px, pz), pz)
 			item.rotation.y = rot_y
 			_root.add_child(item)
 			world.register_loot(item)
 	_scatter_q = []
+
+
+## Local y for a ground pickup at local (x, z): the floor top, or the CURRENT terrain surface when that is higher.
+## Yards beside a building are not covered by its floor slab, and a road bed carved through the pad (a driveway)
+## raises the ground there, so a fixed floor height would bury the item.
+func _scatter_y(x: float, z: float) -> float:
+	var y: float = F + 0.02
+	if world != null and world.terrain != null and _root != null and _root.is_inside_tree():
+		var wp: Vector3 = _root.to_global(Vector3(x, 0.0, z))
+		y = maxf(y, world.terrain.height_at(wp.x, wp.z) - _root.global_position.y + 0.04)
+	return y
 
 
 ## Collision only (no mesh), for props whose visuals are drawn separately.
@@ -232,10 +295,10 @@ func _solid(pos: Vector3, size: Vector3) -> void:
 
 
 ## Parks a car (kind sedan/pickup/van/police/truck). wreck: 0 intact, 1 rusted, 2 burnt out.
-func _car(pos: Vector3, yaw: float, kind: String, wreck: int = 0) -> void:
+func _car(pos: Vector3, yaw: float, kind: String, _wreck: int = 0) -> void:
 	var xf := Transform3D(Basis(Vector3.UP, yaw), pos)
 	_foot.append(Rect2(pos.x - 3.0, pos.z - 3.0, 6.0, 6.0))
-	PropFactory.add_car(_mu, _body, xf, kind, PropFactory.random_car_color(_rng), wreck, _rng)
+	_vehicle(str(CAR_MODEL.get(kind, "sedan")), xf)
 
 
 ## Fence line from a to b (local XZ) with an optional gate gap (gap_w > 0) in the middle.
@@ -246,22 +309,9 @@ func _fence(a: Vector2, b: Vector2, gap_w: float, col: Color, h: float) -> void:
 		return
 	var dir := d / length
 	var fx := Transform3D(Basis(Vector3.UP, atan2(-dir.y, dir.x)), Vector3(a.x, F, a.y))
-	var n: int = maxi(int(length / 2.4), 1)
-	var step: float = length / float(n)
 	var g0: float = length * 0.5 - gap_w * 0.5
 	var g1: float = length * 0.5 + gap_w * 0.5
 	var has_gap: bool = gap_w > 0.0
-	var posts: Array = []
-	for i in n + 1:
-		var s: float = step * float(i)
-		if has_gap and s > g0 - 0.01 and s < g1 + 0.01:
-			continue
-		posts.append(s)
-	if has_gap:
-		posts.append(g0)
-		posts.append(g1)
-	for s in posts:
-		_mu.add_box_xf(fx, Vector3(float(s), h * 0.5, 0.0), Vector3(0.12, h, 0.12), col.darkened(0.15))
 	var pieces: Array = [[0.0, length]]
 	if has_gap:
 		pieces = [[0.0, g0], [g1, length]]
@@ -272,8 +322,7 @@ func _fence(a: Vector2, b: Vector2, gap_w: float, col: Color, h: float) -> void:
 			continue
 		var mid: float = (s0 + s1) * 0.5
 		var ln: float = s1 - s0
-		_mu.add_box_xf(fx, Vector3(mid, h * 0.45, 0.0), Vector3(ln, 0.08, 0.06), col)
-		_mu.add_box_xf(fx, Vector3(mid, h * 0.9, 0.0), Vector3(ln, 0.08, 0.06), col)
+		_model_at((GY + "iron-fence.glb") if col == C_FENCE_IRON else (SURV + "fence.glb"), fx, Vector3(mid, h * 0.5, 0.0), Vector3(ln, h, 0.12))
 		PropFactory.add_collision(_body, fx, Vector3(mid, h * 0.5, 0.0), Vector3(ln, h, 0.12))
 
 
@@ -335,16 +384,13 @@ func build_farm(root: Node3D, rng: RandomNumberGenerator) -> void:
 	_scatter("barn", 3, bx - 3.4, bx + 3.4, bz - 2.4, bz + 2.4)
 	# Silo and yard
 	_cyl(Vector3(-15.0, 0.0, -5.0), 2.2, 8.0, 8, Color(0.7, 0.72, 0.74))
-	_mu.add_frustum(Vector3(-15.0, 8.0, -5.0), 2.4, 0.0, 1.6, 8, Color(0.55, 0.2, 0.18))
 	_box(Vector3(-9.0, 0.5, 9.0), Vector3(3.0, 1.0, 1.2), Color(0.5, 0.35, 0.2))     # wagon bed
 	_scatter("wild", 2, -10.0, 10.0, 6.0, 14.0)
 	# Round 4 props (no loot rolls): weathered fence with gates, crop rows, tractor, pickup truck
 	_fence_rect(-19.0, -15.0, 19.0, 17.0, 4.0, C_FENCE_WOOD, 1.2)
-	for i in 4:
-		var crop: Color = Color(0.36, 0.55, 0.2).lerp(Color(0.6, 0.55, 0.2), float(i) * 0.15)
-		_mu.add_box(Vector3(12.5 + float(i) * 1.5, F + 0.3, 10.5), Vector3(0.6, 0.6, 9.0), crop)
+	# (crop rows were primitive boxes with no downloaded equivalent: removed)
 	var tractor_xf := Transform3D(Basis(Vector3.UP, rng.randf_range(-0.5, 0.5)), Vector3(-13.0, F, 5.0))
-	PropFactory.add_tractor(_mu, _body, tractor_xf, Color(0.2, 0.5, 0.22))
+	_vehicle("tractor", tractor_xf)
 	_foot.append(Rect2(-15.0, 3.0, 4.0, 4.0))
 	_car(Vector3(3.0, F, 15.5), rng.randf_range(-0.3, 0.3), "pickup", rng.randi_range(0, 1))
 	_finish()
@@ -609,7 +655,6 @@ func build_church(root: Node3D, rng: RandomNumberGenerator) -> void:
 	for lv in [Vector3(-10.5, 0, 1.22), Vector3(-10.5, 0, -1.22), Vector3(-9.28, 0, 0), Vector3(-11.72, 0, 0)]:
 		var sz: Vector3 = Vector3(0.9, 1.4, 0.04) if absf(lv.z) > 0.5 else Vector3(0.04, 1.4, 0.9)
 		_box(Vector3(lv.x, F + H + 4.6, lv.z), sz, C_DARK, false)
-	_mu.add_frustum(Vector3(-10.5, F + H + 6.0, 0.0), 1.9, 0.0, 4.5, 4, roof, PI * 0.25)
 	_box(Vector3(-10.5, F + H + 11.1, 0.0), Vector3(0.14, 1.2, 0.14), C_WHITE, false)
 	_box(Vector3(-10.5, F + H + 11.3, 0.0), Vector3(0.14, 0.14, 0.7), C_WHITE, false)
 	# Pews either side of the aisle
@@ -636,11 +681,10 @@ func build_church(root: Node3D, rng: RandomNumberGenerator) -> void:
 			var gx: float = -12.0 + float(ci) * 4.0 + rng.randf_range(-0.6, 0.6)
 			var gz: float = 8.5 + float(row) * 3.2 + rng.randf_range(-0.4, 0.4)
 			var gxf := Transform3D(Basis(Vector3.UP, rng.randf_range(-0.25, 0.25)), Vector3(gx, F, gz))
-			var shade: float = rng.randf_range(0.0, 0.25)
+			rng.randf_range(0.0, 0.25)   # draw kept so the seeded loot layout is unchanged
 			if row >= 2:
 				continue   # third row dropped (Kenney graveyard rows occupy that ground); rng draws kept so loot layout is unchanged
-			_mu.add_box_xf(gxf, Vector3(0, 0.45, 0), Vector3(0.7, 0.9, 0.16), stone.darkened(shade))
-			_mu.add_box_xf(gxf, Vector3(0, 0.06, 0.9), Vector3(0.9, 0.12, 1.8), Color(0.38, 0.3, 0.2))
+			_model_at(GY + "gravestone-bevel.glb", gxf, Vector3(0, 0.45, 0), Vector3(0.7, 0.9, 0.3))
 			PropFactory.add_collision(_body, gxf, Vector3(0, 0.45, 0), Vector3(0.7, 0.9, 0.16))
 	_fence_rect(-15.0, 6.5, 15.0, 18.5, 4.0, C_FENCE_IRON, 1.4)
 	_car(Vector3(14.0, F, -9.0), 0.4, "sedan", 1)

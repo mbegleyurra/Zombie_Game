@@ -68,15 +68,9 @@ func _build() -> void:
 	var h: float = float(Dressing.CAR_H.get(kind, 1.6))
 	var m: Node3D = ModelUtil.load_fit(Dressing.CARS + kind + ".glb", h)
 	if m == null:
-		push_warning("[Vehicle] missing model %s, using a box" % kind)
+		push_warning("[Vehicle] missing model %s, collider only (no primitive visual)" % kind)
 		m = Node3D.new()
-		var bm := BoxMesh.new()
-		bm.size = Vector3(1.8, h, 4.2)
-		var mi := MeshInstance3D.new()
-		mi.mesh = bm
-		mi.position.y = h * 0.5
-		m.add_child(mi)
-		m.set_meta("size", bm.size)
+		m.set_meta("size", Vector3(1.8, h, 4.2))
 	size = m.get_meta("size") as Vector3
 	m.rotation.y = PI   # glb front is +Z, the vehicle drives toward -Z
 	add_child(m)

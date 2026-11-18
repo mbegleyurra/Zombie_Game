@@ -4,7 +4,19 @@ extends SceneTree
 ##   godot --headless --path . --script res://tests/t_blaster_guns.gd
 
 const ItemDB = preload("res://scripts/world/item_db.gd")
-const KIT := "res://assets/kenney/blaster-kit/"
+const KIT := "res://assets/ithappy_weapons/Meshes/Assets/"
+## WeaponDB model key -> ITHappy pack file. The pack ships four guns, so rifle-class keys share rifle_001.
+const EXPECT := {
+	"pistol": "pistol_001",
+	"ak": "rifle_001",
+	"m4": "rifle_001",
+	"shotgun": "shotgun_001",
+	"hunting": "sniper_rifle_001",
+	"ar": "rifle_001",
+	"ar_t1": "rifle_001",
+	"ar_t2": "rifle_001",
+	"ar_t3": "sniper_rifle_001",
+}
 
 var fails := 0
 
@@ -45,7 +57,9 @@ func _run() -> void:
 			continue
 		var file: String = str(g.get_meta("blaster"))
 		used[file] = true
-		check(file.begins_with("blaster-") and ResourceLoader.exists(KIT + file + ".glb"), tag + " uses " + file + ".glb")
+		check(ResourceLoader.exists(KIT + file + ".glb"), tag + " uses " + file + ".glb")
+		check(file == str(EXPECT[str(id)]), tag + " maps to the ITHappy model " + str(EXPECT[str(id)]))
+		check(not str(g.get_meta("blaster")).begins_with("blaster-"), tag + " no longer uses the Kenney Blaster Kit")
 		var model := g.get_node_or_null("Model") as Node3D
 		check(model != null and _has_mesh(model), tag + " has a real mesh under Model")
 		var mz := GunMesh.muzzle_of(g)
@@ -77,7 +91,7 @@ func _run() -> void:
 		if pk != null:
 			pk.free()
 		g.free()
-	check(used.size() >= 8, "the roster uses %d distinct Blaster Kit models" % used.size())
+	check(used.size() == 4, "the roster uses %d distinct ITHappy models (pistol, rifle, shotgun, sniper)" % used.size())
 
 	# ---- loot item uses the blaster model
 	var li: Node = load("res://scripts/world/loot_item.gd").create("weapon_ak", 1, 5)

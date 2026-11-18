@@ -139,6 +139,8 @@ var _skel: Skeleton3D          ## Kenney walker rig (null for the procedural bod
 var _bone_head: int = -1
 var _bone_arm: Array[int] = []
 var _bone_leg: Array[int] = []
+var _body_dims := Vector2(1.0, 1.0)   ## (width, height) multipliers of the Kenney zombie for this kind
+var _body_tint := Color.WHITE
 var _mat_skin: StandardMaterial3D
 var _mat_shirt: StandardMaterial3D
 var _mat_pants: StandardMaterial3D
@@ -1090,67 +1092,24 @@ func _build_body() -> void:
 	_mat_shirt = _material(Color(0.4, 0.3, 0.3))
 	_mat_pants = _material(Color(0.25, 0.28, 0.35))
 	_mat_blood = _material(Color(0.35, 0.03, 0.03), 0.6)
-	match kind:
-		KIND_RUNNER:
-			_build_runner()
-		KIND_BLOATER:
-			_build_bloater()
-		_:
-			_build_walker()
+	_build_walker()
 	_built = true
 
 
-## Shared head: faceted skull, neck, jaw, eyes, ears, teeth and hair tufts.
-func _build_head(y: float, radius: float, eye_color: Color, z_off: float = 0.0) -> void:
-	_head = Node3D.new()
-	_head.position = Vector3(0, y, z_off)
-	_body.add_child(_head)
-	_mesh(_head, _sphere_mesh(radius, 16, 9, 1.05), Vector3(0, radius * 0.8, 0), _mat_skin)
-	_mesh(_head, _capsule_mesh(0.055, 0.2, 8, 3), Vector3(0, -0.04, 0), _mat_skin)             # neck
-	_mesh(_head, _box_mesh(Vector3(radius * 0.7, 0.045, radius * 0.5)), Vector3(0, 0.0, -radius * 0.6), _mat_skin)   # jaw
-	var eye := _material(eye_color)
-	eye.emission_enabled = true
-	eye.emission = eye_color
-	eye.emission_energy_multiplier = 1.5
-	for side in [-1.0, 1.0]:
-		_mesh(_head, _sphere_mesh(0.02, 6, 3), Vector3(radius * 0.37 * side, radius * 1.0, -radius * 0.9), eye)
-		_mesh(_head, _box_mesh(Vector3(0.03, 0.05, 0.02)), Vector3(radius * 0.95 * side, radius * 0.8, 0.0), _mat_skin)   # ear
-	var teeth := _material(Color(0.8, 0.78, 0.6))
-	for i in range(4):
-		_mesh(_head, _box_mesh(Vector3(0.016, 0.02, 0.012)), Vector3((i - 1.5) * 0.026, radius * 0.2, -radius * 0.95), teeth)
-	_mesh(_head, _box_mesh(Vector3(radius * 0.8, 0.04, 0.03)), Vector3(0, radius * 0.1, -radius * 0.9), _mat_blood)  # gore around the mouth
-	var hair := _material(Color(0.12, 0.1, 0.08))
-	for i in range(3):
-		_mesh(_head, _box_mesh(Vector3(0.05, 0.03, 0.05)), Vector3((i - 1) * 0.07, radius * 1.65, 0.02 * i), hair)
-
-
-## One arm: shoulder pivot, sleeve, forearm, hand with finger knuckles.
-func _build_arm(_side: float, shoulder: Vector3, length: float, radius: float, seg: int) -> void:
-	var arm := Node3D.new()
-	arm.position = shoulder
-	_body.add_child(arm)
-	_mesh(arm, _capsule_mesh(radius, length, seg, 5), Vector3(0, -length * 0.45, 0), _mat_skin)
-	_mesh(arm, _capsule_mesh(radius * 1.12, length * 0.45, seg, 4), Vector3(0, -length * 0.19, 0), _mat_shirt)
-	_mesh(arm, _sphere_mesh(radius * 1.25, 8, 5), Vector3(0, -length * 0.95, 0), _mat_skin)             # hand
-	for i in range(3):
-		_mesh(arm, _box_mesh(Vector3(radius * 0.5, radius * 1.6, radius * 0.5)), Vector3((i - 1) * radius * 0.7, -length - radius * 0.9, -0.01), _mat_skin)  # fingers
-	_arms.append(arm)
-
-
-## One leg: hip pivot, thigh/shin capsule, knee, shoe.
-func _build_leg(_side: float, hip: Vector3, length: float, radius: float, seg: int) -> void:
-	var leg := Node3D.new()
-	leg.position = hip
-	_body.add_child(leg)
-	_mesh(leg, _capsule_mesh(radius, length, seg, 5), Vector3(0, -length * 0.49, 0), _mat_pants)
-	_mesh(leg, _sphere_mesh(radius * 1.1, 8, 4), Vector3(0, -length * 0.5, -0.01), _mat_pants)           # knee
-	_mesh(leg, _box_mesh(Vector3(radius * 1.8, 0.07, radius * 3.2)), Vector3(0, -length * 0.99, -radius * 0.8), _material(Color(0.12, 0.1, 0.09)))   # shoe
-	_legs.append(leg)
-
-
+## Every zombie kind is the downloaded Kenney zombie; kinds differ by proportions and tint only
+## (runner: lean and tall, bloater: broad and short). No primitive body exists any more.
 func _build_walker() -> void:
-	if not _build_kenney_walker():
-		_build_walker_procedural()
+	match kind:
+		KIND_RUNNER:
+			_body_dims = Vector2(0.85, 1.06)
+			_body_tint = Color(1.0, 0.8, 0.8)
+		KIND_BLOATER:
+			_body_dims = Vector2(1.55, 0.95)
+			_body_tint = Color(0.85, 1.0, 0.7)
+		_:
+			_body_dims = Vector2(1.0, 1.0)
+			_body_tint = Color.WHITE
+	_build_kenney_walker()
 
 
 ## Walker: the Kenney Mini Characters zombie, scaled up to near-human height. Its pose is
@@ -1180,7 +1139,7 @@ func _build_kenney_walker() -> bool:
 	if ap != null:
 		ap.get_parent().remove_child(ap)   # poses come from code, not the stock clips
 		ap.free()
-	model.scale = Vector3(WALKER_SCALE * WALKER_WIDTH, WALKER_SCALE, WALKER_SCALE * WALKER_WIDTH)
+	model.scale = Vector3(WALKER_SCALE * WALKER_WIDTH * _body_dims.x, WALKER_SCALE * _body_dims.y, WALKER_SCALE * WALKER_WIDTH * _body_dims.x)
 	model.rotation.y = PI   # Kenney faces +Z; zombies face -Z
 	_body.add_child(model)
 	# one fixed look for every walker: the model's own texture. Private copy so the hit
@@ -1195,6 +1154,7 @@ func _build_kenney_walker() -> bool:
 		if tex_mat != null:
 			mi.material_override = tex_mat
 	if tex_mat != null:
+		tex_mat.albedo_color = _body_tint
 		_mat_skin = tex_mat
 	_head = Node3D.new()
 	_body.add_child(_head)
@@ -1212,8 +1172,8 @@ func _build_kenney_walker() -> bool:
 	var cs := get_node_or_null("Collision") as CollisionShape3D
 	if cs != null and cs.shape is CapsuleShape3D:
 		var shape := (cs.shape as CapsuleShape3D).duplicate() as CapsuleShape3D   # scene sub-resource is shared by every zombie
-		shape.radius = WALKER_RADIUS
-		shape.height = WALKER_HEIGHT
+		shape.radius = WALKER_RADIUS * maxf(_body_dims.x, 1.0)
+		shape.height = WALKER_HEIGHT * _body_dims.y
 		cs.shape = shape
 		cs.position.y = WALKER_HEIGHT * 0.5
 	_add_walker_head_shape()
@@ -1265,59 +1225,6 @@ func _sync_rig() -> void:
 		_skel.set_bone_pose_rotation(_bone_arm[i], Quaternion(Vector3.RIGHT if i == 0 else Vector3.LEFT, d))
 	_apply_sever_pose()
 
-
-func _build_walker_procedural() -> void:
-	_mesh(_body, _box_mesh(Vector3(0.5, 0.62, 0.27)), Vector3(0, 1.17, 0), _mat_shirt)
-	_mesh(_body, _box_mesh(Vector3(0.46, 0.22, 0.25)), Vector3(0, 0.78, 0), _mat_pants)
-	_mesh(_body, _box_mesh(Vector3(0.47, 0.05, 0.26)), Vector3(0, 0.9, 0), _material(Color(0.12, 0.1, 0.08)))   # belt
-	_mesh(_body, _box_mesh(Vector3(0.18, 0.2, 0.02)), Vector3(0.08, 1.2, -0.14), _mat_blood)
-	for i in range(3):   # torn shirt hem
-		_mesh(_body, _box_mesh(Vector3(0.13, 0.12 + 0.04 * i, 0.275)), Vector3((i - 1) * 0.16, 0.88 - 0.02 * i, 0), _mat_shirt)
-	for side in [-1.0, 1.0]:
-		_mesh(_body, _sphere_mesh(0.1, 8, 5), Vector3(0.3 * side, 1.43, 0), _mat_shirt)   # shoulder
-	_mesh(_body, _box_mesh(Vector3(0.12, 0.28, 0.08)), Vector3(0, 1.2, 0.17), _mat_shirt)  # hunched spine
-	_build_head(1.52, 0.15, Color(0.9, 0.7, 0.1))
-	for side in [-1.0, 1.0]:
-		_build_arm(side, Vector3(0.34 * side, 1.4, 0), 0.62, 0.07, 10)
-		_build_leg(side, Vector3(0.13 * side, 0.8, 0), 0.82, 0.09, 10)
-
-
-## Runner: lean, long limbs, exposed ribs, torn shorts, red eyes, head thrust forward.
-func _build_runner() -> void:
-	_mesh(_body, _box_mesh(Vector3(0.4, 0.6, 0.21)), Vector3(0, 1.19, 0), _mat_shirt)
-	_mesh(_body, _box_mesh(Vector3(0.38, 0.2, 0.22)), Vector3(0, 0.8, 0), _mat_pants)
-	for i in range(4):   # ribs through the torn shirt
-		_mesh(_body, _box_mesh(Vector3(0.3, 0.02, 0.02)), Vector3(0, 1.3 - i * 0.07, -0.115), _mat_skin)
-	_mesh(_body, _box_mesh(Vector3(0.22, 0.24, 0.02)), Vector3(0.06, 1.22, -0.11), _mat_blood)
-	for i in range(5):   # spine ridge
-		_mesh(_body, _box_mesh(Vector3(0.035, 0.05, 0.04)), Vector3(0, 1.0 + i * 0.1, 0.12), _mat_skin)
-	for side in [-1.0, 1.0]:
-		_mesh(_body, _sphere_mesh(0.08, 8, 5), Vector3(0.26 * side, 1.44, 0), _mat_skin)
-	_build_head(1.5, 0.135, Color(0.95, 0.15, 0.1), -0.07)
-	for side in [-1.0, 1.0]:
-		_build_arm(side, Vector3(0.27 * side, 1.42, 0), 0.74, 0.055, 10)
-		_build_leg(side, Vector3(0.11 * side, 0.82, 0), 0.84, 0.075, 10)
-
-
-## Bloater: huge swollen belly with glowing boils, small head, thick limbs. 260 hp.
-func _build_bloater() -> void:
-	var boil := _material(Color(0.7, 0.75, 0.25), 0.5)
-	boil.emission_enabled = true
-	boil.emission = Color(0.55, 0.6, 0.1)
-	boil.emission_energy_multiplier = 0.6
-	_mesh(_body, _sphere_mesh(0.46, 16, 10, 0.95), Vector3(0, 1.0, -0.04), _mat_skin)           # belly
-	_mesh(_body, _sphere_mesh(0.4, 14, 8, 0.7), Vector3(0, 1.28, 0.02), _mat_shirt)             # chest in a stretched shirt
-	_mesh(_body, _box_mesh(Vector3(0.6, 0.2, 0.4)), Vector3(0, 0.74, 0), _mat_pants)
-	for i in range(8):   # boils round the belly
-		var a := float(i) / 8.0 * TAU
-		_mesh(_body, _sphere_mesh(0.065, 6, 4), Vector3(cos(a) * 0.4, 0.95 + sin(a * 2.0) * 0.12, sin(a) * 0.4 - 0.04), boil)
-	_mesh(_body, _box_mesh(Vector3(0.3, 0.3, 0.03)), Vector3(0.1, 1.05, -0.45), _mat_blood)
-	for side in [-1.0, 1.0]:
-		_mesh(_body, _sphere_mesh(0.15, 10, 6), Vector3(0.42 * side, 1.42, 0), _mat_shirt)
-	_build_head(1.5, 0.12, Color(0.8, 0.9, 0.2), -0.12)
-	for side in [-1.0, 1.0]:
-		_build_arm(side, Vector3(0.5 * side, 1.4, 0), 0.6, 0.12, 10)
-		_build_leg(side, Vector3(0.2 * side, 0.78, 0), 0.8, 0.14, 10)
 
 
 func _apply_kind() -> void:

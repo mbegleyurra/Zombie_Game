@@ -109,13 +109,16 @@ const RESERVE_KEYS := {
 	"ammo_545": "545", "ammo_68": "68", "ammo_300": "300",
 }
 
+## Every ammo entry in a loot table (and so every ground pile, container and dungeon drop) is multiplied by this.
+const AMMO_LOOT_MULT := 2
+
 const TABLES := {
 	"farm": {
 		"rolls": [1, 3],
 		"entries": [
 			["food", 20, 1, 2], ["water", 18, 1, 2], ["ammo_12ga", 14, 2, 6], ["scrap", 10, 1, 3],
 			["planks", 12, 2, 4], ["ammo_762", 6, 3, 8], ["ammo_9mm", 8, 5, 15], ["medkit", 5, 1, 1],
-			["ammo_556", 3, 5, 10], ["weapon_shotgun", 1.5, 1, 1], ["weapon_hunting", 1.5, 1, 1],
+			["ammo_556", 3, 5, 10], ["weapon_shotgun", 1.5, 1, 1], ["weapon_hunting", 1.5, 1, 1], ["ammo_545", 3, 4, 8],
 		],
 	},
 	"barn": {
@@ -131,7 +134,7 @@ const TABLES := {
 		"entries": [
 			["food", 26, 1, 3], ["water", 26, 1, 3], ["scrap", 10, 1, 3], ["ammo_9mm", 12, 6, 18],
 			["medkit", 5, 1, 1], ["ammo_12ga", 5, 2, 4], ["ammo_556", 3, 5, 10], ["planks", 4, 1, 2],
-			["weapon_pistol", 2, 1, 1], ["weapon_ak", 1, 1, 1],
+			["weapon_pistol", 2, 1, 1], ["weapon_ak", 1, 1, 1], ["ammo_545", 2, 4, 8],
 			],
 	},
 	"hospital": {
@@ -139,7 +142,7 @@ const TABLES := {
 		"entries": [
 			["medkit", 34, 1, 2], ["water", 14, 1, 2], ["food", 10, 1, 2], ["ammo_9mm", 8, 6, 15],
 			["scrap", 6, 1, 2], ["ammo_556", 3, 5, 10], ["ammo_762", 2, 3, 6],
-			["weapon_pistol", 1.5, 1, 1], ["weapon_m4", 1, 1, 1], ["weapon_ar", 0.8, 1, 1],
+			["weapon_pistol", 1.5, 1, 1], ["weapon_m4", 1, 1, 1], ["weapon_ar", 0.8, 1, 1], ["ammo_68", 2, 4, 8],
 			],
 	},
 	"police": {
@@ -148,6 +151,7 @@ const TABLES := {
 			["ammo_9mm", 20, 8, 20], ["ammo_12ga", 12, 3, 8], ["ammo_556", 8, 6, 15], ["medkit", 8, 1, 1],
 			["weapon_pistol", 8, 1, 1], ["weapon_shotgun", 6, 1, 1], ["weapon_m4", 3, 1, 1], ["weapon_ar", 3, 1, 1],
 			["water", 6, 1, 2], ["food", 4, 1, 2], ["scrap", 4, 1, 3],
+			["ammo_545", 4, 5, 10], ["ammo_68", 3, 4, 8], ["ammo_300", 2, 3, 6],
 		],
 	},
 	"warehouse": {
@@ -173,6 +177,7 @@ const TABLES := {
 			["ammo_9mm", 10, 4, 10], ["ammo_12ga", 8, 1, 3], ["medkit", 3, 1, 1], ["ammo_556", 4, 4, 8],
 			["ammo_762", 3, 3, 6],
 			["weapon_pistol", 1, 1, 1], ["weapon_hunting", 1, 1, 1], ["weapon_m4", 0.5, 1, 1], ["weapon_ar", 0.7, 1, 1],
+			["ammo_545", 2, 4, 8], ["ammo_300", 1, 3, 6],
 			],
 	},
 }
@@ -352,7 +357,12 @@ static func pick_one(table: String, rng: RandomNumberGenerator) -> Dictionary:
 		if r <= 0.0:
 			chosen = e
 			break
-	return {"id": str(chosen[0]), "count": rng.randi_range(int(chosen[2]), int(chosen[3]))}
+	var lo: int = int(chosen[2])
+	var hi: int = int(chosen[3])
+	if str(get_item(str(chosen[0])).get("type", "")) == "ammo":
+		lo *= AMMO_LOOT_MULT
+		hi *= AMMO_LOOT_MULT
+	return {"id": str(chosen[0]), "count": rng.randi_range(lo, hi)}
 
 
 # ---------------------------------------------------------------- grid inventory (footprints + deconstruct)
