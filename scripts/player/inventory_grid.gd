@@ -238,3 +238,29 @@ static func deconstruct(p, id: String, units: int = 1) -> Dictionary:
 	res["removed"] = got
 	res["yield"] = gain
 	return res
+
+
+## Can the player wear `new_id` ("" = take the worn pack off) without losing anything? Simulated on a copy: the new
+## pack leaves the inventory, the old one comes back into it, the grid gets its new column count, and everything must
+## still pack. Returns {ok, reason, cols} where cols is the grid width after the change. Nothing is changed.
+static func backpack_swap(p, new_id: String) -> Dictionary:
+	var res := {"ok": false, "reason": "", "cols": _cols(p)}
+	var old: String = str(p.get("backpack_id")) if p.get("backpack_id") != null else ""
+	var inv: Dictionary = (p.get("inventory") as Dictionary).duplicate()
+	if new_id != "":
+		if not ItemDB.is_backpack(new_id):
+			res["reason"] = "%s is not a backpack." % ItemDB.item_name(new_id)
+			return res
+		if int(inv.get(new_id, 0)) <= 0:
+			res["reason"] = "You are not carrying %s." % ItemDB.item_name(new_id)
+			return res
+		inv[new_id] = int(inv[new_id]) - 1
+	if old != "":
+		inv[old] = int(inv.get(old, 0)) + 1
+	var cols := _cols(p) - ItemDB.backpack_cols(old) + ItemDB.backpack_cols(new_id)
+	res["cols"] = cols
+	if not bool(pack(build_items(inv, _weapon_ids(p)), cols, _rows(p))["ok"]):
+		res["reason"] = "Not enough room. Free some space first so nothing is lost."
+		return res
+	res["ok"] = true
+	return res

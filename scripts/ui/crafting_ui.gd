@@ -115,7 +115,7 @@ func refresh() -> void:
 		var kind: String = r["kind"]
 		if kind != section:
 			section = kind
-			_list.add_child(_header("ASSAULT RIFLES" if kind == "weapon" else "AMMUNITION"))
+			_list.add_child(_header({"weapon": "ASSAULT RIFLES", "gear": "BACKPACKS"}.get(kind, "AMMUNITION")))
 		_list.add_child(_make_row(r, b))
 
 

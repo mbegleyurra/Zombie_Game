@@ -19,7 +19,22 @@ const BACK_TOL := 0.003         ## after cancel a palm is back at its hold withi
 const GRIP_HOLD_DIST := 0.08    ## the trigger palm stays this close to the grip for non-bolt styles throughout a reload
 const REACH_DIST := 0.08        ## a hand must come this close to the part it works (mag well, port, bolt, charging handle)
 
+## RAT's section-4 assertions, every anchor below measured from the pack meshes, not read from the viewmodel profile
+const KNOB_REACH := 0.05        ## bolt gun: the trigger palm must come this close to the bolt knob
+const MAG_HOLD_DIST := 0.05     ## rifle / pistol at 75 percent: the support palm is this close to the magazine's centre
+const SHELL_TRAVEL := 0.03      ## shotgun: the support palm moves at least this far between the 25 and 75 percent samples
+const BOLT_KNOB_MESH := Vector3(0.035, -0.005, -0.245)   ## sniper_rifle_001 bolt knob centre at rest (mesh: vertices with x > 0.02 span x 0.021-0.048, y -0.021-0.012, z -0.261--0.229)
+const BOLT_RECEIVER := Vector3(-0.04, 0.03, -0.25)       ## sniper_rifle_001 receiver opening (mesh bins z -0.30 to -0.20, x -0.043 to 0.048, top y 0.044)
 const SHELL_GATE := Vector3(0.0, -0.056, -0.13)   ## shotgun_001 loading gate, gun-local: underside of the receiver (mesh bins: y min -0.056, z -0.15 to -0.09)
+
+## RAT QA_GATE_FINAL6 section A
+const MIN_PART_TRAVEL := 0.01   ## A1: the bolt / slide / pump / charging handle / cylinder visibly moves at least this far (m)
+const MAG_STEP_MAX := 0.03      ## A2: a handled magazine never jumps more than this between two samples (2.4 % apart)
+const MAG_NEAR_75 := 0.035      ## A2: at 75 percent the new magazine's top is this close to its seat
+const CUP_PHASE := 0.1          ## revolver: before / after this share of the reload the support hand cups the grip (palms touch by design)
+
+## RAT QA_GATE_FINAL7 A1
+const FOREND_BELOW_BORE := 0.04 ## at rest the support palm sits over a mesh section reaching at least this far below the bore (forend, not bare barrel / scope)
 
 var fails := 0
 
@@ -85,6 +100,23 @@ func _palm_ok(cam: Camera3D, h: Node3D, hand: String) -> bool:
 	var s := cam.unproject_position(p)
 	var vr := root.get_visible_rect().size
 	return s.x > 0.0 and s.y > 0.0 and s.x < vr.x and s.y < vr.y
+
+
+## Centre of the visible magazine's meshes in gun-local space; Vector3.INF when the magazine is hidden or empty.
+func _mag_center(h: Node3D, gun: Node3D) -> Vector3:
+	var mag := h._mag as Node3D
+	if mag == null or not mag.visible:
+		return Vector3.INF
+	var box := AABB()
+	var first := true
+	for mi in mag.find_children("*", "MeshInstance3D", true, false):
+		var m := mi as MeshInstance3D
+		if m.mesh == null or not m.is_visible_in_tree():
+			continue
+		var bb := m.global_transform * m.get_aabb()
+		box = bb if first else box.merge(bb)
+		first = false
+	return Vector3.INF if first else gun.to_local(box.get_center())
 
 
 func _mesh_count(n: Node) -> int:
@@ -184,8 +216,25 @@ func _run() -> void:
 		var skin := _skin_pixels(img)
 		print("INFO  [%s] skin-coloured pixels at rest: %d" % [sid, skin])
 		check(skin >= MIN_SKIN_PIXELS, "[%s] rendered frame shows hands (%d skin px >= %d)" % [sid, skin, MIN_SKIN_PIXELS])
-		var rest_run := _gap_run(img, cam.unproject_position((h.get_node("Hand_L/Palm") as Node3D).global_position), cam.unproject_position((h.get_node("Hand_R/Palm") as Node3D).global_position))
-		check(rest_run >= MIN_IMG_GAP_PX, "[%s] rendered rest frame shows a gap between the hands (%d px non-skin >= %d)" % [sid, rest_run, MIN_IMG_GAP_PX])
+		var cup: bool = h.style() == "pistol"   ## two-handed pistol cup: the support palm wraps the grip under the trigger hand
+		if cup:
+			var cup_d := (h.get_node("Hand_L") as Node3D).position.distance_to((h.get_node("Hand_R") as Node3D).position)
+			check(cup_d <= 0.1, "[%s] support hand cups the grip at rest (palms %.3f m apart <= 0.10)" % [sid, cup_d])
+		else:
+			var rest_run := _gap_run(img, cam.unproject_position((h.get_node("Hand_L/Palm") as Node3D).global_position), cam.unproject_position((h.get_node("Hand_R/Palm") as Node3D).global_position))
+			check(rest_run >= MIN_IMG_GAP_PX, "[%s] rendered rest frame shows a gap between the hands (%d px non-skin >= %d)" % [sid, rest_run, MIN_IMG_GAP_PX])
+			# gate 7 A1: the support fist wraps the forend, not the barrel / scope ahead of it
+			var lp := w._gun.to_local((h.get_node("Hand_L/Palm") as Node3D).global_position)
+			var lo_y := _mesh_lo_at(w._gun, h, lp.z)
+			check(lo_y <= GunMesh.MUZZLE_Y - FOREND_BELOW_BORE, "[%s] A1 rest support palm (z %.3f) sits on a section reaching below the bore (mesh low %.3f <= %.3f)" % [sid, lp.z, lo_y, GunMesh.MUZZLE_Y - FOREND_BELOW_BORE])
+		# A1: the gun has a moving part to animate
+		var part := h._slide as Node3D
+		var part_mesh: Node3D = null
+		if part != null:
+			var pms := part.find_children("*", "MeshInstance3D", true, false)
+			part_mesh = pms[0] as Node3D if not pms.is_empty() else null
+		check(part_mesh != null, "[%s] A1 gun has a moving bolt / slide / pump / handle / cylinder mesh (%s)" % [sid, str(h._slide_kind)])
+		var part_rest := gun_local(w._gun, part_mesh)
 
 		# ---- reload: deterministic sampling through the hands' own clock
 		var hl := h.get_node("Hand_L") as Node3D
@@ -228,8 +277,33 @@ func _run() -> void:
 		var reach_r := 99.0
 		var grip_ref: Vector3 = vp["grip_r"]
 		var grip_far := 0.0   ## farthest the trigger palm strays from the grip (gun-local) during the reload
+		var l_q1 := Vector3.INF   ## support palm (gun-local) at about 25, 50 and 75 percent
+		var l_q2 := Vector3.INF
+		var l_q3 := Vector3.INF
+		var mag_c := Vector3.INF  ## magazine centre (gun-local) at about 75 percent, from its meshes
+		var knob_reach := 99.0    ## bolt gun: closest the trigger palm gets to the (moving) bolt knob
+		var part_travel := 0.0    ## A1: farthest the moving part's mesh gets from its rest spot
+		var mag_d := {}           ## A2: sample index -> distance of the visible magazine pivot from its seat
+		var mag_jump := 0.0
+		var last_mag := Vector3.INF
+		var q1_mag := Vector3.INF ## A3: magazine centre at 25 percent
 		for i in range(1, SAMPLES + 1):
 			h.advance(dur / float(SAMPLES + 1))
+			var prog := float(i) / float(SAMPLES + 1)
+			var cup_now := cup and (prog < CUP_PHASE or prog > 1.0 - CUP_PHASE)
+			if part_mesh != null:
+				part_travel = maxf(part_travel, gun_local(gun, part_mesh).distance_to(part_rest))
+			var mag := h._mag as Node3D
+			if mag != null and mag.visible and h._mag_off != Vector3.ZERO:
+				mag_d[i] = mag.position.distance_to(h._mag_rest)
+				if last_mag != Vector3.INF:
+					mag_jump = maxf(mag_jump, mag.position.distance_to(last_mag))
+				last_mag = mag.position
+			elif mag != null and mag.visible and last_mag != Vector3.INF:
+				mag_jump = maxf(mag_jump, mag.position.distance_to(last_mag))   ## the seat step itself
+				last_mag = Vector3.INF
+			else:
+				last_mag = Vector3.INF
 			grip_far = maxf(grip_far, gun.to_local((h.get_node("Hand_R/Palm") as Node3D).global_position).distance_to(grip_ref))
 			max_l = maxf(max_l, hl.position.distance_to(rest_l))
 			max_r = maxf(max_r, hr.position.distance_to(rest_r))
@@ -237,13 +311,24 @@ func _run() -> void:
 			var par := (h.get_node("Hand_R/Palm") as Node3D).global_position
 			var gl := gun.to_local(pal)
 			var gr := gun.to_local(par)
+			if i == SAMPLES / 4:
+				l_q1 = gl
+				q1_mag = _mag_center(h, gun)
+			elif i == SAMPLES / 2:
+				l_q2 = gl
+			elif i == SAMPLES * 3 / 4:
+				l_q3 = gl
+				mag_c = _mag_center(h, gun)
+			if style == "bolt":
+				knob_reach = minf(knob_reach, gr.distance_to(BOLT_KNOB_MESH + Vector3(0.0, 0.0, float(h._slide_z))))
 			if minf(_box_dist(gl, ext_lo, ext_hi), _box_dist(gr, ext_lo, ext_hi)) > ON_GUN_DIST:
 				both_off += 1
 				print("INFO  [%s] sample %d/%d: both hands off the gun (left %.3f m, right %.3f m from its bounds)" % [sid, i, SAMPLES, _box_dist(gl, ext_lo, ext_hi), _box_dist(gr, ext_lo, ext_hi)])
-			if pal.distance_to(par) < MIN_PALM_GAP:
+			if pal.distance_to(par) < MIN_PALM_GAP and not cup_now:
 				print("INFO  [%s] sample %d/%d: palms %.3f m apart, left (gun-local) %s, right %s" % [sid, i, SAMPLES, pal.distance_to(par), str(gl), str(gr)])
-			min_gap = minf(min_gap, pal.distance_to(par))
-			min_px = minf(min_px, cam.unproject_position(pal).distance_to(cam.unproject_position(par)))
+			if not cup_now:
+				min_gap = minf(min_gap, pal.distance_to(par))
+				min_px = minf(min_px, cam.unproject_position(pal).distance_to(cam.unproject_position(par)))
 			reach_l = minf(reach_l, gl.distance_to(target_l))
 			if i == SAMPLES / 2:
 				reach_mid = gl.distance_to(target_l)
@@ -254,10 +339,11 @@ func _run() -> void:
 			if not (_palm_ok(cam, h, "Hand_L") and _palm_ok(cam, h, "Hand_R")):
 				off_frame += 1
 				print("INFO  [%s] sample %d/%d off-frame: left palm px %s, right palm px %s" % [sid, i, SAMPLES, str(cam.unproject_position(pal)), str(cam.unproject_position(par))])
-			if i == SAMPLES / 3 or i == SAMPLES / 2:
+			if i == SAMPLES / 3 or i == SAMPLES / 2 or i == SAMPLES / 4 or i == SAMPLES * 3 / 4:
 				await process_frame
 				await process_frame
-				var rimg := _shot("hands_%s_%s" % [sid, "grab" if i == SAMPLES / 3 else "reload"])
+				var tag: String = {SAMPLES / 4: "25", SAMPLES / 3: "grab", SAMPLES / 2: "reload", SAMPLES * 3 / 4: "75"}[i]
+				var rimg := _shot("hands_%s_%s" % [sid, tag])
 				min_img_run = mini(min_img_run, _gap_run(rimg, cam.unproject_position(pal), cam.unproject_position(par)))
 				if i == SAMPLES / 2:
 					print("INFO  [%s] skin-coloured pixels mid-reload: %d" % [sid, _skin_pixels(rimg)])
@@ -277,6 +363,32 @@ func _run() -> void:
 			check(reach_r <= REACH_DIST, "[%s] trigger hand reaches the bolt / charging handle (%.3f m <= %.2f)" % [sid, reach_r, REACH_DIST])
 		if target_c != Vector3.INF:
 			check(reach_c <= REACH_DIST, "[%s] support hand reaches the slide / charging handle (%.3f m <= %.2f)" % [sid, reach_c, REACH_DIST])
+		if style == "bolt":
+			check(knob_reach <= KNOB_REACH, "[%s] trigger palm works the bolt knob measured from the mesh (%.3f m <= %.2f)" % [sid, knob_reach, KNOB_REACH])
+			check(l_q2.distance_to(BOLT_RECEIVER) <= REACH_DIST, "[%s] support palm is at the receiver opening at 50 percent (%.3f m <= %.2f)" % [sid, l_q2.distance_to(BOLT_RECEIVER), REACH_DIST])
+		if style == "rifle" or style == "pistol":
+			check(mag_c != Vector3.INF, "[%s] a magazine is visible at 75 percent of the reload" % sid)
+			if mag_c != Vector3.INF:
+				print("INFO  [%s] 75 percent: left palm %s, magazine centre %s, right palm %s" % [sid, str(l_q3), str(mag_c), str(gun.to_local((h.get_node("Hand_R/Palm") as Node3D).global_position))])
+				check(l_q3.distance_to(mag_c) <= MAG_HOLD_DIST, "[%s] support fist holds the magazine at 75 percent (%.3f m <= %.2f)" % [sid, l_q3.distance_to(mag_c), MAG_HOLD_DIST])
+		if style == "shell":
+			check(l_q1.distance_to(l_q3) >= SHELL_TRAVEL, "[%s] support palm travels between the 25 and 75 percent samples (%.3f m >= %.2f)" % [sid, l_q1.distance_to(l_q3), SHELL_TRAVEL])
+		# ---- RAT section A
+		print("INFO  [%s] A1 moving part travel %.3f m; A2 mag-from-seat %s, largest step %.3f m" % [sid, part_travel, str(_round_vals(mag_d)), mag_jump])
+		check(part_travel >= MIN_PART_TRAVEL, "[%s] A1 the moving part visibly moves during the empty reload (%.3f m >= %.2f)" % [sid, part_travel, MIN_PART_TRAVEL])
+		if style == "rifle" or style == "pistol":
+			var i40 := int(round(0.4 * (SAMPLES + 1)))
+			var i75 := SAMPLES * 3 / 4
+			check(mag_d.has(i40) and mag_d.has(i75), "[%s] A2 the new magazine is in the hand from 40 to 75 percent" % sid)
+			if mag_d.has(i40) and mag_d.has(i75):
+				check(float(mag_d[i75]) <= MAG_NEAR_75, "[%s] A2 at 75 percent the magazine is at the well (%.3f m <= %.3f)" % [sid, mag_d[i75], MAG_NEAR_75])
+				var closing := true
+				for k in range(i40 + 1, i75 + 1):
+					closing = closing and mag_d.has(k) and float(mag_d[k]) <= float(mag_d[k - 1]) + 0.002
+				check(closing, "[%s] A2 the magazine closes on the well steadily from 40 to 75 percent" % sid)
+			check(mag_jump <= MAG_STEP_MAX, "[%s] A2 the magazine never pops (largest step between samples %.3f m <= %.2f)" % [sid, mag_jump, MAG_STEP_MAX])
+		if style == "rifle" or (style == "pistol" and not bool(h._revolver)):
+			check(q1_mag != Vector3.INF and l_q1.distance_to(q1_mag) <= MAG_HOLD_DIST, "[%s] A3 at 25 percent the support fist is carrying a magazine (%s)" % [sid, ("%.3f m" % l_q1.distance_to(q1_mag)) if q1_mag != Vector3.INF else "no magazine"])
 		h.cancel()
 		var back_l := hl.position.distance_to(rest_l)
 		var back_r := hr.position.distance_to(rest_r)
@@ -306,3 +418,36 @@ func _run() -> void:
 
 	print("RESULT %s (%d fails)" % ["PASS" if fails == 0 else "FAIL", fails])
 	quit(1 if fails > 0 else 0)
+
+
+func gun_local(gun: Node3D, n: Node3D) -> Vector3:
+	return gun.to_local(n.global_position) if n != null else Vector3.ZERO
+
+
+## Lowest gun-local y where the gun's own mesh surface (hands excluded) crosses the plane at `z`, from its triangles,
+## so a long face with no vertex near `z` (the pump tube) still counts (INF when nothing crosses).
+func _mesh_lo_at(gun: Node3D, hands: Node, z: float) -> float:
+	var lo := INF
+	for c in gun.find_children("*", "MeshInstance3D", true, false):
+		var mi := c as MeshInstance3D
+		if mi.mesh == null or hands.is_ancestor_of(mi) or not mi.is_visible_in_tree():
+			continue
+		var xf := gun.global_transform.affine_inverse() * mi.global_transform
+		var f := mi.mesh.get_faces()
+		for t in range(f.size() / 3):
+			for j in range(3):
+				var a := xf * f[t * 3 + j]
+				var b := xf * f[t * 3 + (j + 1) % 3]
+				if (a.z - z) * (b.z - z) > 0.0 or is_equal_approx(a.z, b.z):
+					continue
+				var p := a.lerp(b, (z - a.z) / (b.z - a.z))
+				if absf(p.x) < 0.06:
+					lo = minf(lo, p.y)
+	return lo
+
+
+func _round_vals(d: Dictionary) -> Array:
+	var out := []
+	for k in [16, 20, 24, 30]:
+		out.append(("%d:%.3f" % [k, d[k]]) if d.has(k) else "%d:-" % k)
+	return out

@@ -39,6 +39,10 @@ const TP_DISTANCE := 2.8      ## third-person boom length (m); the spring arm sh
 const TP_SHOULDER := 0.45     ## camera sits this far to the right of the head
 const TP_HEIGHT := 0.2        ## and this far above it
 const TP_MARGIN := 0.12
+const LEAN_OFFSET := 0.35     ## head slides this far sideways (m) at full lean
+const LEAN_ROLL_DEG := 14.0   ## and rolls this much
+const LEAN_SPEED := 10.0      ## lerp rate toward the target lean
+const LEAN_PROBE_RADIUS := 0.2   ## sphere swept from the head toward the lean side; the camera never enters a wall
 const HUNGER_RATE := 0.045   ## per second (about 37 minutes from full to empty)
 const THIRST_RATE := 0.07
 
@@ -66,11 +70,15 @@ var is_dead: bool = false
 var is_sprinting: bool = false
 var crouching: bool = false
 var look_pitch: float = 0.0
+var lean: float = 0.0   ## -1 full left .. +1 full right (eased, wall-limited). Replicated; remote bodies tilt with it
+var _lean_input: float = 0.0
+var _lean_forced: bool = false   ## set_lean_input() overrides the keys (tests / automation)
 var equipped_id: String = ""
 var base_fov: float = BASE_FOV
 var inventory: Dictionary = {}
 var inv_cols: int = 10   ## grid size in cells (scripts/player/inventory_grid.gd); items take their ItemDB footprint
 var inv_rows: int = 6
+var backpack_id: String = ""   ## worn backpack (ItemDB id, "" = none). Replicated so remote peers draw it; adds columns to inv_cols
 var _toast: Label
 var _toast_gen: int = 0
 
@@ -123,6 +131,8 @@ static func register_inputs() -> void:
 	_key("use_food", [KEY_J])
 	_key("use_water", [KEY_K])
 	_key("toggle_camera", [KEY_V])
+	_key("lean_left", [KEY_Q])
+	_key("lean_right", [KEY_G])   # E is interact, so lean right is G
 	_mouse("fire", MOUSE_BUTTON_LEFT)
 	_mouse("aim", MOUSE_BUTTON_RIGHT)
 	for i in range(5):
@@ -187,7 +197,7 @@ func _ready() -> void:
 
 func _setup_sync() -> void:
 	var cfg := SceneReplicationConfig.new()
-	for prop in ["position", "rotation", "look_pitch", "crouching", "is_dead", "health", "equipped_id", "is_sprinting"]:
+	for prop in ["position", "rotation", "look_pitch", "crouching", "is_dead", "health", "equipped_id", "is_sprinting", "backpack_id", "lean"]:
 		var path := NodePath(".:" + prop)
 		cfg.add_property(path)
 		cfg.property_set_spawn(path, true)
@@ -281,11 +291,12 @@ func _process(delta: float) -> void:
 
 
 func _process_local(delta: float) -> void:
+	_update_lean(delta)
 	if is_dead:
 		head.position.y = lerpf(head.position.y, 0.35, clampf(delta * 3.0, 0.0, 1.0))
 		head.rotation.z = lerpf(head.rotation.z, 0.9, clampf(delta * 3.0, 0.0, 1.0))
 	else:
-		head.rotation.z = lerpf(head.rotation.z, 0.0, clampf(delta * 8.0, 0.0, 1.0))
+		head.rotation.z = lerpf(head.rotation.z, -lean * deg_to_rad(LEAN_ROLL_DEG), clampf(delta * 8.0, 0.0, 1.0))
 	_interact_timer -= delta
 	if _interact_timer <= 0.0:
 		_interact_timer = 0.1
@@ -299,6 +310,8 @@ func _process_local(delta: float) -> void:
 
 func _process_remote(delta: float) -> void:
 	head.rotation_degrees.x = look_pitch
+	head.position.x = lean * LEAN_OFFSET
+	head.rotation.z = -lean * deg_to_rad(LEAN_ROLL_DEG)
 	var moved := global_position - _last_pos
 	moved.y = 0.0
 	_remote_speed = lerpf(_remote_speed, moved.length() / maxf(delta, 0.0001), clampf(delta * 8.0, 0.0, 1.0))
@@ -319,6 +332,51 @@ func _update_crouch(delta: float) -> void:
 			crouching = false
 	head.position.y = lerpf(head.position.y, EYE_CROUCH if crouching else EYE_STAND, clampf(delta * 12.0, 0.0, 1.0))
 	_apply_shape(crouching, delta)
+
+
+## Hold-to-lean (Q / G). Off while sprinting, seated in a vehicle or dead. A sphere swept from the unleaned head toward
+## the lean side limits how far the head may go, so the camera never ends up inside a wall.
+func set_lean_input(v: float) -> void:
+	_lean_forced = true
+	_lean_input = clampf(v, -1.0, 1.0)
+
+
+func _update_lean(delta: float) -> void:
+	var want := _lean_input
+	if not _lean_forced:
+		want = 0.0
+		if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+			want = Input.get_action_strength("lean_right") - Input.get_action_strength("lean_left")
+	if is_dead or is_sprinting or vehicle != null:
+		want = 0.0
+	var limit := lean_room(signf(want)) if absf(want) > 0.001 else 1.0
+	var target := clampf(want, -limit, limit)
+	lean = lerpf(lean, target, clampf(delta * LEAN_SPEED, 0.0, 1.0))
+	if absf(lean - target) < 0.002:
+		lean = target
+	# never ease into a wall: a wall that appears mid-lean clamps at once
+	if absf(lean) > 0.001:
+		var room := lean_room(signf(lean))
+		lean = clampf(lean, -room, room)
+	head.position.x = lean * LEAN_OFFSET
+
+
+## Fraction (0..1) of a full lean to side (-1 left / +1 right) that is free of world geometry.
+func lean_room(side: float) -> float:
+	if side == 0.0 or not is_inside_tree():
+		return 1.0
+	var shape := SphereShape3D.new()
+	shape.radius = LEAN_PROBE_RADIUS
+	var q := PhysicsShapeQueryParameters3D.new()
+	q.shape = shape
+	q.collision_mask = 1
+	q.exclude = [get_rid()]
+	q.transform = Transform3D(Basis.IDENTITY, global_transform * Vector3(0.0, head.position.y, 0.0))
+	q.motion = global_basis.x.normalized() * side * LEAN_OFFSET
+	var res := get_world_3d().direct_space_state.cast_motion(q)
+	if res.is_empty():
+		return 1.0
+	return clampf(res[0], 0.0, 1.0)
 
 
 func _apply_shape(crouch: bool, delta: float) -> void:
@@ -412,6 +470,9 @@ func respawn(pos: Vector3) -> void:
 	thirst = maxf(thirst, 60.0)
 	is_dead = false
 	crouching = false
+	lean = 0.0
+	_lean_input = 0.0
+	head.position.x = 0.0
 	velocity = Vector3.ZERO
 	global_position = pos
 	head.rotation.z = 0.0
@@ -514,6 +575,44 @@ func deconstruct_item(id: String, units: int = 1) -> Dictionary:
 	return r
 
 
+## Wears a backpack from the inventory ("" takes the worn one off) and resizes the grid. A worn pack being swapped or
+## taken off goes back into the inventory. Refused (nothing changes, HUD message) unless everything still packs into
+## the resulting grid, so no item is ever lost. Owning peer only. Returns {ok, reason}.
+func equip_backpack(id: String) -> Dictionary:
+	id = normalize_id(id)
+	var res := {"ok": false, "reason": ""}
+	if is_inside_tree() and not is_multiplayer_authority():
+		res["reason"] = "Only the owning peer can change its backpack."
+		return res
+	if id == backpack_id:
+		res["ok"] = true
+		return res
+	var chk: Dictionary = InventoryGrid.backpack_swap(self, id)
+	if not bool(chk["ok"]):
+		res["reason"] = str(chk["reason"])
+		notice_msg(res["reason"])
+		return res
+	var old := backpack_id
+	if id != "":
+		var left := int(inventory.get(id, 0)) - 1
+		if left > 0:
+			inventory[id] = left
+		else:
+			inventory.erase(id)
+	if old != "":
+		inventory[old] = int(inventory.get(old, 0)) + 1
+	inv_cols = int(chk["cols"])
+	backpack_id = id
+	inventory_changed.emit()
+	weapons.ammo_changed.emit()
+	res["ok"] = true
+	return res
+
+
+func unequip_backpack() -> Dictionary:
+	return equip_backpack("")
+
+
 func inventory_rejected(id: String) -> void:
 	inventory_full.emit(id)
 	notice_msg("Inventory full - can't carry %s" % ItemDB.item_name(id))
@@ -547,6 +646,8 @@ func give_weapon(id: String) -> int:
 func use_item(id: String) -> bool:
 	if is_dead or count_item(id) <= 0:
 		return false
+	if ItemDB.is_backpack(id):
+		return bool(equip_backpack(id)["ok"])
 	match id:
 		"medkit":
 			if health >= max_health:
@@ -755,9 +856,10 @@ func _part(parent: Node3D, mesh: Mesh, size: Vector3, pos: Vector3, color: Color
 func _update_avatar(delta: float) -> void:
 	if _model != null:
 		var spd := Vector2(velocity.x, velocity.z).length() if is_multiplayer_authority() else _remote_speed
-		_model.animate(delta, spd, look_pitch, crouching, is_sprinting, is_dead, equipped_id != "")
 		if not is_multiplayer_authority() or third_person:
 			_sync_avatar_gun()
+		_model.animate(delta, spd, look_pitch, crouching, is_sprinting, is_dead, equipped_id != "", lean)
+		_model.set_backpack(backpack_id)
 		return
 	if is_multiplayer_authority() and not third_person:
 		return
@@ -786,11 +888,17 @@ func _sync_avatar_gun() -> void:
 		_avatar_gun = null
 	if equipped_id != "" and WeaponDB.has_weapon(equipped_id):
 		_avatar_gun = GunMesh.build(WeaponDB.get_weapon(equipped_id).model)
+		if _model != null:
+			# the body holds it: PlayerModel puts the grip in the right fist and aims the barrel with look pitch
+			_model.hold(_avatar_gun)
+			return
 		# The Kenney body's "holding-both" clip puts both hands at about y 0.65 m, 0.7 m ahead of the chest
 		# (the rig is scaled 2.3x), so the grip sits there; the gun is scaled up to read against the chunky body.
 		_avatar_gun.position = Vector3(0.0, 0.64 if not crouching else 0.45, -0.7)
 		_avatar_gun.scale = Vector3.ONE * 1.5
 		_avatar.add_child(_avatar_gun)
+	elif _model != null:
+		_model.hold(null)
 
 
 # ================================================================== HUD (minimal; the full UI lives in scenes/ui)

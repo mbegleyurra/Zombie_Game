@@ -213,8 +213,8 @@ func _run() -> void:
 	for i in ui._entries.size():
 		var e: Dictionary = ui._entries[i]
 		var b: Button = ui.slots[i]
-		geo_ok = geo_ok and b.visible and is_equal_approx(b.size.x, int(e["w"]) * InvUI.CELL - InvUI.GAP) and is_equal_approx(b.size.y, int(e["h"]) * InvUI.CELL - InvUI.GAP) \
-			and is_equal_approx(b.position.x, int(e["x"]) * InvUI.CELL + InvUI.GAP) and is_equal_approx(b.position.y, int(e["y"]) * InvUI.CELL + InvUI.GAP)
+		geo_ok = geo_ok and b.visible and is_equal_approx(b.size.x, int(e["w"]) * ui.cell - InvUI.GAP) and is_equal_approx(b.size.y, int(e["h"]) * ui.cell - InvUI.GAP) \
+			and is_equal_approx(b.position.x, int(e["x"]) * ui.cell + InvUI.GAP) and is_equal_approx(b.position.y, int(e["y"]) * ui.cell + InvUI.GAP)
 	check(geo_ok, "every item button sits at its footprint on the cell grid")
 	check(ui._bg.size() == 60 and "Space" in ui.space_label.text, "60 background cells and a space readout (%s)" % ui.space_label.text)
 	ui._show_detail(mi)

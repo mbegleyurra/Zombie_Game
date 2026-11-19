@@ -3,7 +3,7 @@ extends RefCounted
 ## cars (sedan, pickup, van, police, box truck), a tractor, wooden power poles and sagging wires.
 ## Every function draws into a caller-owned MeshUtil + StaticBody3D, placed by a Transform3D whose
 ## origin sits on the ground. Cars and the tractor run along local +X (+X = front).
-## Randomness only ever comes from the RandomNumberGenerator the caller passes in.
+## No randomness: every value is fixed or passed in by the caller.
 
 const MeshUtil = preload("res://scripts/world/mesh_util.gd")
 
@@ -21,10 +21,6 @@ const C_WIRE := Color(0.08, 0.08, 0.09)
 
 const POLE_HEIGHT := 9.0
 const WIRE_Y := 8.9
-
-
-static func random_car_color(rng: RandomNumberGenerator) -> Color:
-	return CAR_COLORS[rng.randi_range(0, CAR_COLORS.size() - 1)] as Color
 
 
 static func add_collision(body: StaticBody3D, xf: Transform3D, center: Vector3, size: Vector3) -> void:
@@ -47,7 +43,7 @@ static func add_wheel(mu, xf: Transform3D, center: Vector3, radius: float, width
 
 ## kind: "sedan" | "pickup" | "van" | "police" | "truck".
 ## wreck: 0 intact, 1 rusted and sagging on a flat tyre, 2 burnt out.
-static func add_car(mu, body: StaticBody3D, xf: Transform3D, kind: String, col: Color, wreck: int, rng: RandomNumberGenerator) -> void:
+static func add_car(mu, body: StaticBody3D, xf: Transform3D, kind: String, col: Color, wreck: int) -> void:
 	var paint: Color = col
 	if kind == "police":
 		paint = Color(0.12, 0.13, 0.16)
@@ -59,7 +55,7 @@ static func add_car(mu, body: StaticBody3D, xf: Transform3D, kind: String, col: 
 	var trim: Color = C_BUMPER if wreck != 2 else Color(0.05, 0.05, 0.05)
 	var f := xf
 	if wreck == 1:
-		f = xf * Transform3D(Basis(Vector3(1, 0, 0), rng.randf_range(0.03, 0.07)), Vector3.ZERO)
+		f = xf * Transform3D(Basis(Vector3(1, 0, 0), 0.05), Vector3.ZERO)
 	var wheel_x: Array = [1.4, -1.4]
 	var half_w := 0.9
 	var hull := Vector3(4.4, 1.5, 1.9)
@@ -119,7 +115,7 @@ static func add_car(mu, body: StaticBody3D, xf: Transform3D, kind: String, col: 
 			mu.add_box_xf(f, Vector3(front_x + 0.01, 0.78, half_w * 0.7 * sz), Vector3(0.05, 0.15, 0.3), lamp)
 			mu.add_box_xf(f, Vector3(tail_x - 0.01, 0.78, half_w * 0.7 * sz), Vector3(0.05, 0.15, 0.3), tail)
 	# wheels (one sits lower and is skipped on a burnt hull)
-	var flat_i: int = rng.randi_range(0, wheel_x.size() * 2 - 1) if wreck == 1 else -1
+	var flat_i: int = 0 if wreck == 1 else -1
 	var wi := 0
 	for wx in wheel_x:
 		for sz in [-1.0, 1.0]:

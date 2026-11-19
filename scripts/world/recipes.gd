@@ -3,11 +3,20 @@ extends RefCounted
 ## Usage: const Recipes = preload("res://scripts/world/recipes.gd")
 ##        Recipes.all(), Recipes.get_recipe("ammo_556"), Recipes.can_afford(recipe, {"planks": 9, "scrap": 4})
 ##
-## A recipe is {id, name, kind ("weapon" | "ammo"), give, count, cost, desc}.
+## A recipe is {id, name, kind ("weapon" | "ammo" | "gear"), give, count, cost, desc}.
 ##   give  = id passed to Player.add_item: a weapon id, or the caliber reserve key for ammo.
 ##   count = how many of `give` one craft yields.
 
+const ItemDB := preload("res://scripts/world/item_db.gd")
+
 const MATERIALS: Array[String] = ["planks", "scrap"]
+
+## Backpacks (ItemDB items), smallest first. "give" is the ItemDB id, so the assembler can make them too.
+const BACKPACKS := [
+	{"item": "backpack_small", "cost": {"planks": 4, "scrap": 6}},
+	{"item": "backpack_medium", "cost": {"planks": 8, "scrap": 14}},
+	{"item": "backpack_large", "cost": {"planks": 14, "scrap": 26}},
+]
 
 ## Tiered assault rifles, cheapest first. Stats live in WeaponDB.
 const RIFLES := [
@@ -96,5 +105,12 @@ static func _build() -> Array:
 			"id": ammo_id(cal), "name": "%s ammo x%d" % [cal, int(row["count"])], "kind": "ammo", "give": cal,
 			"count": int(row["count"]), "cost": (row["cost"] as Dictionary).duplicate(),
 			"desc": "For: " + ", ".join(PackedStringArray(seen[cal]["users"])),
+		})
+	for bp in BACKPACKS:
+		var iid: String = bp["item"]
+		out.append({
+			"id": iid, "name": ItemDB.item_name(iid), "kind": "gear", "give": iid, "count": 1,
+			"cost": (bp["cost"] as Dictionary).duplicate(),
+			"desc": "Worn on your back: +%d grid columns." % ItemDB.backpack_cols(iid),
 		})
 	return out

@@ -1,5 +1,5 @@
 extends Node3D
-## Procedural, seed-deterministic smooth terrain. World is CHUNKS x CHUNKS chunks of CHUNK_SIZE metres,
+## Smooth terrain from hand-authored relief grids (data/hand_map/terrain.bin) - no runtime noise or seed. World is CHUNKS x CHUNKS chunks of CHUNK_SIZE metres,
 ## each chunk an indexed smooth-normal ArrayMesh (2 triangles per CELL x CELL quad) with its own trimesh collision.
 ## World spans [-HALF, HALF] on X and Z; a mountain ridge rises at the border to contain players.
 
@@ -29,11 +29,16 @@ const ROAD_JOIN_TOL := 0.3        # a segment end this close to another segment 
 const ROAD_SMOOTH_RINGS := [10.0, 20.0]  # radii of the low-pass that turns raw relief into the road profile
 const ROAD_SNAP_END := 2.0        # a segment end this close to another segment's END takes that end's height (no sliver of grade)
 
+## Hand-authored relief: three 1 m grids (relief, forest density, ground-colour patch) stored in
+## data/hand_map/terrain.bin, sampled bilinearly. No noise is evaluated at runtime.
+const GRID_FILE := "res://data/hand_map/terrain.bin"
+const GRID_PAD := 258                  # samples cover x, z = -GRID_PAD .. GRID_PAD metres
+const GRID_N := 2 * GRID_PAD + 1
+
 var world_seed: int = 0
-var noise_hills: FastNoiseLite
-var noise_detail: FastNoiseLite
-var noise_forest: FastNoiseLite
-var noise_patch: FastNoiseLite
+var _g_relief := PackedFloat32Array()
+var _g_forest := PackedFloat32Array()
+var _g_patch := PackedFloat32Array()
 
 var flat_pos := PackedVector2Array()
 var flat_radius := PackedFloat32Array()
@@ -61,28 +66,40 @@ var _c := PackedColorArray()
 
 func setup(p_seed: int) -> void:
 	world_seed = p_seed
-	var s: int = p_seed & 0x7FFFFFFF
-	noise_hills = FastNoiseLite.new()
-	noise_hills.seed = s
-	noise_hills.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
-	noise_hills.frequency = 0.005
-	noise_hills.fractal_type = FastNoiseLite.FRACTAL_FBM
-	noise_hills.fractal_octaves = 4
-	noise_detail = FastNoiseLite.new()
-	noise_detail.seed = (s + 101) & 0x7FFFFFFF
-	noise_detail.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
-	noise_detail.frequency = 0.035
-	noise_detail.fractal_octaves = 2
-	noise_forest = FastNoiseLite.new()
-	noise_forest.seed = (s + 202) & 0x7FFFFFFF
-	noise_forest.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
-	noise_forest.frequency = 0.012
-	noise_forest.fractal_octaves = 2
-	noise_patch = FastNoiseLite.new()
-	noise_patch.seed = (s + 303) & 0x7FFFFFFF
-	noise_patch.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
-	noise_patch.frequency = 0.045
-	noise_patch.fractal_octaves = 2
+	_load_grids()
+
+
+func _load_grids() -> void:
+	var f := FileAccess.open(GRID_FILE, FileAccess.READ)
+	if f == null:
+		push_error("[Terrain] missing hand-authored grid %s" % GRID_FILE)
+		return
+	var count: int = GRID_N * GRID_N
+	_g_relief = f.get_buffer(count * 4).to_float32_array()
+	_g_forest = f.get_buffer(count * 4).to_float32_array()
+	_g_patch = f.get_buffer(count * 4).to_float32_array()
+	f.close()
+
+
+## Bilinear sample of one authored grid at world (x, z); exact at integer metres, clamped beyond the grid.
+func _grid_at(g: PackedFloat32Array, x: float, z: float) -> float:
+	if g.is_empty():
+		return 0.0
+	var fx: float = clampf(x + float(GRID_PAD), 0.0, float(GRID_N - 1))
+	var fz: float = clampf(z + float(GRID_PAD), 0.0, float(GRID_N - 1))
+	var ix: int = mini(int(fx), GRID_N - 2)
+	var iz: int = mini(int(fz), GRID_N - 2)
+	var tx: float = fx - float(ix)
+	var tz: float = fz - float(iz)
+	var i0: int = iz * GRID_N + ix
+	var a: float = lerpf(g[i0], g[i0 + 1], tx)
+	var b: float = lerpf(g[i0 + GRID_N], g[i0 + GRID_N + 1], tx)
+	return lerpf(a, b, tz)
+
+
+## Ground-colour patch value (was noise_patch): low = lush meadow, high = bare earth.
+func patch_at(x: float, z: float) -> float:
+	return _grid_at(_g_patch, x, z)
 
 
 ## Flatten terrain to `height` inside `radius`, blending to natural terrain over `blend` metres.
@@ -110,7 +127,7 @@ func add_road(a: Vector2, b: Vector2) -> void:
 
 
 func _raw_height(x: float, z: float) -> float:
-	var h: float = noise_hills.get_noise_2d(x, z) * 16.0 + noise_detail.get_noise_2d(x, z) * 2.5
+	var h: float = _grid_at(_g_relief, x, z)
 	var e: float = maxf(absf(x), absf(z))
 	h += smoothstep(HALF - 45.0, HALF - 8.0, e) * 45.0
 	return h
@@ -281,7 +298,7 @@ func normal_at(x: float, z: float) -> Vector3:
 
 
 func forest_density(x: float, z: float) -> float:
-	return noise_forest.get_noise_2d(x, z)
+	return _grid_at(_g_forest, x, z)
 
 
 ## Indices of the roads whose segment passes within `pad` metres of the rectangle.
@@ -421,7 +438,7 @@ func _tri_color(slope_y: float, avg_h: float, road_d: float, jitter: float, x: f
 	else:
 		c = COL_GRASS_A.lerp(COL_GRASS_B, clampf((avg_h + 4.0) / 20.0 + (jitter - 0.5) * 0.8, 0.0, 1.0))
 		# lush dark meadow where the patch noise is low, bare dry earth where it is high
-		var pn: float = noise_patch.get_noise_2d(x, z)
+		var pn: float = patch_at(x, z)
 		if pn < -0.25:
 			c = c.lerp(COL_GRASS_DARK, clampf((-0.25 - pn) * 2.5, 0.0, 0.6))
 		elif pn > 0.3:

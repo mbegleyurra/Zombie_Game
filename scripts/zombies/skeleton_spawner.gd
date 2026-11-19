@@ -20,6 +20,7 @@ signal skeleton_killed(s: SkeletonEnemy)
 const SCENE := "res://scenes/zombies/skeleton.tscn"
 const MARKER_GROUP := "dungeon_skeleton_spawn"
 const ACTIVATE_DIST := 40.0
+const HandMapData = preload("res://scripts/world/hand_map_data.gd")
 
 @export var enabled: bool = true
 @export var day_cap_per_player: int = 1
@@ -33,6 +34,9 @@ const ACTIVATE_DIST := 40.0
 var container: Node
 var night_factor: float = 0.0
 var kills: int = 0
+var _seq: int = 0                 ## deterministic round-robin counter; no random draws
+var _chance_acc: float = 0.5      ## spawn-chance accumulator (replaces a random roll)
+var _last_row: Array = []         ## authored row [x, z, yaw, roll, variant_seed] for the next skeleton
 var _mp_spawner: MultiplayerSpawner
 var _packed: PackedScene
 var _timer: float = 12.0
@@ -117,18 +121,23 @@ func _physics_process(delta: float) -> void:
 	_timer = lerpf(interval_day, interval_night, night_factor)
 	if zs == null or not zs.has_method("_pick_point") or ("enabled" in zs and not bool(zs.get("enabled"))):
 		return   # open-world spawning needs the parent ZombieSpawner
-	if randf() > lerpf(day_spawn_chance, 1.0, night_factor):
+	_chance_acc += lerpf(day_spawn_chance, 1.0, night_factor)
+	if _chance_acc < 1.0:
 		return
+	_chance_acc -= 1.0
 	var players := _alive_players()
 	if players.is_empty():
 		return
 	var cap := mini(int(lerpf(float(day_cap_per_player), float(night_cap_per_player), night_factor) * players.size()), hard_cap)
 	if alive_count(false) >= cap:
 		return
-	var p: Player = players[randi() % players.size()]
+	var p: Player = players[_seq % players.size()]
+	_seq += 1
 	for _attempt in range(8):
-		var pos = zs.call("_pick_point", p, players)
+		var pos = zs.call("_pick_point", p, players, "SKELETON_SPAWNS")
 		if pos != null:
+			_last_row = zs.get("_last_row")
+			zs.set("_last_row", [])
 			spawn_skeleton_at(pos as Vector3, pick_type())
 			return
 
@@ -159,9 +168,21 @@ func _prune_far() -> void:
 			s.queue_free()
 
 
-## Random open-world type: mostly melee, mages are the rarest.
-func pick_type() -> String:
-	var r := randf()
+## The authored row for the next skeleton: the one just picked, else the next SKELETON_SPAWNS row in file order.
+func _row() -> Array:
+	if _last_row.is_empty():
+		var rows: Array = HandMapData.section("SKELETON_SPAWNS")
+		if rows.is_empty():
+			_last_row = [0.0, 0.0, 0.0, 0.5, 1]
+		else:
+			_last_row = rows[_seq % rows.size()]
+			_seq += 1
+	return _last_row
+
+
+## Open-world type from the authored row's roll: mostly melee, mages are the rarest.
+func pick_type(roll: float = -1.0) -> String:
+	var r: float = roll if roll >= 0.0 else float(_row()[3])
 	if r < 0.35:
 		return "warrior"
 	if r < 0.7:
@@ -178,9 +199,11 @@ func spawn_skeleton_at(pos: Vector3, type_name: String = "warrior", yaw: float =
 	var s := _packed.instantiate() as SkeletonEnemy
 	s.kind = SkeletonEnemy.kind_for_type(type_name)
 	s.night_mult = night_factor
-	s.variant_seed = randi_range(1, 2147483000)
+	var row: Array = _row()
+	_last_row = []
+	s.variant_seed = int(row[4])
 	s.position = pos
-	s.rotation.y = randf() * TAU if is_nan(yaw) else yaw
+	s.rotation.y = float(row[2]) if is_nan(yaw) else yaw
 	container.add_child(s, true)
 	_gate_visibility(s)
 	s.died.connect(_on_skeleton_died)

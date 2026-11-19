@@ -32,6 +32,7 @@ const KayKitForest = preload("res://scripts/world/kaykit_forest.gd")
 const VehicleSpawner = preload("res://scripts/vehicles/vehicle_spawner.gd")
 const HandLayout = preload("res://scripts/world/hand_layout.gd")
 const HandBuilder = preload("res://scripts/world/hand_builder.gd")
+const HandMapData = preload("res://scripts/world/hand_map_data.gd")
 const KENNEY_GY := "res://assets/kenney/graveyard/"
 
 const ROADSIDE_MODEL := "res://assets/kenney/city-kit-roads/light-square.glb"
@@ -319,23 +320,23 @@ func _build_locations() -> void:
 		root.set_meta("location_type", l["type"])
 		add_child(root)
 		l["node"] = root
-		var rng := RandomNumberGenerator.new()
-		rng.seed = (world_seed * 31 + int(l["id"]) * 7919 + 11) & 0x7FFFFFFF
+		var lid: int = int(l["id"])
+		root.set_meta("loc_id", lid)
 		match str(l["type"]):
 			"hospital":
-				_factory.build_hospital(root, rng)
+				_factory.build_hospital(root)
 			"gas_station":
-				_factory.build_gas_station(root, rng)
+				_factory.build_gas_station(root)
 			"police_station":
-				_factory.build_police_station(root, rng)
+				_factory.build_police_station(root)
 			"warehouse":
-				_factory.build_warehouse(root, rng)
+				_factory.build_warehouse(root)
 			"church":
-				_factory.build_church(root, rng)
-				_build_graveyard(root, rng)
+				_factory.build_church(root)
+				_build_authored_models(root, lid)
 			_:
-				_factory.build_farm(root, rng)
-				_build_farm_extras(root, rng)
+				_factory.build_farm(root)
+				_build_authored_models(root, lid)
 
 
 # ------------------------------------------------------------------ Kenney graveyard / farm dressing
@@ -364,65 +365,14 @@ func _place_model(root: Node3D, file: String, height: float, local: Vector3, yaw
 	return m
 
 
-## Rows of gravestones, crosses, a small crypt and pines behind the chapel.
-func _build_graveyard(root: Node3D, rng: RandomNumberGenerator) -> void:
-	var stones: Array = ["gravestone-bevel.glb", "gravestone-round.glb", "gravestone-cross.glb",
-		"gravestone-wide.glb", "gravestone-broken.glb", "gravestone-decorative.glb"]
-	for row in 2:
-		for col in 6:
-			if rng.randf() < 0.15:
-				continue
-			# Rows sit beyond the procedural headstones (z 8.5..12.1, two rows) and inside the iron fence (z 18.5)
-			var lp := Vector3(-7.5 + float(col) * 3.0 + rng.randf_range(-0.4, 0.4), 0.0, 14.6 + float(row) * 2.2 + rng.randf_range(-0.3, 0.3))
-			_place_model(root, str(stones[rng.randi_range(0, stones.size() - 1)]), rng.randf_range(1.0, 1.3), lp, rng.randf_range(-0.15, 0.15))
-	_place_model(root, "cross-column.glb", 2.0, Vector3(0.0, 0.0, 19.5), 0.0)
-	# Crypt kept inside the west fence (x -15) and clear of the procedural headstone rows
-	_place_model(root, "crypt-small.glb", 3.4, Vector3(-12.2, 0.0, 15.6), PI * 0.5)
-	_place_model(root, "pine-crooked.glb", 5.5, Vector3(11.5, 0.0, 20.4), 0.0)
-	_place_model(root, "pine-fall.glb", 5.0, Vector3(-9.0, 0.0, 20.0), 0.0)
-	_place_model(root, "lantern-glass.glb", 0.6, Vector3(3.2, 0.0, 11.0), 0.0, false)
-	_dress_graveyard(root, rng)
-
-
-## Churchyard edging and set dressing: stone wall along the back, columns on the iron-fence corners,
-## stone piers and lightposts at the south gate, urns, candles, pumpkins, a shovel and a second lantern.
-## Draws from the per-location rng only after the church interior is built, so loot layout is unaffected.
-func _dress_graveyard(root: Node3D, rng: RandomNumberGenerator) -> void:
-	# Back wall: a column every fourth piece, ~1 in 5 plain sections damaged, closed off with a final column.
-	var x := -13.0
-	var n := 0
-	while x < 13.0:
-		var piece := "stone-wall.glb"
-		var step := 1.656
-		if n % 4 == 0:
-			piece = "stone-wall-column.glb"
-			step = 1.416
-		elif rng.randf() < 0.2:
-			piece = "stone-wall-damaged.glb"
-		_place_model(root, piece, 1.2, Vector3(x + step * 0.5, 0.0, 21.6), 0.0)
-		x += step
-		n += 1
-	_place_model(root, "stone-wall-column.glb", 1.2, Vector3(x + 0.708, 0.0, 21.6), 0.0)
-	# Iron-fence corner columns
-	# Set just outside each corner (fence colliders end at the corner) so the column does not overlap the fence
-	for cx in [-15.0, 15.0]:
-		for cz in [6.5, 18.5]:
-			_place_model(root, "iron-fence-border-column.glb", 1.6, Vector3(cx + signf(cx) * 0.9, 0.0, cz + (-0.9 if cz < 10.0 else 0.9)), 0.0)
-	# South gate: stone piers beside the opening, a lightpost behind each pier with its arm toward the gate
-	for sx in [-1.0, 1.0]:
-		_place_model(root, "stone-wall-column.glb", 1.5, Vector3(sx * 2.9, 0.0, 7.6), 0.0)   # inside the fence line, flanking the gate
-		var post: Node3D = _place_model(root, "lightpost-single.glb", 3.0, Vector3(sx * 4.6, 0.0, 5.4), -sx * PI * 0.5, false)
-		_add_post_collision(root, post, 0.14)
-	_place_model(root, "lantern-candle.glb", 0.6, Vector3(-3.2, 0.0, 11.0), 0.0, false)
-	# Urns and candles at the foot of the cross column, pumpkins and a shovel between the grave rows
-	_place_model(root, "urn-round.glb", 0.8, Vector3(-1.7, 0.0, 19.3), 0.0)
-	_place_model(root, "urn-square.glb", 0.8, Vector3(1.7, 0.0, 19.3), 0.0)
-	_place_model(root, "candle-multiple.glb", 0.3, Vector3(-0.9, 0.0, 18.3), rng.randf() * TAU, false)
-	_place_model(root, "candle.glb", 0.25, Vector3(0.8, 0.0, 18.2), rng.randf() * TAU, false)
-	_place_model(root, "pumpkin-carved.glb", 0.5, Vector3(-2.0, 0.0, 10.0), 0.6, false)
-	_place_model(root, "pumpkin-tall-carved.glb", 0.7, Vector3(6.0, 0.0, 13.2), -0.4, false)
-	_place_model(root, "pumpkin.glb", 0.45, Vector3(10.0, 0.0, 16.8), rng.randf() * TAU, false)
-	_place_model(root, "shovel-dirt.glb", 1.1, Vector3(-5.8, 0.0, 17.2), 0.8, false)
+## Graveyard stones, crypt, pines, wall, urns, pumpkins (church) and hay bales / pumpkins (farm): every model is one
+## authored LOCAL row [location_id, file, height, local_x, local_z, yaw, solid, post_radius, local_y]; no random draws.
+func _build_authored_models(root: Node3D, loc_id: int) -> void:
+	for row in HandMapData.for_loc("LOCAL", loc_id):
+		var r: Array = row
+		var m: Node3D = _place_model(root, str(r[1]), float(r[2]), Vector3(float(r[3]), float(r[8]), float(r[4])), float(r[5]), bool(r[6]))
+		if float(r[7]) > 0.0:
+			_add_post_collision(root, m, float(r[7]))
 
 
 ## Thin cylinder collider for a slim model (lightpost) whose full bounding box would be too wide.
@@ -440,29 +390,3 @@ func _add_post_collision(root: Node3D, m: Node3D, radius: float) -> void:
 	body.position = m.position
 	body.add_child(cs)
 	root.add_child(body)
-
-
-## Hay bales and pumpkins on the edge of each farm pad.
-func _build_farm_extras(root: Node3D, rng: RandomNumberGenerator) -> void:
-	for i in 5:
-		# Reject spots on the farm fence/barn: stay outside the fence rectangle (x -19..19, z -15..17) by 2.4 m
-		var lp := Vector3.ZERO
-		var wp := Vector3.ZERO
-		var found := false
-		for _try in 14:
-			var a: float = rng.randf() * TAU
-			var r: float = rng.randf_range(20.0, 26.0)
-			lp = Vector3(cos(a) * r, 0.0, sin(a) * r)
-			if lp.x > -21.4 and lp.x < 21.4 and lp.z > -17.4 and lp.z < 19.4:
-				continue
-			wp = root.transform * lp
-			if terrain.normal_at(wp.x, wp.z).y < 0.92:
-				continue
-			found = true
-			break
-		if not found:
-			continue
-		if i < 3:
-			_place_model(root, "hay-bale.glb" if i % 2 == 0 else "hay-bale-bundled.glb", 1.1, lp, rng.randf() * TAU)
-		else:
-			_place_model(root, "pumpkin.glb", 0.45, lp, rng.randf() * TAU, false)

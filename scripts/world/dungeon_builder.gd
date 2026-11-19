@@ -5,9 +5,9 @@ extends RefCounted
 ##
 ## Hook (one call from world_builder.build, right after _plan_locations and BEFORE terrain.build_chunks):
 ##   DungeonBuilder.attach(self)
-## attach() picks a deterministic site away from roads and buildings, flattens a plateau and carves the entrance pit
+## attach() takes the authored site (HandMapData.dungeon_site()), flattens a plateau and carves the entrance pit
 ## into the terrain (terrain.add_flat), and queues the build for the world's `built` signal. It also queues the
-## KayKit resource scatter (kaykit_resources.gd). Everything is seeded from world.world_seed, so every peer
+## KayKit resource scatter (kaykit_resources.gd). Every choice comes from data/hand_map/placements.json, so every peer
 ## builds the identical dungeon and identical loot ids.
 ##
 ## Layout (4 m grid, 9 x 9 cells, hand laid; see ROOMS / CORRIDORS / DOORS):
@@ -21,6 +21,7 @@ extends RefCounted
 
 const SELF_PATH := "res://scripts/world/dungeon_builder.gd"
 const KayKitRes = preload("res://scripts/world/kaykit_resources.gd")
+const HandMapData = preload("res://scripts/world/hand_map_data.gd")
 const ModelUtil = preload("res://scripts/world/model_util.gd")
 const DungeonContainer = preload("res://scripts/world/dungeon_container.gd")
 const DungeonDoor = preload("res://scripts/world/dungeon_door.gd")
@@ -83,7 +84,6 @@ var _world: Node
 var _site: Dictionary
 var _root: Node3D
 var _body: StaticBody3D
-var _rng := RandomNumberGenerator.new()
 var _aabbs: Dictionary = {}
 var _room: String = ""
 var F: float = 0.0
@@ -179,27 +179,8 @@ static func _clearance(terrain, p: Vector2) -> float:
 ## Must run before terrain.build_chunks.
 static func plan_site(world: Node) -> Dictionary:
 	var terrain = world.terrain
-	var rng := RandomNumberGenerator.new()
-	rng.seed = (int(world.world_seed) ^ 0xD06E) & 0x7FFFFFFF
-	var best := Vector2(120.0, 120.0)
-	var best_score := -1.0e9
-	var best_clear := 0.0
-	for _i in 3000:
-		var p := Vector2(rng.randf_range(-SITE_LIMIT, SITE_LIMIT), rng.randf_range(-SITE_LIMIT, SITE_LIMIT))
-		if p.length() < 80.0:
-			continue
-		var clear: float = _clearance(terrain, p)
-		var hc: float = terrain.height_at(p.x, p.y)
-		var dev := 0.0
-		for k in 12:
-			var a: float = TAU * float(k) / 12.0
-			var rr: float = 30.0 if k % 2 == 0 else 15.0
-			dev = maxf(dev, absf(terrain.height_at(p.x + cos(a) * rr, p.y + sin(a) * rr) - hc))
-		var score: float = minf(clear, 60.0) - 3.0 * dev
-		if score > best_score:
-			best_score = score
-			best = p
-			best_clear = clear
+	var best: Vector2 = HandMapData.dungeon_site()   # authored entrance site
+	var best_clear: float = _clearance(terrain, best)
 	var h: float = terrain.height_at(best.x, best.y)
 	var site := {
 		"origin": best, "h0": h, "floor_y": h - DEPTH, "gx": best.x - 18.0, "gz": best.y - 8.0, "clearance": best_clear,
@@ -223,7 +204,6 @@ func _init(world: Node, site: Dictionary) -> void:
 	gz = float(site["gz"])
 	h0 = float(site["h0"])
 	ox = (site["origin"] as Vector2).x
-	_rng.seed = (int(world.world_seed) * 7919 + 0xD0) & 0x7FFFFFFF
 
 
 func build() -> Node3D:
@@ -375,7 +355,7 @@ func _edge(a: Vector2i, b: Vector2i, horiz: bool) -> void:
 	var key: String = "%s,%d,%d" % ["H" if horiz else "V", b.x, b.y]
 	var file: String = str(WALL_OVERRIDE.get(key, ""))
 	if file == "":
-		file = "wall_cracked.gltf" if _rng.randf() < 0.2 else "wall.gltf"
+		file = "wall_cracked.gltf" if HandMapData.dungeon_wall_cracked(key) else "wall.gltf"
 	_place(file, center, yaw, 1.0, true)
 	_count("walls")
 
@@ -425,7 +405,7 @@ func _build_surface() -> void:
 		var cx: float = ox + (float(i) - 1.0) * U
 		_place("floor_tile_large.gltf", Vector3(cx - tile.get_center().x, y + FLOOR_TOP - (tile.position.y + tile.size.y), gz - 18.0 - tile.get_center().z), 0.0, 1.0, false)
 	_box(Vector3(12.0, 0.3, 4.4), Vector3(ox, y + FLOOR_TOP - 0.15, gz - 17.8), 0.0)
-	var broken: int = _rng.randi_range(0, 3)
+	var broken: int = HandMapData.dungeon_broken()
 	var corners: Array = [Vector2(-6.0, -20.0), Vector2(6.0, -20.0), Vector2(-6.0, -16.0), Vector2(6.0, -16.0)]
 	for i in corners.size():
 		var cp: Vector2 = corners[i]

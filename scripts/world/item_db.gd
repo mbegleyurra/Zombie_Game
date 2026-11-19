@@ -94,6 +94,30 @@ const ITEMS := {
 		"name": ".300 Rounds", "type": "ammo", "caliber": "300", "stack": 120, "weight": 0.015,
 		"color": Color(0.8, 0.12, 0.12), "shape": "box", "desc": "Ammo for the Reaper AR.",
 	},
+	# Backpacks (type "backpack"): wearing one adds "pack_cols" columns to the grid. No pack in the asset library has a real
+	# backpack model, so Kenney bag / luggage models stand in. "worn_*" is how it sits on the back (bone space, PlayerModel;
+	# x 2.32 = metres): worn_size is width, height, depth and grows with the tier so the large pack reads as a frame pack.
+	"backpack_small": {
+		"name": "Small Backpack", "type": "backpack", "stack": 1, "weight": 0.8, "cells": [2, 2], "pack_cols": 2,
+		"color": Color(0.7, 0.55, 0.3), "shape": "box", "desc": "A small pack. Worn on your back it adds 2 grid columns.",
+		"model": "res://assets/kenney/food/bag.glb", "model_height": 0.3,
+		"worn_model": "res://assets/kenney/food/bag.glb", "worn_size": Vector3(0.172, 0.181, 0.181), "worn_yaw": 0.0,
+		"deconstruct": {"scrap": 3, "planks": 2},
+	},
+	"backpack_medium": {
+		"name": "Hiking Backpack", "type": "backpack", "stack": 1, "weight": 1.2, "cells": [2, 3], "pack_cols": 4,
+		"color": Color(0.45, 0.5, 0.25), "shape": "box", "desc": "A sturdy hiking pack. Worn on your back it adds 4 grid columns.",
+		"model": "res://assets/kenney/mini/item-luggage.glb", "model_height": 0.28,
+		"worn_model": "res://assets/kenney/mini/item-luggage.glb", "worn_size": Vector3(0.233, 0.267, 0.207), "worn_yaw": 90.0,
+		"deconstruct": {"scrap": 7, "planks": 4},
+	},
+	"backpack_large": {
+		"name": "Expedition Backpack", "type": "backpack", "stack": 1, "weight": 1.8, "cells": [3, 3], "pack_cols": 6,
+		"color": Color(0.55, 0.3, 0.75), "shape": "box", "desc": "A huge frame pack. Worn on your back it adds 6 grid columns.",
+		"model": "res://assets/kenney/mini/item-luggage-upright.glb", "model_height": 0.36,
+		"worn_model": "res://assets/kenney/mini/item-luggage-upright.glb", "worn_size": Vector3(0.319, 0.388, 0.25), "worn_yaw": 180.0,
+		"deconstruct": {"scrap": 13, "planks": 7},
+	},
 }
 
 ## Loot tables: "rolls" = [min, max] number of weighted picks, "entries" = [item_id, weight, min_count, max_count].
@@ -118,14 +142,14 @@ const TABLES := {
 		"entries": [
 			["food", 20, 1, 2], ["water", 18, 1, 2], ["ammo_12ga", 14, 2, 6], ["scrap", 10, 1, 3],
 			["planks", 12, 2, 4], ["ammo_762", 6, 3, 8], ["ammo_9mm", 8, 5, 15], ["medkit", 5, 1, 1],
-			["ammo_556", 3, 5, 10], ["weapon_shotgun", 1.5, 1, 1], ["weapon_hunting", 1.5, 1, 1], ["ammo_545", 3, 4, 8],
+			["ammo_556", 3, 5, 10], ["weapon_shotgun", 1.5, 1, 1], ["weapon_hunting", 1.5, 1, 1], ["ammo_545", 3, 4, 8], ["backpack_small", 2, 1, 1],
 		],
 	},
 	"barn": {
 		"rolls": [1, 3],
 		"entries": [
 			["planks", 24, 2, 6], ["scrap", 22, 2, 5], ["ammo_12ga", 12, 2, 5], ["water", 8, 1, 1],
-			["food", 6, 1, 1], ["ammo_762", 5, 3, 6], ["medkit", 2, 1, 1],
+			["food", 6, 1, 1], ["ammo_762", 5, 3, 6], ["medkit", 2, 1, 1], ["backpack_small", 2, 1, 1],
 			["weapon_shotgun", 1.5, 1, 1],
 			],
 	},
@@ -134,7 +158,7 @@ const TABLES := {
 		"entries": [
 			["food", 26, 1, 3], ["water", 26, 1, 3], ["scrap", 10, 1, 3], ["ammo_9mm", 12, 6, 18],
 			["medkit", 5, 1, 1], ["ammo_12ga", 5, 2, 4], ["ammo_556", 3, 5, 10], ["planks", 4, 1, 2],
-			["weapon_pistol", 2, 1, 1], ["weapon_ak", 1, 1, 1], ["ammo_545", 2, 4, 8],
+			["weapon_pistol", 2, 1, 1], ["weapon_ak", 1, 1, 1], ["ammo_545", 2, 4, 8], ["backpack_small", 2, 1, 1],
 			],
 	},
 	"hospital": {
@@ -143,6 +167,7 @@ const TABLES := {
 			["medkit", 34, 1, 2], ["water", 14, 1, 2], ["food", 10, 1, 2], ["ammo_9mm", 8, 6, 15],
 			["scrap", 6, 1, 2], ["ammo_556", 3, 5, 10], ["ammo_762", 2, 3, 6],
 			["weapon_pistol", 1.5, 1, 1], ["weapon_m4", 1, 1, 1], ["weapon_ar", 0.8, 1, 1], ["ammo_68", 2, 4, 8],
+			["backpack_small", 1.5, 1, 1], ["backpack_medium", 0.8, 1, 1],
 			],
 	},
 	"police": {
@@ -152,6 +177,7 @@ const TABLES := {
 			["weapon_pistol", 8, 1, 1], ["weapon_shotgun", 6, 1, 1], ["weapon_m4", 3, 1, 1], ["weapon_ar", 3, 1, 1],
 			["water", 6, 1, 2], ["food", 4, 1, 2], ["scrap", 4, 1, 3],
 			["ammo_545", 4, 5, 10], ["ammo_68", 3, 4, 8], ["ammo_300", 2, 3, 6],
+			["backpack_medium", 3, 1, 1], ["backpack_large", 1, 1, 1],
 		],
 	},
 	"warehouse": {
@@ -160,6 +186,7 @@ const TABLES := {
 			["planks", 22, 3, 8], ["scrap", 24, 2, 6], ["food", 10, 1, 3], ["water", 8, 1, 2],
 			["ammo_12ga", 6, 2, 5], ["ammo_9mm", 6, 5, 12], ["medkit", 3, 1, 1],
 			["weapon_hunting", 1, 1, 1], ["weapon_pistol", 1, 1, 1],
+			["backpack_small", 2, 1, 1], ["backpack_medium", 2, 1, 1], ["backpack_large", 0.8, 1, 1],
 		],
 	},
 	"church": {
@@ -167,7 +194,7 @@ const TABLES := {
 		"entries": [
 			["medkit", 20, 1, 2], ["water", 18, 1, 3], ["food", 14, 1, 3], ["planks", 12, 2, 5],
 			["scrap", 6, 1, 3], ["ammo_9mm", 6, 4, 10], ["ammo_12ga", 6, 2, 5], ["ammo_762", 4, 3, 6],
-			["weapon_hunting", 2, 1, 1], ["weapon_pistol", 1, 1, 1],
+			["weapon_hunting", 2, 1, 1], ["weapon_pistol", 1, 1, 1], ["backpack_small", 1.5, 1, 1],
 		],
 	},
 	"wild": {
@@ -177,7 +204,7 @@ const TABLES := {
 			["ammo_9mm", 10, 4, 10], ["ammo_12ga", 8, 1, 3], ["medkit", 3, 1, 1], ["ammo_556", 4, 4, 8],
 			["ammo_762", 3, 3, 6],
 			["weapon_pistol", 1, 1, 1], ["weapon_hunting", 1, 1, 1], ["weapon_m4", 0.5, 1, 1], ["weapon_ar", 0.7, 1, 1],
-			["ammo_545", 2, 4, 8], ["ammo_300", 1, 3, 6],
+			["ammo_545", 2, 4, 8], ["ammo_300", 1, 3, 6], ["backpack_small", 1.5, 1, 1], ["backpack_medium", 0.6, 1, 1],
 			],
 	},
 }
@@ -296,6 +323,17 @@ static func item_name(id: String) -> String:
 static func item_color(id: String) -> Color:
 	var d: Dictionary = get_item(id)
 	return d.get("color", Color(0.7, 0.7, 0.7)) as Color
+
+
+## True for backpack items (type "backpack").
+static func is_backpack(id: String) -> bool:
+	return str(get_item(id).get("type", "")) == "backpack"
+
+
+## Grid columns a worn backpack adds (0 for "" and for anything that is not a backpack).
+static func backpack_cols(id: String) -> int:
+	var d: Dictionary = get_item(id)
+	return int(d.get("pack_cols", 0)) if str(d.get("type", "")) == "backpack" else 0
 
 
 static func all_ids() -> Array:

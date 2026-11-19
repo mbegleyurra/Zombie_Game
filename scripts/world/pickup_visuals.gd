@@ -16,6 +16,7 @@ const ITH := "res://assets/ithappy_weapons/Meshes/Assets/"
 const CAR := "res://assets/kenney/cars/"
 const FOOD := "res://assets/kenney/food/"
 const SURV := "res://assets/kenney/survival/"
+const MINI := "res://assets/kenney/mini/"
 
 ## No pickup is wider than this (flat plates would otherwise blow up when fitted by height).
 const MAX_SPAN := 0.55
@@ -51,6 +52,10 @@ const VISUALS := {
 	"fuel_can": {"models": [[RES + "Fuel_A_Jerrycan.gltf", 0.36], [RES + "Fuel_B_Jerrycan.gltf", 0.36], [RES + "Fuel_C_Jerrycan.gltf", 0.36]],
 		"accent": Color(0.15, 0.85, 0.6)},
 	"coin": {"models": [[DUN + "coin_stack_small.gltf", 0.14]], "accent": Color(1.0, 0.95, 0.55)},
+	# Backpacks: the packs have no real backpack model, so Kenney's bag and two luggage pieces stand in (one model each).
+	"backpack_small": {"models": [[FOOD + "bag.glb", 0.3]], "accent": Color(0.7, 0.55, 0.3)},
+	"backpack_medium": {"models": [[MINI + "item-luggage.glb", 0.28]], "accent": Color(0.45, 0.5, 0.25)},
+	"backpack_large": {"models": [[MINI + "item-luggage-upright.glb", 0.36]], "accent": Color(0.55, 0.3, 0.75)},
 }
 
 

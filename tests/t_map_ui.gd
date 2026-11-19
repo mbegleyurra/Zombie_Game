@@ -163,7 +163,10 @@ func _run() -> void:
 	check(small >= 20, "all map legend text is >= 20 px (smallest %d)" % small)
 
 	# ---- player moves: marker follows
-	p.global_position += Vector3(7, 0, -9)
+	# land on the handcrafted relief: keeping y would embed the body in the slope and depenetration slides it sideways
+	var to := Vector3(pp.x + 7.0, 0.0, pp.z - 9.0)
+	to.y = float(t.height_at(to.x, to.z)) + 0.05
+	p.global_position = to
 	await _frames(2)
 	var d2: Dictionary = map.data()
 	check((d2["player"] as Vector2).distance_to(Vector2(pp.x + 7.0, pp.z - 9.0)) < 0.5, "player marker follows movement")

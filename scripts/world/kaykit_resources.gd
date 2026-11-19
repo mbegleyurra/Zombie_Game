@@ -11,6 +11,7 @@ extends RefCounted
 ## Entries whose item id does not exist in ItemDB (for example a rifle that has not been added yet) are skipped
 ## when the table is read, so a table can name future items safely.
 
+const HandMapData = preload("res://scripts/world/hand_map_data.gd")
 const RES := "res://assets/kaykit/resources/KayKit_ResourceBits_1.0_FREE/Assets/gltf/"
 const DUN := "res://assets/kaykit/dungeon/KayKit_Dungeon_Pack_1.1_FREE/Assets/gltf/"
 
@@ -146,6 +147,8 @@ const EXTRA := {
 	"gas_station": [["fuel_can", 14, 1, 2], ["parts", 5, 1, 2]],
 	"police": [["iron_ingot", 3, 1, 2]],
 	"church": [["silver_ingot", 2, 1, 1], ["coin", 4, 2, 8]],
+	"dungeon_chest": [["backpack_medium", 5, 1, 1], ["backpack_large", 3, 1, 1]],
+	"dungeon_crate": [["backpack_small", 5, 1, 1]],
 	"wild": [["iron_nuggets", 6, 1, 3], ["copper_nuggets", 5, 1, 3], ["wood_logs", 5, 1, 2], ["parts", 4, 1, 2],
 		["silver_nuggets", 1.5, 1, 2], ["gold_nuggets", 1, 1, 2]],
 }
@@ -173,39 +176,13 @@ static func attach(world: Node) -> void:
 	world.built.connect(func(): scatter(world))
 
 
-## Places the deterministic ground pickups. Uses next_loot_id() so every peer builds identical ids.
-## Returns the number of pickups placed.
+## Places the HAND-AUTHORED ground pickups: one PICKUPS row [item, amount, x, z] each in data/hand_map/placements.json.
+## Uses next_loot_id() so every peer builds identical ids. Returns the number of pickups placed.
 static func scatter(world: Node) -> int:
-	var rng := RandomNumberGenerator.new()
-	rng.seed = (world.world_seed ^ 0x4B41) & 0x7FFFFFFF
-	var terrain = world.terrain
-	var placed: Array = []   # Vector2
 	var count := 0
-	for l in world.locations:
-		var spawns: Array = LOCATION_SPAWNS.get(str(l["type"]), []) as Array
-		for sp in spawns:
-			var p := _find_spot(world, terrain, rng, l["pos2"], float(l["radius"]) + 1.5, float(l["radius"]) + 4.5, placed)
-			if p.x > 1.0e8:
-				continue
-			placed.append(p)
-			_drop(world, str(sp[0]), rng.randi_range(int(sp[1]), int(sp[2])), p)
-			count += 1
-	var limit: float = 200.0
-	var tries := 0
-	var deposits := 0
-	while deposits < WILD_DEPOSITS and tries < 600:
-		tries += 1
-		var p := Vector2(rng.randf_range(-limit, limit), rng.randf_range(-limit, limit))
-		var pick: Array = WILD_ITEMS[rng.randi_range(0, WILD_ITEMS.size() - 1)]
-		var amt: int = rng.randi_range(int(pick[1]), int(pick[2]))
-		if not _spot_ok(world, terrain, p, 8.0, placed):
-			continue
-		var h: float = terrain.height_at(p.x, p.y)
-		if h < -1.0 or h > 14.0:
-			continue
-		placed.append(p)
-		_drop(world, str(pick[0]), amt, p)
-		deposits += 1
+	for row in HandMapData.section("PICKUPS"):
+		var r: Array = row
+		_drop(world, str(r[0]), int(r[1]), Vector2(float(r[2]), float(r[3])))
 		count += 1
 	return count
 
@@ -214,15 +191,6 @@ static func _drop(world: Node, item: String, amount: int, p: Vector2) -> void:
 	var y: float = world.terrain.height_at(p.x, p.y) + 0.06
 	world.spawn_ground_item(item, amount, Vector3(p.x, y, p.y), world.next_loot_id())
 
-
-static func _find_spot(world: Node, terrain, rng: RandomNumberGenerator, center: Vector2, r0: float, r1: float, placed: Array) -> Vector2:
-	for _i in 24:
-		var a: float = rng.randf() * TAU
-		var r: float = rng.randf_range(r0, r1)
-		var p: Vector2 = center + Vector2(cos(a), sin(a)) * r
-		if _spot_ok(world, terrain, p, 0.0, placed):
-			return p
-	return Vector2(1.0e9, 1.0e9)
 
 
 ## Flat enough, off every placed pickup, off the procedural props, off the Kenney dressing colliders.

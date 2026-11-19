@@ -12,6 +12,7 @@ const KENNEY_FOOD := "res://assets/kenney/food/"
 const SURV := "res://assets/kenney/survival/"
 const GY := "res://assets/kenney/graveyard/"
 const CARS := "res://assets/kenney/cars/"
+const HandMapData = preload("res://scripts/world/hand_map_data.gd")
 const WALL_PANEL := SURV + "metal-panel.glb"   # solid 0.5 x 0.5 m panel; structure-metal-wall.glb is an open frame
 const WALL_CELL := 2.5   # target tile height (m) for wall panels
 const SLAB_CELL := 2.0   # target tile edge (m) for floor and roof slabs
@@ -40,7 +41,7 @@ var world
 var material: Material
 var _body: StaticBody3D
 var _root: Node3D
-var _rng: RandomNumberGenerator
+var _loc: int = -1   # location id (root meta "loc_id"): keys the authored rows in HandMapData
 var _foot: Array = []       # Rect2 (local XZ) of every solid that blocks the floor: scatter avoids these
 var _scatter_q: Array = []  # deferred ground-loot requests, resolved in _finish once all solids exist
 
@@ -54,9 +55,9 @@ func _init(p_world, p_material: Material) -> void:
 
 # ---------------------------------------------------------------- shared helpers
 
-func _begin(root: Node3D, rng: RandomNumberGenerator) -> void:
+func _begin(root: Node3D) -> void:
 	_root = root
-	_rng = rng
+	_loc = int(root.get_meta("loc_id", -1))
 	_body = StaticBody3D.new()
 	_body.name = "Collision"
 	_foot = []
@@ -246,29 +247,19 @@ func _blocked_xz(x: float, z: float) -> bool:
 	return false
 
 
+## Authored ground pickups for this location (SCATTER rows [loc, item, amount, local_x, local_z, yaw]).
+## The queued requests only mark where loot belongs; the exact spots are data.
 func _flush_scatter() -> void:
-	for req in _scatter_q:
-		var table: String = req[0]
-		for _i in int(req[1]):
-			var pick: Dictionary = ItemDB.pick_one(table, _rng)
-			var px := 0.0
-			var pz := 0.0
-			var found := false
-			for _t in 24:
-				px = _rng.randf_range(float(req[2]), float(req[3]))
-				pz = _rng.randf_range(float(req[4]), float(req[5]))
-				if not _blocked_xz(px, pz):
-					found = true
-					break
-			var rot_y: float = _rng.randf() * TAU
-			if not found:
-				continue
-			var id: int = world.next_loot_id()
-			var item = LootItem.create(str(pick["id"]), int(pick["count"]), id)
-			item.position = Vector3(px, _scatter_y(px, pz), pz)
-			item.rotation.y = rot_y
-			_root.add_child(item)
-			world.register_loot(item)
+	for row in HandMapData.for_loc("SCATTER", _loc):
+		var r: Array = row
+		var px: float = float(r[3])
+		var pz: float = float(r[4])
+		var id: int = world.next_loot_id()
+		var item = LootItem.create(str(r[1]), int(r[2]), id)
+		item.position = Vector3(px, _scatter_y(px, pz), pz)
+		item.rotation.y = float(r[5])
+		_root.add_child(item)
+		world.register_loot(item)
 	_scatter_q = []
 
 
@@ -335,9 +326,12 @@ func _fence_rect(x0: float, z0: float, x1: float, z1: float, gap_w: float, col: 
 
 # ---------------------------------------------------------------- FARM
 
-func build_farm(root: Node3D, rng: RandomNumberGenerator) -> void:
-	_begin(root, rng)
-	var wall: Color = FARM_WALLS[rng.randi_range(0, FARM_WALLS.size() - 1)]
+func build_farm(root: Node3D) -> void:
+	_begin(root)
+	var farm_rows: Array = HandMapData.for_loc("FARM", _loc)
+	var wall: Color = FARM_WALLS[int((farm_rows[0] as Array)[1]) if not farm_rows.is_empty() else 0]
+	var veh_rows: Array = HandMapData.for_loc("FARM_VEH", _loc)
+	var veh: Array = veh_rows[0] as Array if not veh_rows.is_empty() else [_loc, 0.0, 0.0]
 	var trim := wall.darkened(0.2)
 	# Farmhouse: x in [-5,5], z in [-4,4], walls 3 m.
 	var H := 3.0
@@ -389,17 +383,17 @@ func build_farm(root: Node3D, rng: RandomNumberGenerator) -> void:
 	# Round 4 props (no loot rolls): weathered fence with gates, crop rows, tractor, pickup truck
 	_fence_rect(-19.0, -15.0, 19.0, 17.0, 4.0, C_FENCE_WOOD, 1.2)
 	# (crop rows were primitive boxes with no downloaded equivalent: removed)
-	var tractor_xf := Transform3D(Basis(Vector3.UP, rng.randf_range(-0.5, 0.5)), Vector3(-13.0, F, 5.0))
+	var tractor_xf := Transform3D(Basis(Vector3.UP, float(veh[1])), Vector3(-13.0, F, 5.0))
 	_vehicle("tractor", tractor_xf)
 	_foot.append(Rect2(-15.0, 3.0, 4.0, 4.0))
-	_car(Vector3(3.0, F, 15.5), rng.randf_range(-0.3, 0.3), "pickup", rng.randi_range(0, 1))
+	_car(Vector3(3.0, F, 15.5), float(veh[2]), "pickup", 0)
 	_finish()
 
 
 # ---------------------------------------------------------------- GAS STATION
 
-func build_gas_station(root: Node3D, rng: RandomNumberGenerator) -> void:
-	_begin(root, rng)
+func build_gas_station(root: Node3D) -> void:
+	_begin(root)
 	var H := 3.2
 	var wall := Color(0.9, 0.88, 0.8)
 	_floor_slab(0, 0, 12.6, 8.6, C_FLOOR_CONCRETE)
@@ -456,8 +450,8 @@ func build_gas_station(root: Node3D, rng: RandomNumberGenerator) -> void:
 
 # ---------------------------------------------------------------- HOSPITAL
 
-func build_hospital(root: Node3D, rng: RandomNumberGenerator) -> void:
-	_begin(root, rng)
+func build_hospital(root: Node3D) -> void:
+	_begin(root)
 	var H := 3.6
 	var wall := Color(0.88, 0.9, 0.9)
 	var accent := Color(0.3, 0.62, 0.65)
@@ -503,8 +497,8 @@ func build_hospital(root: Node3D, rng: RandomNumberGenerator) -> void:
 
 # ---------------------------------------------------------------- POLICE STATION
 
-func build_police_station(root: Node3D, rng: RandomNumberGenerator) -> void:
-	_begin(root, rng)
+func build_police_station(root: Node3D) -> void:
+	_begin(root)
 	var H := 3.4
 	var wall := Color(0.62, 0.66, 0.72)
 	var inner := Color(0.78, 0.8, 0.82)
@@ -572,19 +566,17 @@ func _rack_run(x0: float, x1: float, z: float, levels: int = 4) -> void:
 	for l in levels:
 		var y: float = F + 0.15 + float(l) * 1.4
 		_box(Vector3((x0 + x1) * 0.5, y, z), Vector3(x1 - x0, 0.08, 0.9), plank, false)
-		var cx: float = x0 + 0.6
-		while cx < x1 - 0.6:
-			if _rng.randf() < 0.7:
-				var w: float = _rng.randf_range(0.7, 1.2)
-				var ch: float = _rng.randf_range(0.5, 0.9)
-				var shade: float = _rng.randf_range(0.75, 1.1)
-				_box(Vector3(cx, y + 0.04 + ch * 0.5, z), Vector3(w, ch, 0.7), Color(0.6 * shade, 0.45 * shade, 0.25 * shade), false)
-			cx += _rng.randf_range(0.9, 1.6)
+		for row in HandMapData.for_loc("RACK", _loc):
+			var r: Array = row
+			if absf(float(r[3]) - z) > 0.002 or absf(float(r[2]) - y) > 0.002 or float(r[1]) < x0 or float(r[1]) > x1:
+				continue
+			var shade: float = float(r[6])
+			_box(Vector3(float(r[1]), y + 0.04 + float(r[5]) * 0.5, z), Vector3(float(r[4]), float(r[5]), 0.7), Color(0.6 * shade, 0.45 * shade, 0.25 * shade), false)
 	_solid(Vector3((x0 + x1) * 0.5, F + 2.2, z), Vector3(x1 - x0, 4.4, 0.9))
 
 
-func build_warehouse(root: Node3D, rng: RandomNumberGenerator) -> void:
-	_begin(root, rng)
+func build_warehouse(root: Node3D) -> void:
+	_begin(root)
 	var H := 7.0
 	var wall := Color(0.6, 0.62, 0.64)
 	_floor_slab(0, 0, 25.0, 17.0, C_FLOOR_CONCRETE)
@@ -612,9 +604,11 @@ func build_warehouse(root: Node3D, rng: RandomNumberGenerator) -> void:
 	_car(Vector3(-14.0, F, 13.0), 0.3, "van", 2)
 	_car(Vector3(10.0, F, 15.5), PI, "pickup", 1)
 	var cont_cols: Array = [Color(0.65, 0.2, 0.15), Color(0.2, 0.35, 0.6), Color(0.25, 0.5, 0.35), Color(0.75, 0.55, 0.15)]
-	var c0: Color = cont_cols[rng.randi_range(0, 3)]
-	var c1: Color = cont_cols[rng.randi_range(0, 3)]
-	var c2: Color = cont_cols[rng.randi_range(0, 3)]
+	var wh_rows: Array = HandMapData.for_loc("WH_COL", _loc)
+	var wh: Array = wh_rows[0] as Array if not wh_rows.is_empty() else [_loc, 0, 1, 2]
+	var c0: Color = cont_cols[int(wh[1])]
+	var c1: Color = cont_cols[int(wh[2])]
+	var c2: Color = cont_cols[int(wh[3])]
 	_box(Vector3(-16.5, F + 1.3, -4.0), Vector3(2.4, 2.6, 6.0), c0)
 	_box(Vector3(-16.5, F + 3.9, -4.0), Vector3(2.4, 2.6, 6.0), c1)
 	_box(Vector3(-16.5, F + 1.3, 3.0), Vector3(2.4, 2.6, 6.0), c2)
@@ -624,8 +618,8 @@ func build_warehouse(root: Node3D, rng: RandomNumberGenerator) -> void:
 
 # ---------------------------------------------------------------- CHURCH
 
-func build_church(root: Node3D, rng: RandomNumberGenerator) -> void:
-	_begin(root, rng)
+func build_church(root: Node3D) -> void:
+	_begin(root)
 	var H := 5.0
 	var wall := Color(0.86, 0.84, 0.78)
 	var stone := Color(0.55, 0.55, 0.57)
@@ -676,16 +670,11 @@ func build_church(root: Node3D, rng: RandomNumberGenerator) -> void:
 	_scatter("church", 3, -8.0, 4.0, -0.7, 0.7)
 	_scatter("church", 1, -11.5, -9.5, -2.0, 2.0)
 	# Graveyard: seeded headstones with earth mounds, iron fence, a wrecked sedan outside
-	for row in 3:
-		for ci in 7:
-			var gx: float = -12.0 + float(ci) * 4.0 + rng.randf_range(-0.6, 0.6)
-			var gz: float = 8.5 + float(row) * 3.2 + rng.randf_range(-0.4, 0.4)
-			var gxf := Transform3D(Basis(Vector3.UP, rng.randf_range(-0.25, 0.25)), Vector3(gx, F, gz))
-			rng.randf_range(0.0, 0.25)   # draw kept so the seeded loot layout is unchanged
-			if row >= 2:
-				continue   # third row dropped (Kenney graveyard rows occupy that ground); rng draws kept so loot layout is unchanged
-			_model_at(GY + "gravestone-bevel.glb", gxf, Vector3(0, 0.45, 0), Vector3(0.7, 0.9, 0.3))
-			PropFactory.add_collision(_body, gxf, Vector3(0, 0.45, 0), Vector3(0.7, 0.9, 0.16))
+	for row in HandMapData.for_loc("CH_STONE", _loc):
+		var r: Array = row
+		var gxf := Transform3D(Basis(Vector3.UP, float(r[3])), Vector3(float(r[1]), F, float(r[2])))
+		_model_at(GY + "gravestone-bevel.glb", gxf, Vector3(0, 0.45, 0), Vector3(0.7, 0.9, 0.3))
+		PropFactory.add_collision(_body, gxf, Vector3(0, 0.45, 0), Vector3(0.7, 0.9, 0.16))
 	_fence_rect(-15.0, 6.5, 15.0, 18.5, 4.0, C_FENCE_IRON, 1.4)
 	_car(Vector3(14.0, F, -9.0), 0.4, "sedan", 1)
 	_finish()

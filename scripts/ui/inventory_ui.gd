@@ -22,12 +22,16 @@ const ACTION := "toggle_inventory"
 const DECON_ACTION := "inventory_deconstruct"
 const GROUP_OPEN := "ui_open"        ## Hud.is_ui_open() is true while any member is in this group
 const GROUP_ALL := "overlay_ui"      ## close everything: get_tree().call_group("overlay_ui", "close", false)
-const CELL := 84
+const CELL := 84             ## largest cell size (px); `cell` shrinks below it so the panel fits the viewport
+const CELL_MIN := 32
+const SCREEN_MARGIN := 16    ## free space kept around the panel (px)
 const GAP := 3
 const FONT_TITLE := 48
-const FONT_SLOT := 20
+const FONT_SLOT := 20        ## readability floor: slot text never shrinks below 20 px, even when the cells do
 const FONT_COUNT := 28
+const FONT_COUNT_MIN := 20
 const FONT_BODY := 22
+const DETAIL_LINES := 3
 const KEY_COL := Color(0.95, 0.8, 0.35)
 ## Items Player.use_item can consume.
 const USABLE := ["medkit", "food", "water"]
@@ -39,13 +43,18 @@ var detail_label: Label
 var status_label: Label
 var space_label: Label
 var deconstruct_button: Button
+var unequip_button: Button   ## takes the worn backpack off (refused when the items would not fit the smaller grid)
+## Current cell size (px): CELL, or less when the grid (a 16-column large-pack grid, a small window) would not fit.
+var cell := CELL
 ## Tests: skip the Net/Hud gating so the overlay can be driven without a running game.
 var standalone := false
 
 var _player: Node = null
+var _panel: PanelContainer
 var _grid: Control
 var _bg: Array[Panel] = []
 var _bg_dims := Vector2i.ZERO
+var _bg_cell := 0
 var _entries: Array = []
 var _used := 0
 var _selected_key := ""
@@ -77,12 +86,12 @@ func _ready() -> void:
 	var center := CenterContainer.new()
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(center)
-	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", _box(Color(0.06, 0.07, 0.06, 0.97), Color(0.4, 0.38, 0.3), 2, 12))
-	center.add_child(panel)
+	_panel = PanelContainer.new()
+	_panel.add_theme_stylebox_override("panel", _box(Color(0.06, 0.07, 0.06, 0.97), Color(0.4, 0.38, 0.3), 2, 12))
+	center.add_child(_panel)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 8)
-	panel.add_child(box)
+	_panel.add_child(box)
 
 	var title := Label.new()
 	title.text = "INVENTORY"
@@ -99,8 +108,9 @@ func _ready() -> void:
 	detail_label = Label.new()
 	detail_label.text = IDLE_DETAIL
 	detail_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	detail_label.custom_minimum_size = Vector2(0, 64)
+	detail_label.max_lines_visible = DETAIL_LINES   # a long description never grows the panel past the screen
 	detail_label.add_theme_font_size_override("font_size", FONT_BODY)
+	detail_label.custom_minimum_size = Vector2(0, DETAIL_LINES * detail_label.get_line_height())
 	box.add_child(detail_label)
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 16)
@@ -114,6 +124,7 @@ func _ready() -> void:
 	status_label.add_theme_color_override("font_color", KEY_COL)
 	status_label.custom_minimum_size = Vector2(0, 30)
 	status_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	status_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS   # a long reason never widens the panel
 	row.add_child(status_label)
 	deconstruct_button = Button.new()
 	deconstruct_button.text = "DECONSTRUCT (Del)"
@@ -121,6 +132,11 @@ func _ready() -> void:
 	deconstruct_button.add_theme_font_size_override("font_size", FONT_BODY)
 	deconstruct_button.pressed.connect(deconstruct_selected)
 	row.add_child(deconstruct_button)
+	unequip_button = Button.new()
+	unequip_button.focus_mode = Control.FOCUS_NONE
+	unequip_button.add_theme_font_size_override("font_size", FONT_BODY)
+	unequip_button.pressed.connect(unequip_backpack)
+	row.add_child(unequip_button)
 	var hint := Label.new()
 	hint.text = "Click a weapon to equip, medkit / food / water to use. Select an item, then DECONSTRUCT for planks and scrap.     I or Esc - Close"
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -129,6 +145,7 @@ func _ready() -> void:
 	hint.add_theme_font_size_override("font_size", 20)
 	hint.modulate = Color(1, 1, 1, 0.85)
 	box.add_child(hint)
+	get_viewport().size_changed.connect(refresh)
 	refresh()
 
 
@@ -223,14 +240,19 @@ func refresh() -> void:
 		var e: Dictionary = _entries[i]
 		b.visible = true
 		b.disabled = false
-		b.position = Vector2(int(e["x"]) * CELL + GAP, int(e["y"]) * CELL + GAP)
-		b.size = Vector2(int(e["w"]) * CELL - GAP, int(e["h"]) * CELL - GAP)
+		b.position = Vector2(int(e["x"]) * cell + GAP, int(e["y"]) * cell + GAP)
+		b.size = Vector2(int(e["w"]) * cell - GAP, int(e["h"]) * cell - GAP)
 		_name_labels[i].text = str(e["name"])
 		_count_labels[i].text = str(e["tag"]) if str(e["tag"]) != "" else ("x%d" % int(e["count"]) if int(e["count"]) > 0 else "")
+		_layout_slot(i)
 		b.tooltip_text = describe(i)
 		_style_slot(b, e["color"] as Color, true, str(e["key"]) == _selected_key)
 	var total := _grid_dims().x * _grid_dims().y
 	space_label.text = "Space %d / %d cells" % [_used, total]
+	if unequip_button != null:
+		var worn := str(_player.get("backpack_id")) if _player != null and is_instance_valid(_player) and _player.get("backpack_id") != null else ""
+		unequip_button.text = "UNEQUIP " + ItemDB.item_name(worn).to_upper() if worn != "" else "NO BACKPACK WORN"
+		unequip_button.disabled = worn == ""
 	if deconstruct_button != null:
 		var sel := _selected_index()
 		deconstruct_button.disabled = sel < 0 or ItemDB.deconstruct_yield(str(_entries[sel]["item"])).is_empty()
@@ -280,6 +302,9 @@ func use_slot(i: int) -> void:
 			status_label.text = "Equipped %s." % nm
 		else:
 			status_label.text = "Cannot equip %s." % nm
+	elif ItemDB.is_backpack(key):
+		var r: Dictionary = _player.equip_backpack(key) if _player != null and is_instance_valid(_player) and _player.has_method("equip_backpack") else {"ok": false, "reason": "No player."}
+		status_label.text = ("Wearing %s." % nm) if bool(r["ok"]) else str(r["reason"])
 	elif not USABLE.has(key):
 		status_label.text = "%s: selected (display only, no use action)." % nm
 	elif _player != null and is_instance_valid(_player) and _player.has_method("use_item") and bool(_player.use_item(key)):
@@ -314,6 +339,16 @@ func deconstruct_slot(i: int) -> Dictionary:
 	return r
 
 
+## Takes the worn backpack off. Refused with the reason in the status line when the grid would no longer hold everything.
+func unequip_backpack() -> Dictionary:
+	var r := {"ok": false, "reason": "No backpack worn."}
+	if _player != null and is_instance_valid(_player) and _player.has_method("unequip_backpack"):
+		r = _player.unequip_backpack()
+	status_label.text = "Backpack taken off." if bool(r["ok"]) else str(r["reason"])
+	refresh()
+	return r
+
+
 func deconstruct_selected() -> Dictionary:
 	return deconstruct_slot(_selected_index())
 
@@ -335,27 +370,40 @@ func _grid_dims() -> Vector2i:
 	return Vector2i(cols, rows)
 
 
-## Background cells, rebuilt only when the player's grid size changes.
+## Largest cell (CELL_MIN..CELL) at which the panel, grid plus its fixed title / detail / buttons, fits the viewport.
+func _fit_cell(dims: Vector2i) -> int:
+	var vp := get_viewport_rect().size if is_inside_tree() else Vector2(1280, 720)
+	var chrome_w := _panel.get_theme_stylebox("panel").get_minimum_size().x
+	var chrome_h := _panel.get_combined_minimum_size().y - _grid.get_combined_minimum_size().y
+	var avail := vp - Vector2(2 * SCREEN_MARGIN + chrome_w + GAP, 2 * SCREEN_MARGIN + chrome_h + GAP)
+	var c := floori(minf(avail.x / maxi(dims.x, 1), avail.y / maxi(dims.y, 1)))
+	return clampi(c, CELL_MIN, CELL)
+
+
+## Background cells, rebuilt only when the player's grid size or the fitted cell size changes.
 func _sync_background() -> void:
 	var dims := _grid_dims()
-	if dims == _bg_dims:
+	var fit := _fit_cell(dims)
+	if dims == _bg_dims and fit == _bg_cell:
 		return
-	for c in _bg:
-		c.queue_free()
+	for old in _bg:
+		old.queue_free()
 	_bg.clear()
 	_bg_dims = dims
-	_grid.custom_minimum_size = Vector2(dims.x * CELL + GAP, dims.y * CELL + GAP)
+	_bg_cell = fit
+	cell = fit
+	_grid.custom_minimum_size = Vector2(dims.x * cell + GAP, dims.y * cell + GAP)
 	var sb := _box(Color(0.12, 0.13, 0.12, 0.85), Color(0.25, 0.26, 0.24), 1, 3)
 	for y in dims.y:
 		for x in dims.x:
-			var c := Panel.new()
-			c.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			c.add_theme_stylebox_override("panel", sb)
-			c.position = Vector2(x * CELL + GAP, y * CELL + GAP)
-			c.size = Vector2(CELL - GAP, CELL - GAP)
-			_grid.add_child(c)
-			_grid.move_child(c, 0)
-			_bg.append(c)
+			var bgc := Panel.new()
+			bgc.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			bgc.add_theme_stylebox_override("panel", sb)
+			bgc.position = Vector2(x * cell + GAP, y * cell + GAP)
+			bgc.size = Vector2(cell - GAP, cell - GAP)
+			_grid.add_child(bgc)
+			_grid.move_child(bgc, 0)
+			_bg.append(bgc)
 
 
 func _input(event: InputEvent) -> void:
@@ -430,6 +478,7 @@ func _add_slot() -> void:
 	b.clip_contents = true
 	var nl := _slot_label(b, FONT_SLOT, HORIZONTAL_ALIGNMENT_LEFT, VERTICAL_ALIGNMENT_TOP)
 	nl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	nl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	var cl := _slot_label(b, FONT_COUNT, HORIZONTAL_ALIGNMENT_RIGHT, VERTICAL_ALIGNMENT_BOTTOM)
 	b.pressed.connect(use_slot.bind(i))
 	b.mouse_entered.connect(_show_detail.bind(i))
@@ -448,11 +497,34 @@ func _slot_label(parent: Button, font_size: int, h: int, v: int) -> Label:
 	l.vertical_alignment = v as VerticalAlignment
 	l.add_theme_font_size_override("font_size", font_size)
 	l.add_theme_color_override("font_outline_color", Color.BLACK)
-	l.add_theme_constant_override("outline_size", 5)
+	l.add_theme_constant_override("outline_size", 4)
 	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(l)
-	l.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT, Control.PRESET_MODE_MINSIZE, 4)
+	l.set_anchors_preset(Control.PRESET_FULL_RECT)
 	return l
+
+
+## Slot i's labels at the current cell size: the count gets a strip along the bottom, the name the space above it
+## (as many whole lines as fit, ellipsis after), so a long name can never run over the count.
+func _layout_slot(i: int) -> void:
+	var b := slots[i]
+	var nl := _name_labels[i]
+	var cl := _count_labels[i]
+	var cfs := clampi(int(cell * 0.27), FONT_COUNT_MIN, FONT_COUNT)
+	cl.add_theme_font_size_override("font_size", cfs)
+	var pad := 3.0
+	var count_h: float = float(cl.get_line_height()) if cl.text != "" else 0.0
+	cl.anchor_top = 1.0   # a strip of count_h along the bottom edge
+	cl.offset_left = pad
+	cl.offset_right = -pad
+	cl.offset_bottom = -1.0
+	cl.offset_top = -1.0 - count_h
+	var name_h := maxf(b.size.y - 2.0 * pad - count_h, 0.0)
+	nl.offset_left = pad
+	nl.offset_right = -pad
+	nl.offset_top = pad
+	nl.offset_bottom = -(pad + count_h)
+	nl.max_lines_visible = maxi(1, floori(name_h / maxf(nl.get_line_height(), 1.0)))
 
 
 ## Hovering / focusing an item shows its detail and selects it for DECONSTRUCT (i = -1 clears only the detail text).

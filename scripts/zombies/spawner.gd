@@ -23,6 +23,7 @@ signal horde_started(count: int)
 
 const ZOMBIE_SCENE := "res://scenes/zombies/zombie.tscn"
 const MASK_WORLD := 1
+const HandMapData = preload("res://scripts/world/hand_map_data.gd")
 
 @export var enabled: bool = true
 @export var base_cap: int = 8
@@ -46,6 +47,9 @@ var _night_poll: float = 0.0
 var _was_night: bool = false
 var _prune_timer: float = 0.0
 var kills: int = 0
+var _seq: int = 0                 ## deterministic round-robin counter (player choice, row cycling); no random draws
+var _cursor: Dictionary = {}      ## section -> next authored spawn row to try
+var _last_row: Array = []         ## authored row [x, z, yaw, roll, variant_seed] picked for the next spawn
 
 
 func _ready() -> void:
@@ -160,7 +164,8 @@ func _poll_night() -> void:
 	if is_night and not _was_night and horde_on_nightfall:
 		var players := _alive_players()
 		if not players.is_empty():
-			var p: Player = players[randi() % players.size()]
+			var p: Player = players[_seq % players.size()]
+			_seq += 1
 			spawn_horde(p.global_position, 6 + 4 * players.size())
 	_was_night = is_night
 
@@ -194,7 +199,8 @@ func _prune_far() -> void:
 # ================================================================== spawning
 
 func _try_spawn(players: Array[Player]) -> void:
-	var p: Player = players[randi() % players.size()]
+	var p: Player = players[_seq % players.size()]
+	_seq += 1
 	for _attempt in range(8):
 		var pos = _pick_point(p, players)
 		if pos != null:
@@ -202,12 +208,36 @@ func _try_spawn(players: Array[Player]) -> void:
 			return
 
 
-## Returns a ground point 32-60 m from `anchor` that no player can currently see, or null.
-func _pick_point(anchor: Player, players: Array[Player]) -> Variant:
-	var ang := randf() * TAU
-	var dist := randf_range(min_spawn_dist, max_spawn_dist)
-	var xz := anchor.global_position + Vector3(cos(ang) * dist, 0.0, sin(ang) * dist)
+## Returns a ground point 32-60 m from `anchor` that no player can currently see, or null. Candidates are the
+## AUTHORED spawn rows of `section` in data/hand_map/placements.json, walked from a rolling cursor (no random draws).
+## The row used is left in _last_row for the spawn that follows.
+func _pick_point(anchor: Player, players: Array[Player], section: String = "ZOMBIE_SPAWNS") -> Variant:
+	var rows: Array = HandMapData.section(section)
+	if rows.is_empty():
+		return null
+	var start: int = int(_cursor.get(section, 0))
 	var space := anchor.get_world_3d().direct_space_state
+	var flat := Vector2(anchor.global_position.x, anchor.global_position.z)
+	var tested := 0
+	for k in rows.size():
+		var i: int = (start + k) % rows.size()
+		var row: Array = rows[i]
+		var d: float = Vector2(float(row[0]), float(row[1])).distance_to(flat)
+		if d < min_spawn_dist or d > max_spawn_dist:
+			continue
+		_cursor[section] = i + 1
+		tested += 1
+		var pos = _unseen_ground(float(row[0]), float(row[1]), anchor, players, space)
+		if pos != null:
+			_last_row = row
+			return pos
+		if tested >= 3:
+			return null
+	return null
+
+
+func _unseen_ground(x: float, z: float, anchor: Player, players: Array[Player], space: PhysicsDirectSpaceState3D) -> Variant:
+	var xz := Vector3(x, 0.0, z)
 	var q := PhysicsRayQueryParameters3D.create(
 		Vector3(xz.x, anchor.global_position.y + 80.0, xz.z),
 		Vector3(xz.x, anchor.global_position.y - 80.0, xz.z), MASK_WORLD)
@@ -235,10 +265,22 @@ func _player_can_see(pl: Player, space: PhysicsDirectSpaceState3D, spot: Vector3
 	return space.intersect_ray(q).is_empty()
 
 
-## Random variant mix, scaled by the night factor: by day mostly walkers, by
+## The authored row for the next spawn: the one _pick_point just chose, else the next row in file order.
+func _row() -> Array:
+	if _last_row.is_empty():
+		var rows: Array = HandMapData.section("ZOMBIE_SPAWNS")
+		if rows.is_empty():
+			_last_row = [0.0, 0.0, 0.0, 0.5, 1]
+		else:
+			_last_row = rows[_seq % rows.size()]
+			_seq += 1
+	return _last_row
+
+
+## Variant mix from the authored row's roll (0..1), scaled by the night factor: by day mostly walkers, by
 ## night many more runners and bloaters.
-func pick_kind() -> int:
-	var r := randf()
+func pick_kind(roll: float = -1.0) -> int:
+	var r: float = roll if roll >= 0.0 else float(_row()[3])
 	var bloater_p := 0.04 + 0.12 * night_factor
 	var runner_p := 0.05 + 0.35 * night_factor
 	if r < bloater_p:
@@ -257,9 +299,11 @@ func spawn_zombie_at(pos: Vector3, runner: bool = false, kind: int = -1) -> Zomb
 	z.night_mult = night_factor
 	z.kind = (Zombie.KIND_RUNNER if runner else Zombie.KIND_WALKER) if kind < 0 else kind
 	z.runner = z.kind == Zombie.KIND_RUNNER
-	z.variant_seed = randi_range(1, 2147483000)
+	var row: Array = _row()
+	_last_row = []
+	z.variant_seed = int(row[4])
 	z.position = pos
-	z.rotation.y = randf() * TAU
+	z.rotation.y = float(row[2])
 	container.add_child(z, true)
 	_gate_visibility(z)
 	z.died.connect(_on_zombie_died)

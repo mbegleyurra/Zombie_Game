@@ -11,6 +11,7 @@ signal opened(container, by)
 const ItemDB = preload("res://scripts/world/item_db.gd")
 const LootItem = preload("res://scripts/world/loot_item.gd")
 const ModelFit = preload("res://scripts/world/model_util.gd")
+const HandMapData = preload("res://scripts/world/hand_map_data.gd")
 
 ## kind -> [downloaded model]. All Kenney (mini-shop, mini-arcade, survival, graveyard).
 const K := "res://assets/kenney/"
@@ -66,7 +67,8 @@ static func _open_overlay() -> StandardMaterial3D:
 	return _overlay
 
 
-## Call BEFORE adding to the tree. Builds visuals/collision and rolls contents deterministically.
+## Call BEFORE adding to the tree. Builds visuals/collision and loads the AUTHORED contents for this loot id from
+## data/hand_map/placements.json (CONTAINERS rows). world_seed is kept for API compatibility and is not used.
 func setup(p_loot_id: int, p_kind: String, p_table: String, world_seed: int) -> void:
 	loot_id = p_loot_id
 	kind = p_kind if KINDS.has(p_kind) else "crate"
@@ -75,9 +77,11 @@ func setup(p_loot_id: int, p_kind: String, p_table: String, world_seed: int) -> 
 	var def: Dictionary = KINDS[kind]
 	var size: Vector3 = def["size"]
 	_base_color = def["color"]
-	var rng := RandomNumberGenerator.new()
-	rng.seed = (world_seed * 1000003 + loot_id * 7919 + 17) & 0x7FFFFFFF
-	contents = ItemDB.roll_table(table, rng)
+	contents = []
+	var row: Array = HandMapData.container(loot_id)
+	if not row.is_empty():
+		for it in (row[3] as Array):
+			contents.append({"id": str((it as Array)[0]), "count": int((it as Array)[1])})
 
 	# Visual is a downloaded Kenney model fitted to the container's footprint (no primitive meshes).
 	var spec: Array = MODELS.get(kind, MODELS["crate"]) as Array

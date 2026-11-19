@@ -79,34 +79,6 @@ func add_frustum(base: Vector3, rb: float, rt: float, height: float, segs: int, 
 			add_tri(apex, t0, t1, col, Vector3.UP)
 
 
-## Jittered low-poly blob (rocks). radius is per-axis.
-func add_blob(center: Vector3, radius: Vector3, segs: int, rings: int, col: Color, rng: RandomNumberGenerator, jitter: float) -> void:
-	var rows: Array = []
-	for r in range(1, rings):
-		var phi := PI * float(r) / float(rings)
-		var row := PackedVector3Array()
-		for s in segs:
-			var a := TAU * float(s) / float(segs)
-			var k := 1.0 + rng.randf_range(-jitter, jitter)
-			row.append(center + Vector3(sin(phi) * cos(a) * radius.x, cos(phi) * radius.y, sin(phi) * sin(a) * radius.z) * k)
-		rows.append(row)
-	var top := center + Vector3(0, radius.y * (1.0 + rng.randf_range(-jitter, jitter)), 0)
-	var bottom := center - Vector3(0, radius.y * 0.8, 0)
-	var first: PackedVector3Array = rows[0]
-	var last: PackedVector3Array = rows[rows.size() - 1]
-	for s in segs:
-		var s2 := (s + 1) % segs
-		_tri_out(top, first[s2], first[s], center, col)
-		_tri_out(bottom, last[s], last[s2], center, col)
-	for r in range(rows.size() - 1):
-		var ra: PackedVector3Array = rows[r]
-		var rb: PackedVector3Array = rows[r + 1]
-		for s in segs:
-			var s2 := (s + 1) % segs
-			_tri_out(ra[s], ra[s2], rb[s2], center, col)
-			_tri_out(ra[s], rb[s2], rb[s], center, col)
-
-
 ## Oriented box. centre/size are in the local frame of xf, which carries yaw, tilt and position.
 func add_box_xf(xf: Transform3D, center: Vector3, size: Vector3, col: Color) -> void:
 	var h := size * 0.5

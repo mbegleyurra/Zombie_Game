@@ -65,16 +65,27 @@ const MODEL_YAW := PI * 0.5  ## turns the pack's +X muzzle direction onto -Z
 ## model key -> pack file, in-hand length (muzzle to butt, metres) and the magazine mesh shown in reloads.
 ## Only four guns ship in the pack: every rifle-class key shares rifle_001, the bolt gun and the heavy
 ## tier-3 rifle use sniper_rifle_001, the pump shotgun uses shotgun_001. Lengths tell them apart.
+## "part" = the gun's moving part (built under a "MovingPart" node, meta "kind"; viewmodel.gd animates it),
+## every coordinate in the pack file's own space (+X muzzle, +Y up, +Z the gun's right side):
+##   cylinder / pump : a separate pack mesh ("file") whose origin goes at "at" (pistol_001 is a revolver that ships
+##                     without its drum, shotgun_001 ships without its pump forend)
+##   charge / bolt   : the mesh components inside the AABB "split" are cut out of the fused gun and moved; "knob" is
+##                     where the hand works them (rifle_001: the small cross bar on top of the receiver; sniper: bolt)
+## "well" = top of the magazine well (rifle_001 ships without a magazine; the clip is seated there).
+const RIFLE_PART := {"kind": "charge", "split": AABB(Vector3(0.448, 0.3, -0.035), Vector3(0.03, 0.028, 0.07)), "knob": Vector3(0.463, 0.314, 0.029)}
+const RIFLE_WELL := Vector3(0.27, 0.19, 0.0)
+const SNIPER_WELL := Vector3(0.30, 0.0, 0.0)   ## ahead of sniper_rifle_001's trigger guard (x 0.047-0.214), under the stock line
+const SNIPER_PART := {"kind": "bolt", "split": AABB(Vector3(0.035, 0.04, -0.02), Vector3(0.105, 0.1, 0.16)), "knob": Vector3(0.097, 0.077, 0.101)}
 const BLASTERS := {
-	"pistol": {"file": "pistol_001", "len": 0.28, "clip": "pistol_drum_001"},
-	"ak": {"file": "rifle_001", "len": 0.78, "clip": "rifle_magazine_001"},
-	"m4": {"file": "rifle_001", "len": 0.86, "clip": "rifle_magazine_001"},
-	"shotgun": {"file": "shotgun_001", "len": 0.84, "clip": ""},
-	"hunting": {"file": "sniper_rifle_001", "len": 1.0, "clip": "rifle_magazine_001"},
-	"ar": {"file": "rifle_001", "len": 0.82, "clip": "rifle_magazine_001"},
-	"ar_t1": {"file": "rifle_001", "len": 0.7, "clip": "rifle_magazine_001"},
-	"ar_t2": {"file": "rifle_001", "len": 0.74, "clip": "rifle_magazine_001"},
-	"ar_t3": {"file": "sniper_rifle_001", "len": 0.98, "clip": "rifle_magazine_001"},
+	"pistol": {"file": "pistol_001", "len": 0.28, "clip": "", "part": {"kind": "cylinder", "file": "pistol_drum_001", "at": Vector3(0.196, 0.118, 0.0), "radius": 0.046}},
+	"ak": {"file": "rifle_001", "len": 0.78, "clip": "rifle_magazine_001", "part": RIFLE_PART, "well": RIFLE_WELL},
+	"m4": {"file": "rifle_001", "len": 0.86, "clip": "rifle_magazine_001", "part": RIFLE_PART, "well": RIFLE_WELL},
+	"shotgun": {"file": "shotgun_001", "len": 0.84, "clip": "", "part": {"kind": "pump", "file": "shotgun_handguard_001", "at": Vector3(0.68, 0.14, 0.0)}},
+	"hunting": {"file": "sniper_rifle_001", "len": 1.0, "clip": "rifle_magazine_001", "part": SNIPER_PART},
+	"ar": {"file": "rifle_001", "len": 0.82, "clip": "rifle_magazine_001", "part": RIFLE_PART, "well": RIFLE_WELL},
+	"ar_t1": {"file": "rifle_001", "len": 0.7, "clip": "rifle_magazine_001", "part": RIFLE_PART, "well": RIFLE_WELL},
+	"ar_t2": {"file": "rifle_001", "len": 0.74, "clip": "rifle_magazine_001", "part": RIFLE_PART, "well": RIFLE_WELL},
+	"ar_t3": {"file": "sniper_rifle_001", "len": 0.98, "clip": "rifle_magazine_001", "part": SNIPER_PART, "well": SNIPER_WELL},
 }
 
 static var _blaster_cache: Dictionary = {}
@@ -163,6 +174,9 @@ static func _build_blaster(root: Node3D, model: String) -> bool:
 	var mag_top := lerpf(f_lo_y, MUZZLE_Y, 0.55)
 	var hang := maxf(mag_top - (float(info["mag_ymin"]) * s + off.y), 0.05)
 	p["mag_pos"] = Vector3(0.0, mag_top, float(info["mag_z"]) * s + off.z)
+	if spec.has("well"):
+		p["mag_pos"] = inst.transform * (spec["well"] as Vector3)
+		p["clip_seated"] = true   ## the clip IS the gun's magazine: shown in the well at rest, not only while handled
 	p["grab_off"] = Vector3(0.0, -hang * 0.7, 0.0)
 	var clip_file: String = str(spec.get("clip", ""))
 	var cinfo := _blaster_info(clip_file) if clip_file != "" else {}
@@ -179,12 +193,158 @@ static func _build_blaster(root: Node3D, model: String) -> bool:
 	p["bolt_hand"] = Vector3(xr + 0.05, MUZZLE_Y + 0.02, GRIP_Z - 0.03)
 	if model == "hunting":
 		p["port"] = Vector3(0.0, MUZZLE_Y + 0.05, GRIP_Z - 0.1)
+	var part: Dictionary = spec.get("part", {})
+	if not part.is_empty():
+		var handle := _build_moving_part(root, inst, part, s)
+		if handle != Vector3.INF:
+			p["handle"] = handle   ## gun-local point the support hand works (charging handle, bolt knob, cylinder, pump)
+			if part["kind"] == "cylinder":
+				p["revolver"] = true
+				p["cyl_radius"] = float(part["radius"]) * s
 	p["extent"] = {
 		"lo": Vector3(-size.x * s * 0.5, f_lo_y, lo.z * s + off.z),
 		"hi": Vector3(size.x * s * 0.5, f_hi_y, hi.z * s + off.z),
 	}
 	root.set_meta("vm_profile", p)
 	return true
+
+
+## Builds the gun's moving part under a "MovingPart" node of `root` (gun-local) and returns the gun-local point a
+## hand works it at (Vector3.INF when nothing was built). A cylinder's node sits on the crane axis below the drum,
+## so rotating it about Z swings the drum out to the left; every other part slides along Z.
+static func _build_moving_part(root: Node3D, inst: Node3D, part: Dictionary, s: float) -> Vector3:
+	var kind: String = part["kind"]
+	var ixf := inst.transform   ## pack-file space -> gun-local (yaw, scale, offset)
+	var pivot := Node3D.new()
+	pivot.name = "MovingPart"
+	pivot.set_meta("kind", kind)
+	var handle := Vector3.INF
+	match kind:
+		"cylinder", "pump":
+			var path := blaster_dir + str(part["file"]) + ".glb"
+			var ps := load(path) as PackedScene if ResourceLoader.exists(path) else null
+			var mesh := ps.instantiate() as Node3D if ps != null else null
+			if mesh == null:
+				pivot.free()
+				return Vector3.INF
+			var at_g := ixf * (part["at"] as Vector3)
+			if kind == "cylinder":
+				pivot.position = at_g - Vector3(0.0, float(part["radius"]) * s, 0.0)
+			mesh.name = "Drum" if kind == "cylinder" else "Pump"
+			mesh.transform = Transform3D(ixf.basis, at_g - pivot.position)
+			_no_shadow(mesh)
+			apply_pack_material(mesh)
+			pivot.add_child(mesh)
+			handle = at_g
+		"charge", "bolt":
+			var moved := _split_out(inst, part["split"])
+			if moved == null:
+				pivot.free()
+				return Vector3.INF
+			moved.name = "Bolt" if kind == "bolt" else "ChargingHandle"
+			moved.transform = ixf * moved.transform
+			pivot.add_child(moved)
+			handle = ixf * (part["knob"] as Vector3)
+	root.add_child(pivot)
+	return handle
+
+
+static var _split_cache: Dictionary = {}
+
+
+## Cuts the connected mesh components of `inst` whose bounds lie inside `box` (pack-file space) out of the fused
+## model and returns them as a new MeshInstance3D (transform relative to `inst`), or null when none match.
+static func _split_out(inst: Node3D, box: AABB) -> MeshInstance3D:
+	for c in inst.find_children("*", "MeshInstance3D", true, false):
+		var mi := c as MeshInstance3D
+		if mi.mesh == null or mi.mesh.get_surface_count() != 1:
+			continue
+		var key := "%d_%s" % [mi.mesh.get_instance_id(), str(box)]
+		if not _split_cache.has(key):
+			var pr := _split_mesh(mi.mesh, _rel_xf(inst, mi), box)
+			# both halves are the pack's own geometry (the source mesh may be a runtime UV-fixed copy without a path):
+			# record the .glb as their provenance on a unique sub-path, so asset scans tell them from procedural meshes
+			var src_path := inst.scene_file_path
+			if not pr.is_empty() and src_path.ends_with(".glb"):
+				for half in pr:
+					(half as Mesh).resource_path = "%s::split_%d" % [src_path, (half as Mesh).get_instance_id()]
+			_split_cache[key] = pr
+		var pair: Array = _split_cache[key]
+		if pair.is_empty():
+			continue
+		mi.mesh = pair[0]
+		var out := MeshInstance3D.new()
+		out.mesh = pair[1]
+		out.material_override = mi.material_override
+		out.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		out.transform = _rel_xf(inst, mi)
+		return out
+	return null
+
+
+static func _rel_xf(top: Node3D, n: Node3D) -> Transform3D:
+	var xf := Transform3D.IDENTITY
+	var cur: Node = n
+	while cur != null and cur != top:
+		xf = (cur as Node3D).transform * xf
+		cur = cur.get_parent()
+	return xf
+
+
+## [kept mesh, cut mesh] split by connected component (vertices joined by position), [] when nothing is in `box`.
+static func _split_mesh(src: Mesh, xf: Transform3D, box: AABB) -> Array:
+	var arr := src.surface_get_arrays(0)
+	var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+	var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX] if arr[Mesh.ARRAY_INDEX] != null else PackedInt32Array()
+	if idx.is_empty():
+		for i in range(v.size()):
+			idx.append(i)
+	var ids := {}
+	var par := PackedInt32Array()
+	var vid := PackedInt32Array()
+	for p in v:
+		var k := (p * 10000.0).round()
+		if not ids.has(k):
+			ids[k] = par.size()
+			par.append(par.size())
+		vid.append(ids[k])
+	for t in range(idx.size() / 3):
+		var a := _uf_root(par, vid[idx[t * 3]])
+		for j in range(1, 3):
+			var b := _uf_root(par, vid[idx[t * 3 + j]])
+			if a != b:
+				par[b] = a
+	var bounds := {}
+	for i in range(v.size()):
+		var r := _uf_root(par, vid[i])
+		var w := xf * v[i]
+		bounds[r] = (bounds[r] as AABB).expand(w) if bounds.has(r) else AABB(w, Vector3.ZERO)
+	var keep := PackedInt32Array()
+	var cut := PackedInt32Array()
+	for t in range(idx.size() / 3):
+		var inside := box.encloses(bounds[_uf_root(par, vid[idx[t * 3]])])
+		for j in range(3):
+			if inside:
+				cut.append(idx[t * 3 + j])
+			else:
+				keep.append(idx[t * 3 + j])
+	if cut.is_empty():
+		return []
+	var a_keep := arr.duplicate()
+	a_keep[Mesh.ARRAY_INDEX] = keep
+	var a_cut := arr.duplicate()
+	a_cut[Mesh.ARRAY_INDEX] = cut
+	var m_keep := ArrayMesh.new()
+	m_keep.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, a_keep)
+	var m_cut := ArrayMesh.new()
+	m_cut.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, a_cut)
+	return [m_keep, m_cut]
+
+
+static func _uf_root(par: PackedInt32Array, x: int) -> int:
+	while par[x] != x:
+		x = par[x]
+	return x
 
 
 ## The pack's .glb files embed a plain untextured grey material (it renders as white blobs); the real colours

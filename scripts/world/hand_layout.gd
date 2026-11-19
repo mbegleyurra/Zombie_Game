@@ -8,7 +8,7 @@ extends RefCounted
 ## City (Millbrook): a 3 x 3 grid of 44 m blocks between x 24..156 and z -156..-24: hospital, police station and church
 ## in the middle row, tall towers everywhere else. The player spawn (0, 0) is in the countryside, about 34 m from the nearest city corner (24, -24) and outside its flat pad.
 
-const HAND_SEED := 20260101          ## terrain relief + decoration seed, always used regardless of the seed passed to build()
+const HAND_SEED := 20260101          ## fixed world_seed value kept for logs/API; no layout, relief or decoration reads it (all placements come from hand_map_data.gd)
 const SPAWN := Vector2(0.0, 0.0)
 
 const CITY_CENTER := Vector2(90.0, -90.0)
