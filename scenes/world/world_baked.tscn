@@ -31,3 +31,12 @@
 [node name="DayNight" type="Node3D" parent="."]
 script = ExtResource("9")
 time_hours = 9.0
+
+[editable path="Terrain"]
+[editable path="Roads"]
+[editable path="Buildings"]
+[editable path="Vegetation"]
+[editable path="Props"]
+[editable path="Dungeon"]
+[editable path="Vehicles"]
+[editable path="Markers"]
