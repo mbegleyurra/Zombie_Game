@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://scenes/world/props/vegetation/res/Tree_3_A.res" id="1_ffqjy"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_4k04r"]
+height = 2.4304764
+radius = 0.24745585
+
+[node name="Tree_3_A" type="Node3D" unique_id=1025959235]
+metadata/kind = "tree"
+
+[node name="Mesh" type="MeshInstance3D" parent="." unique_id=728935382]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0055201054, 0.261318, 1.1920929e-07)
+visibility_range_end = 260.0
+visibility_range_end_margin = 15.0
+mesh = ExtResource("1_ffqjy")
+
+[node name="Body" type="StaticBody3D" parent="." unique_id=1463227221]
+
+[node name="Shape" type="CollisionShape3D" parent="Body" unique_id=417941990]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2152382, 0)
+shape = SubResource("CylinderShape3D_4k04r")

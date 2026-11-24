@@ -1,9 +1,744 @@
 [gd_scene format=3]
 
-[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0000.res" id="1_eb7yc"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0000.res" id="1_e3uu4"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0001.res" id="2_rdvte"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0002.res" id="3_67cmq"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0003.res" id="4_pnnsa"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0004.res" id="5_8nxxo"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0005.res" id="6_47dut"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0006.res" id="7_mjqpn"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0007.res" id="8_7jbj6"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0008.res" id="9_6ncrq"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0009.res" id="10_k12h0"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0010.res" id="11_co8wv"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0011.res" id="12_w84hs"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0012.res" id="13_sk76u"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0013.res" id="14_tc1ke"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0014.res" id="15_jfy7k"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0015.res" id="16_vcx0x"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0016.res" id="17_0t72y"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0017.res" id="18_0kf8e"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0018.res" id="19_ybpmv"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0019.res" id="20_ew2ct"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0020.res" id="21_nguye"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0021.res" id="22_mvytg"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0022.res" id="23_ulr13"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0023.res" id="24_jvjrk"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0024.res" id="25_n8qya"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0025.res" id="26_3sfp7"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0026.res" id="27_72iwy"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0027.res" id="28_j6om6"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0028.res" id="29_0f7b0"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0029.res" id="30_n21cn"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0030.res" id="31_51m0m"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0031.res" id="32_3ey1x"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0032.res" id="33_42ybh"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0033.res" id="34_5mnhh"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0034.res" id="35_pgmnf"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0035.res" id="36_t3d70"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0036.res" id="37_5fghm"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0037.res" id="38_wfs8s"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0038.res" id="39_k2vs3"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0039.res" id="40_lgycj"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0040.res" id="41_odewp"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0041.res" id="42_yl3jj"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0042.res" id="43_qgnq5"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0043.res" id="44_istif"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0044.res" id="45_e4tg1"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0045.res" id="46_ex4c5"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0046.res" id="47_muoxh"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0047.res" id="48_q4bkh"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0048.res" id="49_cat7g"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0049.res" id="50_s42fn"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0050.res" id="51_fvyll"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0051.res" id="52_6o4mx"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0052.res" id="53_e4m5t"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0053.res" id="54_332hy"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0054.res" id="55_liv8n"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0055.res" id="56_roti7"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0056.res" id="57_sascr"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0057.res" id="58_0g6cv"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0058.res" id="59_j3vm1"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0059.res" id="60_tnsdq"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0060.res" id="61_qpm7u"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0061.res" id="62_0fpki"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0062.res" id="63_sikvh"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0063.res" id="64_2fjss"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0064.res" id="65_lhbwk"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0065.res" id="66_wyfg0"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0066.res" id="67_wjxs5"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0067.res" id="68_avc4y"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0068.res" id="69_vgixj"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0069.res" id="70_f4565"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0070.res" id="71_c6q3d"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0071.res" id="72_7t25y"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0072.res" id="73_5thxt"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0073.res" id="74_xenh2"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0074.res" id="75_wi8yv"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0075.res" id="76_d3vba"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0076.res" id="77_kq5q8"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0077.res" id="78_uy3db"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0078.res" id="79_ugivl"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0079.res" id="80_5yf7d"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0080.res" id="81_7k0vc"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0081.res" id="82_n6pyp"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0082.res" id="83_mus7b"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0083.res" id="84_mbi3k"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0084.res" id="85_wov67"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0085.res" id="86_krqp3"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0086.res" id="87_dr0jm"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0087.res" id="88_yp42l"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0088.res" id="89_4af3w"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0089.res" id="90_chcx8"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0090.res" id="91_80sqh"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0091.res" id="92_gmmqg"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0092.res" id="93_isifd"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0093.res" id="94_iys68"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0094.res" id="95_ffat5"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0095.res" id="96_we8uc"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0096.res" id="97_jivbe"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0097.res" id="98_5q4ow"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0098.res" id="99_gmbd4"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0099.res" id="100_26j6o"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0100.res" id="101_102sh"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0101.res" id="102_ygekc"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0102.res" id="103_lwibc"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0103.res" id="104_0u6rg"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0104.res" id="105_xnyx2"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0105.res" id="106_4u3hk"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0106.res" id="107_nojiq"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0107.res" id="108_5vwo5"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0108.res" id="109_rtjtv"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0109.res" id="110_noy1k"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0110.res" id="111_jpbhq"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0111.res" id="112_deyvn"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0112.res" id="113_bu0x0"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0113.res" id="114_u1ckk"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0114.res" id="115_sugma"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0115.res" id="116_3qwtj"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0116.res" id="117_hc5y0"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0117.res" id="118_jmivm"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0118.res" id="119_rx4nr"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0119.res" id="120_bjkk2"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0120.res" id="121_0v1yv"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0121.res" id="122_qo20h"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/roads_mesh_0122.res" id="123_vkavm"]
 
-[node name="Roads" type="Node3D" unique_id=1644699749]
+[node name="Roads" type="Node3D" unique_id=1419226262]
 
-[node name="Roads" type="MeshInstance3D" parent="." unique_id=574821257]
+[node name="Roads" type="Node3D" parent="." unique_id=1930503076]
+
+[node name="Junction_000" type="MeshInstance3D" parent="Roads" unique_id=655158809]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -195, 5.9991827, 40)
 cast_shadow = 0
-mesh = ExtResource("1_eb7yc")
+mesh = ExtResource("1_e3uu4")
+
+[node name="Junction_001" type="MeshInstance3D" parent="Roads" unique_id=348263317]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -120, -5.437666, 28)
+cast_shadow = 0
+mesh = ExtResource("2_rdvte")
+
+[node name="Junction_002" type="MeshInstance3D" parent="Roads" unique_id=805311691]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -45, -7.6478505, 14)
+cast_shadow = 0
+mesh = ExtResource("3_67cmq")
+
+[node name="Junction_003" type="MeshInstance3D" parent="Roads" unique_id=533403318]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 2.1594799, 12)
+cast_shadow = 0
+mesh = ExtResource("4_pnnsa")
+
+[node name="Junction_004" type="MeshInstance3D" parent="Roads" unique_id=915239096]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 2.0608368, 6)
+cast_shadow = 0
+mesh = ExtResource("5_8nxxo")
+
+[node name="Junction_005" type="MeshInstance3D" parent="Roads" unique_id=581971384]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 165, 2.0906663, -6)
+cast_shadow = 0
+mesh = ExtResource("6_47dut")
+
+[node name="Junction_006" type="MeshInstance3D" parent="Roads" unique_id=363174523]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 205, 5.030254, -10)
+cast_shadow = 0
+mesh = ExtResource("7_mjqpn")
+
+[node name="Junction_007" type="MeshInstance3D" parent="Roads" unique_id=2078062511]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.4078279, 12.6)
+cast_shadow = 0
+mesh = ExtResource("8_7jbj6")
+
+[node name="Junction_008" type="MeshInstance3D" parent="Roads" unique_id=1959737119]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -5.939211, -84)
+cast_shadow = 0
+mesh = ExtResource("9_6ncrq")
+
+[node name="Junction_009" type="MeshInstance3D" parent="Roads" unique_id=1724528100]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 2.06, -24)
+cast_shadow = 0
+mesh = ExtResource("10_k12h0")
+
+[node name="Junction_010" type="MeshInstance3D" parent="Roads" unique_id=41914893]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, -1.0249999, 175)
+cast_shadow = 0
+mesh = ExtResource("11_co8wv")
+
+[node name="Junction_011" type="MeshInstance3D" parent="Roads" unique_id=275563638]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 70, 4.9643354, 55)
+cast_shadow = 0
+mesh = ExtResource("12_w84hs")
+
+[node name="Junction_012" type="MeshInstance3D" parent="Roads" unique_id=2087475500]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 160, 1.0370382, 55)
+cast_shadow = 0
+mesh = ExtResource("13_sk76u")
+
+[node name="Junction_013" type="MeshInstance3D" parent="Roads" unique_id=1016304340]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 160, -8.289462, 125)
+cast_shadow = 0
+mesh = ExtResource("14_tc1ke")
+
+[node name="Junction_014" type="MeshInstance3D" parent="Roads" unique_id=1696568091]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 70, 1.4938649, 125)
+cast_shadow = 0
+mesh = ExtResource("15_jfy7k")
+
+[node name="Junction_015" type="MeshInstance3D" parent="Roads" unique_id=229104510]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 3.9052517, 55)
+cast_shadow = 0
+mesh = ExtResource("16_vcx0x")
+
+[node name="Junction_016" type="MeshInstance3D" parent="Roads" unique_id=1773233871]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 0.62924653, 92)
+cast_shadow = 0
+mesh = ExtResource("17_0t72y")
+
+[node name="Junction_017" type="MeshInstance3D" parent="Roads" unique_id=838152267]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 70, 3.0847971, 92)
+cast_shadow = 0
+mesh = ExtResource("18_0kf8e")
+
+[node name="Junction_018" type="MeshInstance3D" parent="Roads" unique_id=614385508]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, -0.05784477, 126)
+cast_shadow = 0
+mesh = ExtResource("19_ybpmv")
+
+[node name="Junction_019" type="MeshInstance3D" parent="Roads" unique_id=444533767]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -60, 2.551688, 134)
+cast_shadow = 0
+mesh = ExtResource("20_ew2ct")
+
+[node name="Junction_020" type="MeshInstance3D" parent="Roads" unique_id=1405763881]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -90, -6.3470125, 22.4)
+cast_shadow = 0
+mesh = ExtResource("21_nguye")
+
+[node name="Junction_021" type="MeshInstance3D" parent="Roads" unique_id=243979473]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -90, -2.4868944, -96)
+cast_shadow = 0
+mesh = ExtResource("22_mvytg")
+
+[node name="Junction_022" type="MeshInstance3D" parent="Roads" unique_id=1676974936]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, -5.9852123, -112)
+cast_shadow = 0
+mesh = ExtResource("23_ulr13")
+
+[node name="Junction_023" type="MeshInstance3D" parent="Roads" unique_id=1118417947]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 1.9912401, -112)
+cast_shadow = 0
+mesh = ExtResource("24_jvjrk")
+
+[node name="Junction_024" type="MeshInstance3D" parent="Roads" unique_id=30043192]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 112, 2.0716562, 3.1)
+cast_shadow = 0
+mesh = ExtResource("25_n8qya")
+
+[node name="Junction_025" type="MeshInstance3D" parent="Roads" unique_id=486675663]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 112, 2.06, -24)
+cast_shadow = 0
+mesh = ExtResource("26_3sfp7")
+
+[node name="Junction_026" type="MeshInstance3D" parent="Roads" unique_id=1444758779]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 2.06, -156)
+cast_shadow = 0
+mesh = ExtResource("27_72iwy")
+
+[node name="Junction_027" type="MeshInstance3D" parent="Roads" unique_id=654850451]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 2.06, -68)
+cast_shadow = 0
+mesh = ExtResource("28_j6om6")
+
+[node name="Junction_028" type="MeshInstance3D" parent="Roads" unique_id=2062048710]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 68, 2.06, -156)
+cast_shadow = 0
+mesh = ExtResource("29_0f7b0")
+
+[node name="Junction_029" type="MeshInstance3D" parent="Roads" unique_id=618258367]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 68, 2.06, -112)
+cast_shadow = 0
+mesh = ExtResource("30_n21cn")
+
+[node name="Junction_030" type="MeshInstance3D" parent="Roads" unique_id=1105200532]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 68, 2.06, -68)
+cast_shadow = 0
+mesh = ExtResource("31_51m0m")
+
+[node name="Junction_031" type="MeshInstance3D" parent="Roads" unique_id=407457510]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 68, 2.06, -24)
+cast_shadow = 0
+mesh = ExtResource("32_3ey1x")
+
+[node name="Junction_032" type="MeshInstance3D" parent="Roads" unique_id=1171442545]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 112, 2.06, -156)
+cast_shadow = 0
+mesh = ExtResource("33_42ybh")
+
+[node name="Junction_033" type="MeshInstance3D" parent="Roads" unique_id=945291447]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 112, 2.06, -112)
+cast_shadow = 0
+mesh = ExtResource("34_5mnhh")
+
+[node name="Junction_034" type="MeshInstance3D" parent="Roads" unique_id=510992907]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 112, 2.06, -68)
+cast_shadow = 0
+mesh = ExtResource("35_pgmnf")
+
+[node name="Junction_035" type="MeshInstance3D" parent="Roads" unique_id=735931497]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 156, 2.0510712, -156)
+cast_shadow = 0
+mesh = ExtResource("36_t3d70")
+
+[node name="Junction_036" type="MeshInstance3D" parent="Roads" unique_id=1265350941]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 156, 2.06, -112)
+cast_shadow = 0
+mesh = ExtResource("37_5fghm")
+
+[node name="Junction_037" type="MeshInstance3D" parent="Roads" unique_id=1244582142]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 156, 2.06, -68)
+cast_shadow = 0
+mesh = ExtResource("38_wfs8s")
+
+[node name="Junction_038" type="MeshInstance3D" parent="Roads" unique_id=2022072317]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 156, 2.06, -24)
+cast_shadow = 0
+mesh = ExtResource("39_k2vs3")
+
+[node name="Junction_039" type="MeshInstance3D" parent="Roads" unique_id=1077525786]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 2.1119092, 8)
+cast_shadow = 0
+mesh = ExtResource("40_lgycj")
+
+[node name="Junction_040" type="MeshInstance3D" parent="Roads" unique_id=470479647]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 2.06, -2)
+cast_shadow = 0
+mesh = ExtResource("41_odewp")
+
+[node name="Junction_041" type="MeshInstance3D" parent="Roads" unique_id=1572079]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 165, 2.0873005, -10)
+cast_shadow = 0
+mesh = ExtResource("42_yl3jj")
+
+[node name="Junction_042" type="MeshInstance3D" parent="Roads" unique_id=1591262417]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 165.39604, 2.094752, -6.039604)
+cast_shadow = 0
+mesh = ExtResource("43_qgnq5")
+
+[node name="Junction_043" type="MeshInstance3D" parent="Roads" unique_id=1865467187]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 165, 2.06, -20)
+cast_shadow = 0
+mesh = ExtResource("44_istif")
+
+[node name="Junction_044" type="MeshInstance3D" parent="Roads" unique_id=780368167]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 158, 2.035763, -146)
+cast_shadow = 0
+mesh = ExtResource("45_e4tg1")
+
+[node name="Junction_045" type="MeshInstance3D" parent="Roads" unique_id=1561784125]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 168, 1.6558139, -146)
+cast_shadow = 0
+mesh = ExtResource("46_ex4c5")
+
+[node name="Junction_046" type="MeshInstance3D" parent="Roads" unique_id=1273214942]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, -6.090614, -84)
+cast_shadow = 0
+mesh = ExtResource("47_muoxh")
+
+[node name="Junction_047" type="MeshInstance3D" parent="Roads" unique_id=233926849]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -50, -1.3690171, -130)
+cast_shadow = 0
+mesh = ExtResource("48_q4bkh")
+
+[node name="Junction_048" type="MeshInstance3D" parent="Roads" unique_id=155639865]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -44.190872, -5.2406197, -108.21577)
+cast_shadow = 0
+mesh = ExtResource("49_cat7g")
+
+[node name="Junction_049" type="MeshInstance3D" parent="Roads" unique_id=1682611432]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -50, -1.1900855, -140)
+cast_shadow = 0
+mesh = ExtResource("50_s42fn")
+
+[node name="Junction_050" type="MeshInstance3D" parent="Roads" unique_id=1106442769]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -90, -4.593063, -29.999998)
+cast_shadow = 0
+mesh = ExtResource("51_fvyll")
+
+[node name="Junction_051" type="MeshInstance3D" parent="Roads" unique_id=168786566]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -118, -4.258803, -30)
+cast_shadow = 0
+mesh = ExtResource("52_6o4mx")
+
+[node name="Junction_052" type="MeshInstance3D" parent="Roads" unique_id=1065502440]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, -2.3186502, 148)
+cast_shadow = 0
+mesh = ExtResource("53_e4m5t")
+
+[node name="Junction_053" type="MeshInstance3D" parent="Roads" unique_id=1747640384]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -31.591011, 1.4951049, 131.29439)
+cast_shadow = 0
+mesh = ExtResource("54_332hy")
+
+[node name="Junction_054" type="MeshInstance3D" parent="Roads" unique_id=1189419233]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, -2.3186502, 158)
+cast_shadow = 0
+mesh = ExtResource("55_liv8n")
+
+[node name="Junction_055" type="MeshInstance3D" parent="Roads" unique_id=2100152544]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 70, 3.209865, 90)
+cast_shadow = 0
+mesh = ExtResource("56_roti7")
+
+[node name="Junction_056" type="MeshInstance3D" parent="Roads" unique_id=1435174842]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 105, -1.1568491, 90)
+cast_shadow = 0
+mesh = ExtResource("57_sascr")
+
+[node name="Junction_057" type="MeshInstance3D" parent="Roads" unique_id=1319106577]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 130, -5.154774, 125)
+cast_shadow = 0
+mesh = ExtResource("58_0g6cv")
+
+[node name="Junction_058" type="MeshInstance3D" parent="Roads" unique_id=646776512]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 130, -6.343118, 150)
+cast_shadow = 0
+mesh = ExtResource("59_j3vm1")
+
+[node name="Junction_059" type="MeshInstance3D" parent="Roads" unique_id=446386377]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -153.59114, -0.25492296, 33.37458)
+cast_shadow = 0
+mesh = ExtResource("60_tnsdq")
+
+[node name="Junction_060" type="MeshInstance3D" parent="Roads" unique_id=847907013]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -143.32814, -6.391569, 97.51831)
+cast_shadow = 0
+mesh = ExtResource("61_qpm7u")
+
+[node name="Road_000" type="MeshInstance3D" parent="Roads" unique_id=618886911]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -157.5, -5.157705, 34)
+cast_shadow = 0
+mesh = ExtResource("62_0fpki")
+
+[node name="Road_001" type="MeshInstance3D" parent="Roads" unique_id=1227761726]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -82.5, -7.644204, 21)
+cast_shadow = 0
+mesh = ExtResource("63_sikvh")
+
+[node name="Road_002" type="MeshInstance3D" parent="Roads" unique_id=1756212999]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10.500002, -7.472663, 13)
+cast_shadow = 0
+mesh = ExtResource("64_2fjss")
+
+[node name="Road_003" type="MeshInstance3D" parent="Roads" unique_id=2007830948]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 59.500004, 2.0631366, 9)
+cast_shadow = 0
+mesh = ExtResource("65_lhbwk")
+
+[node name="Road_004" type="MeshInstance3D" parent="Roads" unique_id=509178403]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 130, 2.0607736, 0)
+cast_shadow = 0
+mesh = ExtResource("66_wyfg0")
+
+[node name="Road_005" type="MeshInstance3D" parent="Roads" unique_id=1247785915]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 185, 2.1496336, -8)
+cast_shadow = 0
+mesh = ExtResource("67_wjxs5")
+
+[node name="Road_006" type="MeshInstance3D" parent="Roads" unique_id=544932633]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.2352386, 4.8)
+cast_shadow = 0
+mesh = ExtResource("68_avc4y")
+
+[node name="Road_007" type="MeshInstance3D" parent="Roads" unique_id=355736640]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -5.8693166, -40.5)
+cast_shadow = 0
+mesh = ExtResource("69_vgixj")
+
+[node name="Road_008" type="MeshInstance3D" parent="Roads" unique_id=1413171849]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 2.0639732, -5.9)
+cast_shadow = 0
+mesh = ExtResource("70_f4565")
+
+[node name="Road_009" type="MeshInstance3D" parent="Roads" unique_id=2107194380]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, -0.96410733, 93.5)
+cast_shadow = 0
+mesh = ExtResource("71_c6q3d")
+
+[node name="Road_010" type="MeshInstance3D" parent="Roads" unique_id=362078856]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 115, 1.1013914, 55)
+cast_shadow = 0
+mesh = ExtResource("72_7t25y")
+
+[node name="Road_011" type="MeshInstance3D" parent="Roads" unique_id=1872062571]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 160, -8.085232, 90)
+cast_shadow = 0
+mesh = ExtResource("73_5thxt")
+
+[node name="Road_012" type="MeshInstance3D" parent="Roads" unique_id=435290416]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 115, -8.123643, 125)
+cast_shadow = 0
+mesh = ExtResource("74_xenh2")
+
+[node name="Road_013" type="MeshInstance3D" parent="Roads" unique_id=594914638]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 70, 1.5676388, 90)
+cast_shadow = 0
+mesh = ExtResource("75_wi8yv")
+
+[node name="Road_014" type="MeshInstance3D" parent="Roads" unique_id=871817646]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 2.100834, 30.5)
+cast_shadow = 0
+mesh = ExtResource("76_d3vba")
+
+[node name="Road_015" type="MeshInstance3D" parent="Roads" unique_id=1412920591]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 47, 0.7147797, 92)
+cast_shadow = 0
+mesh = ExtResource("77_kq5q8")
+
+[node name="Road_016" type="MeshInstance3D" parent="Roads" unique_id=70694383]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18.000002, -0.016024353, 130)
+cast_shadow = 0
+mesh = ExtResource("78_uy3db")
+
+[node name="Road_017" type="MeshInstance3D" parent="Roads" unique_id=217857707]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -90, -6.3135552, -36.8)
+cast_shadow = 0
+mesh = ExtResource("79_ugivl")
+
+[node name="Road_018" type="MeshInstance3D" parent="Roads" unique_id=1404644300]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -60, -5.972847, -104)
+cast_shadow = 0
+mesh = ExtResource("80_5yf7d")
+
+[node name="Road_019" type="MeshInstance3D" parent="Roads" unique_id=834387976]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.1000004, -5.836637, -112)
+cast_shadow = 0
+mesh = ExtResource("81_7k0vc")
+
+[node name="Road_020" type="MeshInstance3D" parent="Roads" unique_id=1474274617]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 112, 2.060225, -10.35)
+cast_shadow = 0
+mesh = ExtResource("82_n6pyp")
+
+[node name="Road_021" type="MeshInstance3D" parent="Roads" unique_id=1511177485]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 1.97792, -134)
+cast_shadow = 0
+mesh = ExtResource("83_mus7b")
+
+[node name="Road_022" type="MeshInstance3D" parent="Roads" unique_id=991460081]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 1.97792, -90)
+cast_shadow = 0
+mesh = ExtResource("84_mbi3k")
+
+[node name="Road_023" type="MeshInstance3D" parent="Roads" unique_id=1374367327]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 2.06, -45.999996)
+cast_shadow = 0
+mesh = ExtResource("85_wov67")
+
+[node name="Road_024" type="MeshInstance3D" parent="Roads" unique_id=549821254]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 68, 2.06, -134)
+cast_shadow = 0
+mesh = ExtResource("86_krqp3")
+
+[node name="Road_025" type="MeshInstance3D" parent="Roads" unique_id=1762248178]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 68, 2.06, -90)
+cast_shadow = 0
+mesh = ExtResource("87_dr0jm")
+
+[node name="Road_026" type="MeshInstance3D" parent="Roads" unique_id=1221547219]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 68, 2.06, -45.999996)
+cast_shadow = 0
+mesh = ExtResource("88_yp42l")
+
+[node name="Road_027" type="MeshInstance3D" parent="Roads" unique_id=1344302421]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 112, 2.06, -134)
+cast_shadow = 0
+mesh = ExtResource("89_4af3w")
+
+[node name="Road_028" type="MeshInstance3D" parent="Roads" unique_id=580097046]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 112, 2.06, -90)
+cast_shadow = 0
+mesh = ExtResource("90_chcx8")
+
+[node name="Road_029" type="MeshInstance3D" parent="Roads" unique_id=1054782876]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 112, 2.06, -45.999996)
+cast_shadow = 0
+mesh = ExtResource("91_80sqh")
+
+[node name="Road_030" type="MeshInstance3D" parent="Roads" unique_id=2135310353]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 156, 2.0438323, -134)
+cast_shadow = 0
+mesh = ExtResource("92_gmmqg")
+
+[node name="Road_031" type="MeshInstance3D" parent="Roads" unique_id=140206164]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 156, 2.06, -90)
+cast_shadow = 0
+mesh = ExtResource("93_isifd")
+
+[node name="Road_032" type="MeshInstance3D" parent="Roads" unique_id=954179844]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 156, 2.06, -45.999996)
+cast_shadow = 0
+mesh = ExtResource("94_iys68")
+
+[node name="Road_033" type="MeshInstance3D" parent="Roads" unique_id=858526458]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45.999996, 2.06, -156)
+cast_shadow = 0
+mesh = ExtResource("95_ffat5")
+
+[node name="Road_034" type="MeshInstance3D" parent="Roads" unique_id=292700688]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 90, 2.06, -156)
+cast_shadow = 0
+mesh = ExtResource("96_we8uc")
+
+[node name="Road_035" type="MeshInstance3D" parent="Roads" unique_id=1740398600]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 134, 2.06, -156)
+cast_shadow = 0
+mesh = ExtResource("97_jivbe")
+
+[node name="Road_036" type="MeshInstance3D" parent="Roads" unique_id=838105320]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45.999996, 2.06, -112)
+cast_shadow = 0
+mesh = ExtResource("98_5q4ow")
+
+[node name="Road_037" type="MeshInstance3D" parent="Roads" unique_id=541283929]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 90, 2.06, -112)
+cast_shadow = 0
+mesh = ExtResource("99_gmbd4")
+
+[node name="Road_038" type="MeshInstance3D" parent="Roads" unique_id=402856850]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 134, 2.06, -112)
+cast_shadow = 0
+mesh = ExtResource("100_26j6o")
+
+[node name="Road_039" type="MeshInstance3D" parent="Roads" unique_id=2080196358]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45.999996, 2.06, -68)
+cast_shadow = 0
+mesh = ExtResource("101_102sh")
+
+[node name="Road_040" type="MeshInstance3D" parent="Roads" unique_id=454153987]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 90, 2.06, -68)
+cast_shadow = 0
+mesh = ExtResource("102_ygekc")
+
+[node name="Road_041" type="MeshInstance3D" parent="Roads" unique_id=1007538946]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 134, 2.06, -68)
+cast_shadow = 0
+mesh = ExtResource("103_lwibc")
+
+[node name="Road_042" type="MeshInstance3D" parent="Roads" unique_id=207621212]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45.999996, 2.06, -24)
+cast_shadow = 0
+mesh = ExtResource("104_0u6rg")
+
+[node name="Road_043" type="MeshInstance3D" parent="Roads" unique_id=541874620]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 90, 2.06, -24)
+cast_shadow = 0
+mesh = ExtResource("105_xnyx2")
+
+[node name="Road_044" type="MeshInstance3D" parent="Roads" unique_id=235963640]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 134, 2.06, -24)
+cast_shadow = 0
+mesh = ExtResource("106_4u3hk")
+
+[node name="Road_045" type="MeshInstance3D" parent="Roads" unique_id=1388331358]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 2.0684006, 3)
+cast_shadow = 0
+mesh = ExtResource("107_nojiq")
+
+[node name="Road_046" type="MeshInstance3D" parent="Roads" unique_id=2099842806]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 165.19803, 2.0934453, -8.019802)
+cast_shadow = 0
+mesh = ExtResource("108_5vwo5")
+
+[node name="Road_047" type="MeshInstance3D" parent="Roads" unique_id=52319477]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 165, 2.0600007, -15)
+cast_shadow = 0
+mesh = ExtResource("109_rtjtv")
+
+[node name="Road_048" type="MeshInstance3D" parent="Roads" unique_id=1508290629]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 163, 1.7810167, -146)
+cast_shadow = 0
+mesh = ExtResource("110_noy1k")
+
+[node name="Road_049" type="MeshInstance3D" parent="Roads" unique_id=146211530]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.5, -6.0500154, -84)
+cast_shadow = 0
+mesh = ExtResource("111_jpbhq")
+
+[node name="Road_050" type="MeshInstance3D" parent="Roads" unique_id=2028795051]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12.1, -6.090614, -84)
+cast_shadow = 0
+mesh = ExtResource("112_deyvn")
+
+[node name="Road_051" type="MeshInstance3D" parent="Roads" unique_id=1025843633]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -47.095436, -5.0810666, -119.10788)
+cast_shadow = 0
+mesh = ExtResource("113_bu0x0")
+
+[node name="Road_052" type="MeshInstance3D" parent="Roads" unique_id=845384217]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -50, -1.1900855, -135)
+cast_shadow = 0
+mesh = ExtResource("114_u1ckk")
+
+[node name="Road_053" type="MeshInstance3D" parent="Roads" unique_id=274888369]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -99.899994, -4.5778513, -30)
+cast_shadow = 0
+mesh = ExtResource("115_sugma")
+
+[node name="Road_054" type="MeshInstance3D" parent="Roads" unique_id=1630716526]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -112.100006, -4.258803, -30)
+cast_shadow = 0
+mesh = ExtResource("116_3qwtj")
+
+[node name="Road_055" type="MeshInstance3D" parent="Roads" unique_id=1536870151]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30.795506, -2.1009028, 139.64719)
+cast_shadow = 0
+mesh = ExtResource("117_hc5y0")
+
+[node name="Road_056" type="MeshInstance3D" parent="Roads" unique_id=178448933]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, -2.3186502, 153)
+cast_shadow = 0
+mesh = ExtResource("118_jmivm")
+
+[node name="Road_057" type="MeshInstance3D" parent="Roads" unique_id=207011871]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 83.4, -1.1568491, 90)
+cast_shadow = 0
+mesh = ExtResource("119_rx4nr")
+
+[node name="Road_058" type="MeshInstance3D" parent="Roads" unique_id=1203892836]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 99.100006, -1.1568491, 90)
+cast_shadow = 0
+mesh = ExtResource("120_bjkk2")
+
+[node name="Road_059" type="MeshInstance3D" parent="Roads" unique_id=763122560]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 130, -6.343118, 133.4)
+cast_shadow = 0
+mesh = ExtResource("121_0v1yv")
+
+[node name="Road_060" type="MeshInstance3D" parent="Roads" unique_id=176391759]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 130, -6.343118, 144.1)
+cast_shadow = 0
+mesh = ExtResource("122_qo20h")
+
+[node name="Road_061" type="MeshInstance3D" parent="Roads" unique_id=2025242230]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -148.45964, -2.4764318, 65.44644)
+cast_shadow = 0
+mesh = ExtResource("123_vkavm")

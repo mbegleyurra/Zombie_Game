@@ -28,10 +28,9 @@ func _build(seed_value: int) -> Node3D:
 
 
 func _sig(w: Node3D) -> String:
-	var body: StaticBody3D = w.get_node("KenneyDressing/Collision")
 	var parts := PackedStringArray()
-	for c in body.get_children():
-		var t: Transform3D = (c as CollisionShape3D).transform
+	for c in w.get_node("KenneyDressing").find_children("*", "CollisionShape3D", true, false):
+		var t: Transform3D = (c as CollisionShape3D).global_transform
 		parts.append("%.2f,%.2f,%.2f,%.3f" % [t.origin.x, t.origin.y, t.origin.z, t.basis.get_euler().y])
 	return "\n".join(parts).md5_text()
 
@@ -51,11 +50,11 @@ func _run() -> void:
 		check(int(cnt["crates_barrels"]) >= 8, "seed %d: barrels/crates in warehouse+gas (%d)" % [seed_value, int(cnt["crates_barrels"])])
 		check(int(cnt["trees"]) >= 20 and int(cnt["rocks"]) >= 20, "seed %d: open-terrain trees %d rocks %d" % [seed_value, int(cnt["trees"]), int(cnt["rocks"])])
 		var dn: Node3D = w.get_node("KenneyDressing")
-		var body: StaticBody3D = dn.get_node("Collision")
+		var shapes: Array = dn.find_children("*", "CollisionShape3D", true, false)
 		var space := w.get_world_3d().direct_space_state
 		# overlap with every location's own colliders and the procedural props
 		var overl := PackedStringArray()
-		for c in body.get_children():
+		for c in shapes:
 			var cs: CollisionShape3D = c
 			var q := PhysicsShapeQueryParameters3D.new()
 			q.shape = cs.shape
@@ -63,7 +62,7 @@ func _run() -> void:
 			q.transform = cs.global_transform
 			for hit in space.intersect_shape(q, 8):
 				var col: Node = hit["collider"] as Node
-				if col != null and col != body and col.name != "Chunk" and not col.name.begins_with("Terrain") and col.get_parent() != null and col.get_parent().get_parent() != w.get_node("Terrain"):
+				if col != null and not dn.is_ancestor_of(col) and col.name != "Chunk" and not col.name.begins_with("Terrain") and col.get_parent() != null and col.get_parent().get_parent() != w.get_node("Terrain"):
 					var other := ""
 					if col is CollisionObject3D:
 						var oi: int = (col as CollisionObject3D).shape_find_owner(int(hit["shape"]))
@@ -71,7 +70,7 @@ func _run() -> void:
 						var osh = (col as CollisionObject3D).shape_owner_get_shape(oi, 0)
 						other = " other=%s@(%.1f,%.1f,%.1f) %s" % [osh.get_class(), on.global_position.x, on.global_position.y, on.global_position.z, str((osh as BoxShape3D).size) if osh is BoxShape3D else (str((osh as SphereShape3D).radius) if osh is SphereShape3D else "r=%s" % str((osh as CylinderShape3D).radius if osh is CylinderShape3D else "?"))]
 					var mine := str((cs.shape as BoxShape3D).size) if cs.shape is BoxShape3D else "cyl"
-					overl.append("%s%s@(%.1f,%.1f) hits %s/%s%s" % [cs.shape.get_class(), mine, cs.position.x, cs.position.z, col.get_parent().name, col.name, other])
+					overl.append("%s%s@(%.1f,%.1f) hits %s/%s%s" % [cs.shape.get_class(), mine, cs.global_position.x, cs.global_position.z, col.get_parent().name, col.name, other])
 					break
 		info("seed %d: %d dressing shapes overlapping other non-terrain colliders: %s" % [seed_value, overl.size(), ", ".join(overl)])
 		check(overl.is_empty(), "seed %d: dressing colliders overlap no location/prop collider (%d)" % [seed_value, overl.size()])
@@ -82,7 +81,7 @@ func _run() -> void:
 			if n == null or not is_instance_valid(n):
 				continue
 			var p: Vector3 = (n as Node3D).global_position
-			for c in body.get_children():
+			for c in shapes:
 				var cs2: CollisionShape3D = c
 				var lp: Vector3 = cs2.global_transform.affine_inverse() * p
 				var half := Vector3(0.5, 0.5, 0.5)
@@ -96,8 +95,8 @@ func _run() -> void:
 		check(bad == 0, "seed %d: no loot item inside a dressing collider (%d)" % [seed_value, bad])
 		# spawn ring clear
 		var near := 0
-		for c in body.get_children():
-			if Vector2((c as CollisionShape3D).position.x, (c as CollisionShape3D).position.z).distance_to(w.spawn_center) < 20.0:
+		for c in shapes:
+			if Vector2((c as CollisionShape3D).global_position.x, (c as CollisionShape3D).global_position.z).distance_to(w.spawn_center) < 20.0:
 				near += 1
 		check(near == 0, "seed %d: nothing within 20 m of the spawn centre (%d)" % [seed_value, near])
 		# car shape sizes (informational + sanity)

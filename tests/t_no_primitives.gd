@@ -3,7 +3,8 @@ extends SceneTree
 ##   xvfb-run -a godot --headless --path . --script res://tests/t_no_primitives.gd
 ## Builds the world and asserts every visible MeshInstance3D / MultiMeshInstance3D is either part of an instanced
 ## downloaded asset (scene under res://assets/ or a mesh resource from a .glb) or on the allowed list below
-## (terrain chunks, the terrain-baked road mesh, pickup glow discs). Also builds one zombie of each kind and one
+## (terrain chunks, the terrain-baked road pieces under "Roads" (Kenney road-kit tiles merged per segment / junction),
+## pickup glow discs). Also builds one zombie of each kind and one
 ## placed piece of each building kind, and scans them the same way.
 ## Meshes the bake copied out of an imported model into scenes/world/baked/res/ carry meta "source_asset" = the
 ## model file they came from; they count as assets only if that file exists under res://assets/. Meshes generated
@@ -63,6 +64,8 @@ func _offenders(root_node: Node, out: Array) -> int:
 		for pre in ALLOWED_PREFIX:
 			if str(n.name).begins_with(pre):
 				allowed = true
+		if str(n.get_parent().name) == "Roads":
+			allowed = true
 		if not allowed:
 			out.append("%s (%s) under %s" % [n.name, mesh.get_class(), n.get_parent().name])
 	return seen

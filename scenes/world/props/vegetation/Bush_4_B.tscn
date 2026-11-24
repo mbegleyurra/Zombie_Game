@@ -1,0 +1,13 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://scenes/world/props/vegetation/res/Bush_4_B.res" id="1_uouo1"]
+
+[node name="Bush_4_B" type="Node3D" unique_id=1970465192]
+metadata/kind = "bush"
+
+[node name="Mesh" type="MeshInstance3D" parent="." unique_id=1035705094]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.940697e-08, 0.0031614304, 0)
+cast_shadow = 0
+visibility_range_end = 150.0
+visibility_range_end_margin = 15.0
+mesh = ExtResource("1_uouo1")

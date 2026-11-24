@@ -23,7 +23,7 @@ func _run() -> void:
 	var man: Dictionary = JSON.parse_string(FileAccess.get_file_as_string(RES + "bake_manifest.json"))
 	var w: Node = (load("res://scenes/world/world_baked.tscn") as PackedScene).instantiate()
 	var fails := 0
-	var totals := {"loot_containers": 0, "ground_loot": 0, "vehicles": 0, "mm_instances": 0, "multimeshes": 0}
+	var totals := {"loot_containers": 0, "ground_loot": 0, "vehicles": 0, "veg_nodes": 0, "multimeshes": 0}
 	print("scene        nodes(bake/load)  semantic")
 	for s in Bake.SCENES:
 		var sub: Node = w.get_node_or_null(String(s).capitalize().replace(" ", ""))
@@ -45,26 +45,24 @@ func _run() -> void:
 		print("%-12s %6d/%-6d %s %s" % [s, int(want["nodes"]), got_n, "OK  " if ok else "FAIL", JSON.stringify(got_s)])
 	var mk: Node = w.get_node("Markers")
 	var b: Dictionary = man["builder"]
-	# Instance transforms, not just counts: a batch saved without its buffer (all-zero bases) renders nothing.
-	var mm_bad := 0
-	var mm_ok_inst := 0
-	for mmi in w.find_children("*", "MultiMeshInstance3D", true, false):
-		var mm: MultiMesh = (mmi as MultiMeshInstance3D).multimesh
-		if mm != null and ForestData.buffer_ok(mm):
-			mm_ok_inst += mm.instance_count
-		else:
-			mm_bad += 1
+	# Vegetation is one node per object; each blocking one carries its own collider inside its prop scene.
+	var forest: Node = w.get_node("Vegetation/KayKitForest")
+	var veg_shapes := forest.find_children("*", "CollisionShape3D", true, false).size()
+	var veg_degenerate := 0
+	for n in ForestData.nodes(forest):
+		if absf((n as Node3D).transform.basis.determinant()) < 1e-6:
+			veg_degenerate += 1
 	var checks := [
 		["loot_nodes", int(b["loot_nodes"]), totals["loot_containers"] + totals["ground_loot"]],
 		["vehicles", int(b["vehicles"]), totals["vehicles"]],
 		["locations", int(b["locations"]), mk.get_node("Locations").get_child_count()],
-		["forest instances", int(b["forest"]["instances"]), totals["mm_instances"]],
-		["forest xforms non-0", int(b["forest"]["instances"]), mm_ok_inst],
-		["mm w/o buffer", 0, mm_bad],
-		["forest multimeshes", int(b["forest"]["multimeshes"]), totals["multimeshes"]],
-		["dressing models", int(b["dressing"]["models"]), w.get_node("Props/KenneyDressing").get_child_count() - 1],
-		["dressing shapes", int(b["dressing"]["shapes"]), w.get_node("Props/KenneyDressing/Collision").get_child_count()],
-		["forest shapes", int(b["forest"]["shapes"]), w.get_node("Vegetation/KayKitForest/Collision").get_child_count()],
+		["forest nodes", int(b["forest"]["instances"]), totals["veg_nodes"]],
+		["forest sites", int(b["forest"]["instances"]), ForestData.sites(forest).size()],
+		["forest degenerate", 0, veg_degenerate],
+		["multimeshes", 0, totals["multimeshes"]],
+		["dressing models", int(b["dressing"]["models"]), w.get_node("Props/KenneyDressing").get_child_count()],
+		["dressing shapes", int(b["dressing"]["shapes"]), w.get_node("Props/KenneyDressing").find_children("*", "CollisionShape3D", true, false).size()],
+		["forest shapes", int(b["forest"]["shapes"]), veg_shapes],
 		["player spawns", 8, mk.get_node("PlayerSpawns").get_child_count()],
 	]
 	for c in checks:

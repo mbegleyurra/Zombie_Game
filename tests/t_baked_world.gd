@@ -72,22 +72,21 @@ func _run() -> void:
 			chunks += 1
 	check(chunks == 64, "64 terrain chunks (%d)" % chunks)
 	var forest: Node = w.get_node_or_null("KayKitForest")
-	var mmi := 0
-	var inst := 0
+	var veg: Array = ForestData.nodes(forest)
 	var xf_ok := 0
-	if forest != null:
-		for c in forest.get_children():
-			if c is MultiMeshInstance3D:
-				mmi += 1
-				inst += (c as MultiMeshInstance3D).multimesh.instance_count
-				if ForestData.buffer_ok((c as MultiMeshInstance3D).multimesh):
-					xf_ok += (c as MultiMeshInstance3D).multimesh.instance_count
-	check(mmi == 316 and inst == 2450, "vegetation: 316 multimeshes / 2450 instances (%d / %d)" % [mmi, inst])
-	check(xf_ok == 2450, "vegetation: every instance has a saved non-zero transform (%d / 2450)" % xf_ok)
-	var fcol: Node = w.get_node_or_null("KayKitForest/Collision")
-	check(fcol != null and fcol.get_child_count() == 564, "vegetation collision 564 shapes (%d)" % (fcol.get_child_count() if fcol else -1))
-	var dcol: Node = w.get_node_or_null("KenneyDressing/Collision")
-	check(dcol != null and dcol.get_child_count() == 131, "dressing collision 131 shapes (%d)" % (dcol.get_child_count() if dcol else -1))
+	for n in veg:
+		if absf((n as Node3D).transform.basis.determinant()) > 1e-6:
+			xf_ok += 1
+	check(veg.size() == 2450, "vegetation: 2450 individual object nodes (%d)" % veg.size())
+	check(xf_ok == 2450, "vegetation: every object has a non-degenerate transform (%d / 2450)" % xf_ok)
+	check(w.find_children("*", "MultiMeshInstance3D", true, false).is_empty(), "no MultiMeshInstance3D anywhere in the world")
+	var fshapes: int = forest.find_children("*", "CollisionShape3D", true, false).size() if forest else -1
+	check(fshapes == 564, "vegetation colliders 564, one per blocking object (%d)" % fshapes)
+	var dress: Node = w.get_node_or_null("KenneyDressing")
+	var dshapes: int = dress.find_children("*", "CollisionShape3D", true, false).size() if dress else -1
+	check(dshapes == 131, "dressing colliders 131, one per blocking model (%d)" % dshapes)
+	check(w.get_node_or_null("KayKitForest/Collision") == null and w.get_node_or_null("KenneyDressing/Collision") == null
+		and w.find_child("PropCollision", true, false) == null, "no shared collision body (each object owns its collider)")
 	check(_count_group(w, "vehicles") == 10, "10 baked cars (%d)" % _count_group(w, "vehicles"))
 	check(_count_group(w, "dungeon_door") == 12, "12 dungeon doors (%d)" % _count_group(w, "dungeon_door"))
 	check(_count_group(w, "zombie_spawn") == 253, "253 zombie spawn markers (%d)" % _count_group(w, "zombie_spawn"))

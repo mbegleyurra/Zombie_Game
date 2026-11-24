@@ -317,8 +317,8 @@ static func _stamp_buildings(img: Image, world: Node, n: int, half: float, cell:
 		_fill_rect(img, n, half, cell, Vector2(float(f[0]), float(f[1])), float(f[4]), Vector2(float(f[2]), float(f[3])), col, OUTLINE_COL)
 
 
-## Vegetation dots come straight from the KayKitForest MultiMesh buffers (scripts/world/forest_data.gd), so the map
-## follows any edit made to scenes/world/baked/vegetation.tscn.
+## Vegetation dots come straight from the KayKitForest object nodes (scripts/world/forest_data.gd), so the map
+## follows any tree / bush / rock moved, added or deleted in scenes/world/baked/vegetation.tscn.
 static func _stamp_vegetation(img: Image, world: Node, n: int, half: float, cell: float) -> void:
 	var sites: Array = ForestData.sites(world.get_node_or_null("KayKitForest"))
 	for s in sites:

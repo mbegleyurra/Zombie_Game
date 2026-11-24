@@ -112,9 +112,22 @@ func _run() -> void:
 	check(int(info.get("junctions", 0)) >= 16, "junction tiles placed (%d)" % int(info.get("junctions", 0)))
 	# city streets and countryside both get tiles: count tiles outside the city grid
 	var hb: Node = w1.find_child("Roads", true, false)
-	check(hb is MeshInstance3D and (hb as MeshInstance3D).mesh.get_surface_count() == 1, "all roads render as one kit mesh")
-	if hb is MeshInstance3D:
-		var aabb: AABB = (hb as MeshInstance3D).mesh.get_aabb()
+	# one MeshInstance3D per road segment / junction (editable per piece), each a single kit-material surface
+	var pieces := 0
+	var single := true
+	var aabb := AABB()
+	if hb != null:
+		for ch in hb.get_children():
+			var mi := ch as MeshInstance3D
+			if mi == null or mi.mesh == null:
+				single = false
+				continue
+			single = single and mi.mesh.get_surface_count() == 1
+			var g: AABB = mi.global_transform * mi.mesh.get_aabb()
+			aabb = g if pieces == 0 else aabb.merge(g)
+			pieces += 1
+	check(pieces > 50 and single, "roads render as %d per-piece kit meshes, one surface each" % pieces)
+	if pieces > 0:
 		check(aabb.size.x > 300.0 and aabb.size.z > 300.0, "road mesh spans the whole map, not just the city (%.0f x %.0f m)" % [aabb.size.x, aabb.size.z])
 		check(_count_shapes(hb) == 0, "road tiles carry no collision (terrain is the drivable ground)")
 	# collision: the hand world body has shapes for the kit buildings (24 lots) plus props

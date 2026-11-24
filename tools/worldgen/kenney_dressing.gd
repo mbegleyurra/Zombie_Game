@@ -17,7 +17,6 @@ const CAR_H: Dictionary = preload("res://scripts/vehicles/vehicle.gd").CAR_H
 var world
 var terrain
 var node: Node3D
-var body: StaticBody3D
 var counts := {"cars": 0, "cones": 0, "camps": 0, "camp_models": 0, "signposts": 0, "crates_barrels": 0, "trees": 0, "rocks": 0, "models": 0, "shapes": 0}
 
 
@@ -29,24 +28,27 @@ func _init(p_world) -> void:
 func build() -> Node3D:
 	node = Node3D.new()
 	node.name = "KenneyDressing"
-	body = StaticBody3D.new()
-	body.name = "Collision"
-	node.add_child(body)
 	for row in HandMapData.section("DRESSING"):
 		_place(row as Array)
 	return node
 
 
-## mode: 0 none, 1 box (0.9 of the model's size), 2 slim cylinder (posts, trees)
+## mode: 0 none, 1 box (0.9 of the model's size), 2 slim cylinder (posts, trees). The collider is the model's OWN child
+## (StaticBody3D "Body"), and the wrapper is an editor group, so clicking the model selects it and moving it moves both.
 func _finish_put(m: Node3D, x: float, z: float, yaw: float, mode: int, lift: float = 0.0) -> Node3D:
 	var y: float = terrain.height_at(x, z) + lift
 	m.position = Vector3(x, y, z)
 	m.rotation.y = yaw
+	m.set_meta("_edit_group_", true)
 	node.add_child(m)
 	counts["models"] += 1
 	var sz: Vector3 = m.get_meta("size") as Vector3
 	if mode != 0:
+		var body := StaticBody3D.new()
+		body.name = "Body"
+		m.add_child(body)
 		var cs := CollisionShape3D.new()
+		cs.name = "Shape"
 		if mode == 1:
 			var bs := BoxShape3D.new()
 			bs.size = sz * 0.9
@@ -56,7 +58,7 @@ func _finish_put(m: Node3D, x: float, z: float, yaw: float, mode: int, lift: flo
 			cyl.radius = clampf(minf(sz.x, sz.z) * 0.3, 0.12, 0.45)
 			cyl.height = sz.y
 			cs.shape = cyl
-		cs.transform = Transform3D(Basis(Vector3.UP, yaw), Vector3(x, y + sz.y * 0.5, z))
+		cs.position = Vector3(0.0, sz.y * 0.5, 0.0)
 		body.add_child(cs)
 		counts["shapes"] += 1
 	return m

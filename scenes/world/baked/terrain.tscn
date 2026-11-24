@@ -130,708 +130,708 @@
 [ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0063.res" id="128_24xrr"]
 [ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0063.res" id="129_fmfn8"]
 
-[node name="Terrain" type="Node3D" unique_id=1877671107]
+[node name="Terrain" type="Node3D" unique_id=1923934075]
 
-[node name="Chunk_0_0" type="MeshInstance3D" parent="." unique_id=1852589417]
+[node name="Chunk_0_0" type="MeshInstance3D" parent="." unique_id=447644149]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("2_wt1uu")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_0_0" unique_id=382800896]
+[node name="Collision" type="StaticBody3D" parent="Chunk_0_0" unique_id=652129698]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_0_0/Collision" unique_id=199181408]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_0_0/Collision" unique_id=1362155218]
 shape = ExtResource("3_bths6")
 
-[node name="Chunk_1_0" type="MeshInstance3D" parent="." unique_id=1895048268]
+[node name="Chunk_1_0" type="MeshInstance3D" parent="." unique_id=1168945819]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("4_4x0f0")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_1_0" unique_id=1527724096]
+[node name="Collision" type="StaticBody3D" parent="Chunk_1_0" unique_id=1406864574]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_1_0/Collision" unique_id=148853050]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_1_0/Collision" unique_id=1693639263]
 shape = ExtResource("5_ovlhd")
 
-[node name="Chunk_2_0" type="MeshInstance3D" parent="." unique_id=619274001]
+[node name="Chunk_2_0" type="MeshInstance3D" parent="." unique_id=710449550]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("6_ho21a")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_2_0" unique_id=433913743]
+[node name="Collision" type="StaticBody3D" parent="Chunk_2_0" unique_id=1469630677]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_2_0/Collision" unique_id=839222742]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_2_0/Collision" unique_id=1059227772]
 shape = ExtResource("7_wix7p")
 
-[node name="Chunk_3_0" type="MeshInstance3D" parent="." unique_id=1273119081]
+[node name="Chunk_3_0" type="MeshInstance3D" parent="." unique_id=1574838813]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("8_rq6dt")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_3_0" unique_id=1523002638]
+[node name="Collision" type="StaticBody3D" parent="Chunk_3_0" unique_id=172147200]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_3_0/Collision" unique_id=96251570]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_3_0/Collision" unique_id=1494645837]
 shape = ExtResource("9_oasjs")
 
-[node name="Chunk_4_0" type="MeshInstance3D" parent="." unique_id=229135982]
+[node name="Chunk_4_0" type="MeshInstance3D" parent="." unique_id=405234429]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("10_qhi1t")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_4_0" unique_id=1763099324]
+[node name="Collision" type="StaticBody3D" parent="Chunk_4_0" unique_id=89722412]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_4_0/Collision" unique_id=1677582985]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_4_0/Collision" unique_id=2010584061]
 shape = ExtResource("11_pk8v5")
 
-[node name="Chunk_5_0" type="MeshInstance3D" parent="." unique_id=355880052]
+[node name="Chunk_5_0" type="MeshInstance3D" parent="." unique_id=354298555]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("12_q3q6a")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_5_0" unique_id=1688914828]
+[node name="Collision" type="StaticBody3D" parent="Chunk_5_0" unique_id=4292347]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_5_0/Collision" unique_id=1426712358]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_5_0/Collision" unique_id=51520754]
 shape = ExtResource("13_btxxn")
 
-[node name="Chunk_6_0" type="MeshInstance3D" parent="." unique_id=1953948760]
+[node name="Chunk_6_0" type="MeshInstance3D" parent="." unique_id=273398948]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("14_oc0b1")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_6_0" unique_id=1070496578]
+[node name="Collision" type="StaticBody3D" parent="Chunk_6_0" unique_id=254708245]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_6_0/Collision" unique_id=1258959164]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_6_0/Collision" unique_id=1093244038]
 shape = ExtResource("15_rm18u")
 
-[node name="Chunk_7_0" type="MeshInstance3D" parent="." unique_id=781446715]
+[node name="Chunk_7_0" type="MeshInstance3D" parent="." unique_id=1061409008]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("16_tqyfx")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_7_0" unique_id=1021086221]
+[node name="Collision" type="StaticBody3D" parent="Chunk_7_0" unique_id=1809283106]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_7_0/Collision" unique_id=661721433]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_7_0/Collision" unique_id=1098904096]
 shape = ExtResource("17_lowgj")
 
-[node name="Chunk_0_1" type="MeshInstance3D" parent="." unique_id=1098839144]
+[node name="Chunk_0_1" type="MeshInstance3D" parent="." unique_id=333236019]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("18_wfgb2")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_0_1" unique_id=411255514]
+[node name="Collision" type="StaticBody3D" parent="Chunk_0_1" unique_id=898380361]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_0_1/Collision" unique_id=981705391]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_0_1/Collision" unique_id=1609070280]
 shape = ExtResource("19_wwffr")
 
-[node name="Chunk_1_1" type="MeshInstance3D" parent="." unique_id=262526001]
+[node name="Chunk_1_1" type="MeshInstance3D" parent="." unique_id=1123163978]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("20_kj4o2")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_1_1" unique_id=2091179813]
+[node name="Collision" type="StaticBody3D" parent="Chunk_1_1" unique_id=554453057]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_1_1/Collision" unique_id=1413502720]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_1_1/Collision" unique_id=361198069]
 shape = ExtResource("21_6nn22")
 
-[node name="Chunk_2_1" type="MeshInstance3D" parent="." unique_id=509450628]
+[node name="Chunk_2_1" type="MeshInstance3D" parent="." unique_id=464003196]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("22_8doi4")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_2_1" unique_id=1237219005]
+[node name="Collision" type="StaticBody3D" parent="Chunk_2_1" unique_id=1501109269]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_2_1/Collision" unique_id=830041741]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_2_1/Collision" unique_id=1269857412]
 shape = ExtResource("23_w02jq")
 
-[node name="Chunk_3_1" type="MeshInstance3D" parent="." unique_id=1558462154]
+[node name="Chunk_3_1" type="MeshInstance3D" parent="." unique_id=1923105215]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("24_76s0p")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_3_1" unique_id=181505702]
+[node name="Collision" type="StaticBody3D" parent="Chunk_3_1" unique_id=489796144]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_3_1/Collision" unique_id=1802922601]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_3_1/Collision" unique_id=1086688618]
 shape = ExtResource("25_q365r")
 
-[node name="Chunk_4_1" type="MeshInstance3D" parent="." unique_id=1730565079]
+[node name="Chunk_4_1" type="MeshInstance3D" parent="." unique_id=233032786]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("26_l2kj1")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_4_1" unique_id=1293716709]
+[node name="Collision" type="StaticBody3D" parent="Chunk_4_1" unique_id=1254624784]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_4_1/Collision" unique_id=793008191]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_4_1/Collision" unique_id=756471300]
 shape = ExtResource("27_wxosp")
 
-[node name="Chunk_5_1" type="MeshInstance3D" parent="." unique_id=571503511]
+[node name="Chunk_5_1" type="MeshInstance3D" parent="." unique_id=477176866]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("28_ksfy4")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_5_1" unique_id=1081637726]
+[node name="Collision" type="StaticBody3D" parent="Chunk_5_1" unique_id=538739665]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_5_1/Collision" unique_id=800580037]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_5_1/Collision" unique_id=1293783281]
 shape = ExtResource("29_b3y6g")
 
-[node name="Chunk_6_1" type="MeshInstance3D" parent="." unique_id=776933037]
+[node name="Chunk_6_1" type="MeshInstance3D" parent="." unique_id=1788955322]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("30_58cxv")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_6_1" unique_id=1797875881]
+[node name="Collision" type="StaticBody3D" parent="Chunk_6_1" unique_id=266391984]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_6_1/Collision" unique_id=2045857441]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_6_1/Collision" unique_id=1661550544]
 shape = ExtResource("31_5erpa")
 
-[node name="Chunk_7_1" type="MeshInstance3D" parent="." unique_id=145845927]
+[node name="Chunk_7_1" type="MeshInstance3D" parent="." unique_id=989382365]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("32_i1s54")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_7_1" unique_id=38320740]
+[node name="Collision" type="StaticBody3D" parent="Chunk_7_1" unique_id=1848474747]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_7_1/Collision" unique_id=1399636024]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_7_1/Collision" unique_id=1851876741]
 shape = ExtResource("33_0og7f")
 
-[node name="Chunk_0_2" type="MeshInstance3D" parent="." unique_id=1693267510]
+[node name="Chunk_0_2" type="MeshInstance3D" parent="." unique_id=1204359377]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("34_t8foc")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_0_2" unique_id=543570160]
+[node name="Collision" type="StaticBody3D" parent="Chunk_0_2" unique_id=32736679]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_0_2/Collision" unique_id=1821103140]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_0_2/Collision" unique_id=1111312249]
 shape = ExtResource("35_k1iug")
 
-[node name="Chunk_1_2" type="MeshInstance3D" parent="." unique_id=376840671]
+[node name="Chunk_1_2" type="MeshInstance3D" parent="." unique_id=637818221]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("36_t6p3e")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_1_2" unique_id=1849806188]
+[node name="Collision" type="StaticBody3D" parent="Chunk_1_2" unique_id=2134058235]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_1_2/Collision" unique_id=1325288354]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_1_2/Collision" unique_id=1649271099]
 shape = ExtResource("37_i7s7t")
 
-[node name="Chunk_2_2" type="MeshInstance3D" parent="." unique_id=642402297]
+[node name="Chunk_2_2" type="MeshInstance3D" parent="." unique_id=474911404]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("38_68mvl")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_2_2" unique_id=2114587392]
+[node name="Collision" type="StaticBody3D" parent="Chunk_2_2" unique_id=644832221]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_2_2/Collision" unique_id=941869592]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_2_2/Collision" unique_id=1804200193]
 shape = ExtResource("39_w48vg")
 
-[node name="Chunk_3_2" type="MeshInstance3D" parent="." unique_id=1652974217]
+[node name="Chunk_3_2" type="MeshInstance3D" parent="." unique_id=150770457]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("40_eq3eg")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_3_2" unique_id=1520069614]
+[node name="Collision" type="StaticBody3D" parent="Chunk_3_2" unique_id=2022476696]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_3_2/Collision" unique_id=592105722]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_3_2/Collision" unique_id=807754564]
 shape = ExtResource("41_gobq5")
 
-[node name="Chunk_4_2" type="MeshInstance3D" parent="." unique_id=1296370145]
+[node name="Chunk_4_2" type="MeshInstance3D" parent="." unique_id=1986745495]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("42_8cock")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_4_2" unique_id=531110550]
+[node name="Collision" type="StaticBody3D" parent="Chunk_4_2" unique_id=19525935]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_4_2/Collision" unique_id=229957497]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_4_2/Collision" unique_id=331628040]
 shape = ExtResource("43_arlnq")
 
-[node name="Chunk_5_2" type="MeshInstance3D" parent="." unique_id=2115167678]
+[node name="Chunk_5_2" type="MeshInstance3D" parent="." unique_id=925601724]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("44_ii04g")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_5_2" unique_id=1325109297]
+[node name="Collision" type="StaticBody3D" parent="Chunk_5_2" unique_id=115829754]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_5_2/Collision" unique_id=1631660357]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_5_2/Collision" unique_id=1104331266]
 shape = ExtResource("45_kfuxi")
 
-[node name="Chunk_6_2" type="MeshInstance3D" parent="." unique_id=12974160]
+[node name="Chunk_6_2" type="MeshInstance3D" parent="." unique_id=1361398101]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("46_lvf60")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_6_2" unique_id=195657495]
+[node name="Collision" type="StaticBody3D" parent="Chunk_6_2" unique_id=979119294]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_6_2/Collision" unique_id=1941959471]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_6_2/Collision" unique_id=1826363820]
 shape = ExtResource("47_wa18n")
 
-[node name="Chunk_7_2" type="MeshInstance3D" parent="." unique_id=635651801]
+[node name="Chunk_7_2" type="MeshInstance3D" parent="." unique_id=1629805846]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("48_3hr21")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_7_2" unique_id=645752314]
+[node name="Collision" type="StaticBody3D" parent="Chunk_7_2" unique_id=1399080109]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_7_2/Collision" unique_id=851194403]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_7_2/Collision" unique_id=828906827]
 shape = ExtResource("49_igxbv")
 
-[node name="Chunk_0_3" type="MeshInstance3D" parent="." unique_id=1485190997]
+[node name="Chunk_0_3" type="MeshInstance3D" parent="." unique_id=139618373]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("50_uxjjm")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_0_3" unique_id=1100824576]
+[node name="Collision" type="StaticBody3D" parent="Chunk_0_3" unique_id=5936674]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_0_3/Collision" unique_id=1817435746]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_0_3/Collision" unique_id=1354162798]
 shape = ExtResource("51_5t1iw")
 
-[node name="Chunk_1_3" type="MeshInstance3D" parent="." unique_id=1481101759]
+[node name="Chunk_1_3" type="MeshInstance3D" parent="." unique_id=704806553]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("52_sct2f")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_1_3" unique_id=837443920]
+[node name="Collision" type="StaticBody3D" parent="Chunk_1_3" unique_id=1424711577]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_1_3/Collision" unique_id=42939580]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_1_3/Collision" unique_id=26362781]
 shape = ExtResource("53_w0xge")
 
-[node name="Chunk_2_3" type="MeshInstance3D" parent="." unique_id=2063274980]
+[node name="Chunk_2_3" type="MeshInstance3D" parent="." unique_id=1727862957]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("54_rpry3")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_2_3" unique_id=674599141]
+[node name="Collision" type="StaticBody3D" parent="Chunk_2_3" unique_id=163872655]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_2_3/Collision" unique_id=665459241]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_2_3/Collision" unique_id=188854254]
 shape = ExtResource("55_xb1qq")
 
-[node name="Chunk_3_3" type="MeshInstance3D" parent="." unique_id=1040296308]
+[node name="Chunk_3_3" type="MeshInstance3D" parent="." unique_id=83264428]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("56_efh6r")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_3_3" unique_id=1807372035]
+[node name="Collision" type="StaticBody3D" parent="Chunk_3_3" unique_id=610995588]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_3_3/Collision" unique_id=1834088680]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_3_3/Collision" unique_id=1465662526]
 shape = ExtResource("57_qob8y")
 
-[node name="Chunk_4_3" type="MeshInstance3D" parent="." unique_id=752726381]
+[node name="Chunk_4_3" type="MeshInstance3D" parent="." unique_id=46328713]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("58_rkwfc")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_4_3" unique_id=1515307900]
+[node name="Collision" type="StaticBody3D" parent="Chunk_4_3" unique_id=1238696407]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_4_3/Collision" unique_id=1642333215]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_4_3/Collision" unique_id=901203361]
 shape = ExtResource("59_kt2r1")
 
-[node name="Chunk_5_3" type="MeshInstance3D" parent="." unique_id=1140017306]
+[node name="Chunk_5_3" type="MeshInstance3D" parent="." unique_id=1964193572]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("60_qfmex")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_5_3" unique_id=168930601]
+[node name="Collision" type="StaticBody3D" parent="Chunk_5_3" unique_id=1606062066]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_5_3/Collision" unique_id=1338509721]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_5_3/Collision" unique_id=425335434]
 shape = ExtResource("61_eih1c")
 
-[node name="Chunk_6_3" type="MeshInstance3D" parent="." unique_id=111855241]
+[node name="Chunk_6_3" type="MeshInstance3D" parent="." unique_id=1904964645]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("62_7p54w")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_6_3" unique_id=2016793280]
+[node name="Collision" type="StaticBody3D" parent="Chunk_6_3" unique_id=1418876707]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_6_3/Collision" unique_id=1661015290]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_6_3/Collision" unique_id=293885465]
 shape = ExtResource("63_d54ms")
 
-[node name="Chunk_7_3" type="MeshInstance3D" parent="." unique_id=1862498155]
+[node name="Chunk_7_3" type="MeshInstance3D" parent="." unique_id=2146884504]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("64_2mr5v")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_7_3" unique_id=1065898525]
+[node name="Collision" type="StaticBody3D" parent="Chunk_7_3" unique_id=1040375674]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_7_3/Collision" unique_id=1822632867]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_7_3/Collision" unique_id=1984883089]
 shape = ExtResource("65_nh2gd")
 
-[node name="Chunk_0_4" type="MeshInstance3D" parent="." unique_id=1848629509]
+[node name="Chunk_0_4" type="MeshInstance3D" parent="." unique_id=385069081]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("66_pyq1v")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_0_4" unique_id=1349872931]
+[node name="Collision" type="StaticBody3D" parent="Chunk_0_4" unique_id=1711634286]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_0_4/Collision" unique_id=2016409375]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_0_4/Collision" unique_id=2069338039]
 shape = ExtResource("67_m6gt4")
 
-[node name="Chunk_1_4" type="MeshInstance3D" parent="." unique_id=684129637]
+[node name="Chunk_1_4" type="MeshInstance3D" parent="." unique_id=1692768625]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("68_wh7wj")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_1_4" unique_id=1257329422]
+[node name="Collision" type="StaticBody3D" parent="Chunk_1_4" unique_id=557796057]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_1_4/Collision" unique_id=204045300]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_1_4/Collision" unique_id=1185184020]
 shape = ExtResource("69_2rd05")
 
-[node name="Chunk_2_4" type="MeshInstance3D" parent="." unique_id=1104220450]
+[node name="Chunk_2_4" type="MeshInstance3D" parent="." unique_id=1707469548]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("70_drxtg")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_2_4" unique_id=991185905]
+[node name="Collision" type="StaticBody3D" parent="Chunk_2_4" unique_id=239847714]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_2_4/Collision" unique_id=591857213]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_2_4/Collision" unique_id=30777625]
 shape = ExtResource("71_0cb5c")
 
-[node name="Chunk_3_4" type="MeshInstance3D" parent="." unique_id=1430224044]
+[node name="Chunk_3_4" type="MeshInstance3D" parent="." unique_id=189744439]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("72_75tkt")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_3_4" unique_id=862648307]
+[node name="Collision" type="StaticBody3D" parent="Chunk_3_4" unique_id=241851763]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_3_4/Collision" unique_id=2146374450]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_3_4/Collision" unique_id=138722923]
 shape = ExtResource("73_kqo60")
 
-[node name="Chunk_4_4" type="MeshInstance3D" parent="." unique_id=490105357]
+[node name="Chunk_4_4" type="MeshInstance3D" parent="." unique_id=2106525573]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("74_sgcw4")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_4_4" unique_id=1059977788]
+[node name="Collision" type="StaticBody3D" parent="Chunk_4_4" unique_id=2090972504]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_4_4/Collision" unique_id=464105096]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_4_4/Collision" unique_id=414942433]
 shape = ExtResource("75_3xl2q")
 
-[node name="Chunk_5_4" type="MeshInstance3D" parent="." unique_id=953535946]
+[node name="Chunk_5_4" type="MeshInstance3D" parent="." unique_id=300415327]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("76_pl1r7")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_5_4" unique_id=339413748]
+[node name="Collision" type="StaticBody3D" parent="Chunk_5_4" unique_id=169026288]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_5_4/Collision" unique_id=515954107]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_5_4/Collision" unique_id=966842569]
 shape = ExtResource("77_ks4gq")
 
-[node name="Chunk_6_4" type="MeshInstance3D" parent="." unique_id=935524276]
+[node name="Chunk_6_4" type="MeshInstance3D" parent="." unique_id=2117196911]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("78_lf310")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_6_4" unique_id=999617794]
+[node name="Collision" type="StaticBody3D" parent="Chunk_6_4" unique_id=1600968035]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_6_4/Collision" unique_id=1994921289]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_6_4/Collision" unique_id=177315195]
 shape = ExtResource("79_aavj5")
 
-[node name="Chunk_7_4" type="MeshInstance3D" parent="." unique_id=781300774]
+[node name="Chunk_7_4" type="MeshInstance3D" parent="." unique_id=668238383]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("80_ou3mg")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_7_4" unique_id=715405679]
+[node name="Collision" type="StaticBody3D" parent="Chunk_7_4" unique_id=1903412711]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_7_4/Collision" unique_id=672780457]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_7_4/Collision" unique_id=271518663]
 shape = ExtResource("81_npgds")
 
-[node name="Chunk_0_5" type="MeshInstance3D" parent="." unique_id=681897873]
+[node name="Chunk_0_5" type="MeshInstance3D" parent="." unique_id=790260767]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("82_f82u8")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_0_5" unique_id=1591469675]
+[node name="Collision" type="StaticBody3D" parent="Chunk_0_5" unique_id=1297484960]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_0_5/Collision" unique_id=1356273160]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_0_5/Collision" unique_id=1227814693]
 shape = ExtResource("83_02h0k")
 
-[node name="Chunk_1_5" type="MeshInstance3D" parent="." unique_id=438557034]
+[node name="Chunk_1_5" type="MeshInstance3D" parent="." unique_id=78698543]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("84_xubxd")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_1_5" unique_id=1211501744]
+[node name="Collision" type="StaticBody3D" parent="Chunk_1_5" unique_id=1717846515]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_1_5/Collision" unique_id=1538219072]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_1_5/Collision" unique_id=363013066]
 shape = ExtResource("85_5vdhc")
 
-[node name="Chunk_2_5" type="MeshInstance3D" parent="." unique_id=1674245033]
+[node name="Chunk_2_5" type="MeshInstance3D" parent="." unique_id=1648818629]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("86_c4c67")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_2_5" unique_id=1730906929]
+[node name="Collision" type="StaticBody3D" parent="Chunk_2_5" unique_id=646161967]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_2_5/Collision" unique_id=483965624]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_2_5/Collision" unique_id=549914385]
 shape = ExtResource("87_ednwl")
 
-[node name="Chunk_3_5" type="MeshInstance3D" parent="." unique_id=1664005087]
+[node name="Chunk_3_5" type="MeshInstance3D" parent="." unique_id=530770053]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("88_2vt1f")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_3_5" unique_id=1174472958]
+[node name="Collision" type="StaticBody3D" parent="Chunk_3_5" unique_id=1240569850]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_3_5/Collision" unique_id=1918516542]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_3_5/Collision" unique_id=752753394]
 shape = ExtResource("89_82yyw")
 
-[node name="Chunk_4_5" type="MeshInstance3D" parent="." unique_id=288259984]
+[node name="Chunk_4_5" type="MeshInstance3D" parent="." unique_id=695130773]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("90_d0ery")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_4_5" unique_id=84149388]
+[node name="Collision" type="StaticBody3D" parent="Chunk_4_5" unique_id=489134906]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_4_5/Collision" unique_id=1094510431]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_4_5/Collision" unique_id=1201092943]
 shape = ExtResource("91_cj61j")
 
-[node name="Chunk_5_5" type="MeshInstance3D" parent="." unique_id=696417975]
+[node name="Chunk_5_5" type="MeshInstance3D" parent="." unique_id=1849594013]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("92_clrnu")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_5_5" unique_id=700951932]
+[node name="Collision" type="StaticBody3D" parent="Chunk_5_5" unique_id=995123636]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_5_5/Collision" unique_id=1481836974]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_5_5/Collision" unique_id=1362696015]
 shape = ExtResource("93_o75wa")
 
-[node name="Chunk_6_5" type="MeshInstance3D" parent="." unique_id=1568177394]
+[node name="Chunk_6_5" type="MeshInstance3D" parent="." unique_id=1070804854]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("94_cfdfj")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_6_5" unique_id=2124406678]
+[node name="Collision" type="StaticBody3D" parent="Chunk_6_5" unique_id=1260289718]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_6_5/Collision" unique_id=1508249857]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_6_5/Collision" unique_id=992268163]
 shape = ExtResource("95_jlnjc")
 
-[node name="Chunk_7_5" type="MeshInstance3D" parent="." unique_id=89275446]
+[node name="Chunk_7_5" type="MeshInstance3D" parent="." unique_id=2120803652]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("96_0kxuj")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_7_5" unique_id=1251401781]
+[node name="Collision" type="StaticBody3D" parent="Chunk_7_5" unique_id=1885564802]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_7_5/Collision" unique_id=895521878]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_7_5/Collision" unique_id=578508524]
 shape = ExtResource("97_045h1")
 
-[node name="Chunk_0_6" type="MeshInstance3D" parent="." unique_id=955279152]
+[node name="Chunk_0_6" type="MeshInstance3D" parent="." unique_id=717125759]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("98_snbj1")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_0_6" unique_id=211861937]
+[node name="Collision" type="StaticBody3D" parent="Chunk_0_6" unique_id=210868207]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_0_6/Collision" unique_id=192796881]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_0_6/Collision" unique_id=1151289612]
 shape = ExtResource("99_cmfic")
 
-[node name="Chunk_1_6" type="MeshInstance3D" parent="." unique_id=1830797553]
+[node name="Chunk_1_6" type="MeshInstance3D" parent="." unique_id=210828297]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("100_6l1hv")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_1_6" unique_id=1309148785]
+[node name="Collision" type="StaticBody3D" parent="Chunk_1_6" unique_id=2102084285]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_1_6/Collision" unique_id=441387602]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_1_6/Collision" unique_id=848731735]
 shape = ExtResource("101_ljuwt")
 
-[node name="Chunk_2_6" type="MeshInstance3D" parent="." unique_id=1550233320]
+[node name="Chunk_2_6" type="MeshInstance3D" parent="." unique_id=1825463385]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("102_oh640")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_2_6" unique_id=1417957084]
+[node name="Collision" type="StaticBody3D" parent="Chunk_2_6" unique_id=1754063848]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_2_6/Collision" unique_id=1480347978]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_2_6/Collision" unique_id=1682417221]
 shape = ExtResource("103_385v8")
 
-[node name="Chunk_3_6" type="MeshInstance3D" parent="." unique_id=1001626201]
+[node name="Chunk_3_6" type="MeshInstance3D" parent="." unique_id=227058165]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("104_c5ud7")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_3_6" unique_id=782378418]
+[node name="Collision" type="StaticBody3D" parent="Chunk_3_6" unique_id=1793032440]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_3_6/Collision" unique_id=1267366470]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_3_6/Collision" unique_id=584913704]
 shape = ExtResource("105_at6kk")
 
-[node name="Chunk_4_6" type="MeshInstance3D" parent="." unique_id=1234079351]
+[node name="Chunk_4_6" type="MeshInstance3D" parent="." unique_id=965218114]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("106_7pd8o")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_4_6" unique_id=448527715]
+[node name="Collision" type="StaticBody3D" parent="Chunk_4_6" unique_id=603057455]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_4_6/Collision" unique_id=1041256684]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_4_6/Collision" unique_id=700028553]
 shape = ExtResource("107_fmwix")
 
-[node name="Chunk_5_6" type="MeshInstance3D" parent="." unique_id=383452980]
+[node name="Chunk_5_6" type="MeshInstance3D" parent="." unique_id=516606138]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("108_nry3y")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_5_6" unique_id=1812204730]
+[node name="Collision" type="StaticBody3D" parent="Chunk_5_6" unique_id=1950007362]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_5_6/Collision" unique_id=2122651295]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_5_6/Collision" unique_id=922311927]
 shape = ExtResource("109_4sndl")
 
-[node name="Chunk_6_6" type="MeshInstance3D" parent="." unique_id=1515843533]
+[node name="Chunk_6_6" type="MeshInstance3D" parent="." unique_id=539147632]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("110_ixmq6")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_6_6" unique_id=1416049999]
+[node name="Collision" type="StaticBody3D" parent="Chunk_6_6" unique_id=1774135350]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_6_6/Collision" unique_id=357009027]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_6_6/Collision" unique_id=1718081901]
 shape = ExtResource("111_3hbbn")
 
-[node name="Chunk_7_6" type="MeshInstance3D" parent="." unique_id=1537589555]
+[node name="Chunk_7_6" type="MeshInstance3D" parent="." unique_id=253824357]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("112_1y7c7")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_7_6" unique_id=902656865]
+[node name="Collision" type="StaticBody3D" parent="Chunk_7_6" unique_id=2017138993]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_7_6/Collision" unique_id=702988555]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_7_6/Collision" unique_id=1427626442]
 shape = ExtResource("113_oc0sk")
 
-[node name="Chunk_0_7" type="MeshInstance3D" parent="." unique_id=1568888533]
+[node name="Chunk_0_7" type="MeshInstance3D" parent="." unique_id=1529301346]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("114_n657y")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_0_7" unique_id=1464150781]
+[node name="Collision" type="StaticBody3D" parent="Chunk_0_7" unique_id=41950749]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_0_7/Collision" unique_id=551025055]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_0_7/Collision" unique_id=1606930102]
 shape = ExtResource("115_mf4mf")
 
-[node name="Chunk_1_7" type="MeshInstance3D" parent="." unique_id=1356407835]
+[node name="Chunk_1_7" type="MeshInstance3D" parent="." unique_id=1113384310]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("116_owp3x")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_1_7" unique_id=97716821]
+[node name="Collision" type="StaticBody3D" parent="Chunk_1_7" unique_id=746592198]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_1_7/Collision" unique_id=1459613307]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_1_7/Collision" unique_id=1366741757]
 shape = ExtResource("117_3uhtj")
 
-[node name="Chunk_2_7" type="MeshInstance3D" parent="." unique_id=1508548505]
+[node name="Chunk_2_7" type="MeshInstance3D" parent="." unique_id=1776919565]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("118_6jf1q")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_2_7" unique_id=1658569345]
+[node name="Collision" type="StaticBody3D" parent="Chunk_2_7" unique_id=2016050397]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_2_7/Collision" unique_id=856923785]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_2_7/Collision" unique_id=1632211890]
 shape = ExtResource("119_1sa0a")
 
-[node name="Chunk_3_7" type="MeshInstance3D" parent="." unique_id=1432340989]
+[node name="Chunk_3_7" type="MeshInstance3D" parent="." unique_id=2100637610]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("120_km36f")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_3_7" unique_id=1405101174]
+[node name="Collision" type="StaticBody3D" parent="Chunk_3_7" unique_id=288843920]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_3_7/Collision" unique_id=304668054]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_3_7/Collision" unique_id=1654881199]
 shape = ExtResource("121_7utd4")
 
-[node name="Chunk_4_7" type="MeshInstance3D" parent="." unique_id=1852443822]
+[node name="Chunk_4_7" type="MeshInstance3D" parent="." unique_id=110749886]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("122_vk32o")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_4_7" unique_id=1859723368]
+[node name="Collision" type="StaticBody3D" parent="Chunk_4_7" unique_id=1043826866]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_4_7/Collision" unique_id=1778271147]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_4_7/Collision" unique_id=1796155821]
 shape = ExtResource("123_beyjl")
 
-[node name="Chunk_5_7" type="MeshInstance3D" parent="." unique_id=1203988163]
+[node name="Chunk_5_7" type="MeshInstance3D" parent="." unique_id=76778706]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("124_0nep5")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_5_7" unique_id=1213202543]
+[node name="Collision" type="StaticBody3D" parent="Chunk_5_7" unique_id=505885532]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_5_7/Collision" unique_id=755971822]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_5_7/Collision" unique_id=1120800244]
 shape = ExtResource("125_k57qc")
 
-[node name="Chunk_6_7" type="MeshInstance3D" parent="." unique_id=171120846]
+[node name="Chunk_6_7" type="MeshInstance3D" parent="." unique_id=1782927280]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("126_1opo7")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_6_7" unique_id=357116860]
+[node name="Collision" type="StaticBody3D" parent="Chunk_6_7" unique_id=663907863]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_6_7/Collision" unique_id=861696906]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_6_7/Collision" unique_id=1905968957]
 shape = ExtResource("127_0a2iy")
 
-[node name="Chunk_7_7" type="MeshInstance3D" parent="." unique_id=355173302]
+[node name="Chunk_7_7" type="MeshInstance3D" parent="." unique_id=238550191]
 material_override = ExtResource("1_dun67")
 visibility_range_end = 300.0
 visibility_range_end_margin = 20.0
 mesh = ExtResource("128_24xrr")
 
-[node name="Collision" type="StaticBody3D" parent="Chunk_7_7" unique_id=1226290795]
+[node name="Collision" type="StaticBody3D" parent="Chunk_7_7" unique_id=64641603]
 
-[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_7_7/Collision" unique_id=178519206]
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_7_7/Collision" unique_id=1278049120]
 shape = ExtResource("129_fmfn8")

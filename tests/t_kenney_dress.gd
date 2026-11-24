@@ -99,11 +99,17 @@ func _near_reach(reach: Dictionary, lp: Vector3, r: float) -> bool:
 
 func _model_name_at(dressing: Node3D, x: float, z: float) -> String:
 	for c in dressing.get_children():
-		if c is Node3D and c.name != "Collision":
+		if c is Node3D:
 			var p: Vector3 = (c as Node3D).position
 			if absf(p.x - x) < 0.01 and absf(p.z - z) < 0.01 and c.get_child_count() > 0:
 				return str(c.get_child(0).name)
 	return "?"
+
+
+## Every model owns its collider (StaticBody3D "Body" child); toggles all of them.
+func _set_layer(bodies: Array, layer: int) -> void:
+	for b in bodies:
+		(b as StaticBody3D).collision_layer = layer
 
 
 func _run() -> void:
@@ -118,10 +124,15 @@ func _run() -> void:
 		if dressing == null:
 			w.queue_free()
 			continue
-		var body: StaticBody3D = dressing.get_node("Collision")
+		var bodies: Array = dressing.find_children("*", "StaticBody3D", true, false)
+		var shapes: Array = dressing.find_children("*", "CollisionShape3D", true, false)
 		info("seed %d counts %s" % [seed_value, str(w.dressing_counts)])
 		check(int(w.dressing_counts["cars"]) >= 3, "seed %d: cars placed (%d)" % [seed_value, int(w.dressing_counts["cars"])])
-		check(body.collision_layer == 1, "seed %d: dressing collider on layer 1 only (%d)" % [seed_value, body.collision_layer])
+		var off_layer := 0
+		for b in bodies:
+			if (b as StaticBody3D).collision_layer != 1:
+				off_layer += 1
+		check(bodies.size() > 0 and off_layer == 0, "seed %d: all %d dressing colliders on layer 1 only (%d not)" % [seed_value, bodies.size(), off_layer])
 
 		# 1 spawn clearance: capsule at each spawn slot, plus nearest dressing shape to spawn centre
 		var spawn_bad := 0
@@ -132,12 +143,12 @@ func _run() -> void:
 			q.collision_mask = 1
 			q.transform = Transform3D(Basis(), sp + Vector3(0, 0.3, 0))
 			for h in space.intersect_shape(q, 8):
-				if h["collider"] == body:
+				if dressing.is_ancestor_of(h["collider"]):
 					spawn_bad += 1
 		check(spawn_bad == 0, "seed %d: no dressing collider on any of the 8 spawn slots (%d hits)" % [seed_value, spawn_bad])
 		var near_spawn := 9999.0
-		for cs in body.get_children():
-			var o: Vector3 = (cs as CollisionShape3D).transform.origin
+		for cs in shapes:
+			var o: Vector3 = (cs as CollisionShape3D).global_position
 			near_spawn = minf(near_spawn, Vector2(o.x, o.z).distance_to(w.spawn_center))
 		info("seed %d: nearest dressing collider to spawn centre %.1f m" % [seed_value, near_spawn])
 		check(near_spawn > 8.0, "seed %d: dressing keeps >8 m from spawn centre (%.1f)" % [seed_value, near_spawn])
@@ -155,19 +166,19 @@ func _run() -> void:
 			for ang in 16:
 				var a := TAU * float(ang) / 16.0
 				var cand := Vector2(cos(a), sin(a)) * (r + 1.0)
-				body.collision_layer = 0
+				_set_layer(bodies, 0)
 				await physics_frame
 				if _free_local(space, node, cand):
 					start = cand
 					found = true
 					break
-			body.collision_layer = 0
+			_set_layer(bodies, 0)
 			await physics_frame
 			if not found:
 				skipped += 1
 				continue
 			var base := _flood(space, node, start, half)
-			body.collision_layer = 1
+			_set_layer(bodies, 1)
 			await physics_frame
 			var with := {}
 			if _free_local(space, node, start):
@@ -199,7 +210,7 @@ func _run() -> void:
 			info("seed %d %s: cells reachable off %d on %d (lost %d), loot reachable-off %d, lost by dressing %d" % [seed_value, str(l["type"]), base.size(), with.size(), lost, tested, lost_loot])
 		check(loot_lost.is_empty(), "seed %d: dressing makes no loot unreachable (%d lost: %s)" % [seed_value, loot_lost.size(), ", ".join(loot_lost)])
 		info("seed %d: floor cells lost to dressing across locations: %d (locations with no free entry ring cell, skipped: %d)" % [seed_value, lost_total, skipped])
-		body.collision_layer = 1
+		_set_layer(bodies, 1)
 		await physics_frame
 
 		# 3 road corridor: centreline capsule free along every road
@@ -223,10 +234,10 @@ func _run() -> void:
 				var blocked := false
 				var who := ""
 				for h in space.intersect_shape(q, 8):
-					if h["collider"] == body:
+					if dressing.is_ancestor_of(h["collider"]):
 						blocked = true
-						var hc := body.get_child(int(h["shape"])) as CollisionShape3D
-						who = _model_name_at(dressing, hc.transform.origin.x, hc.transform.origin.z)
+						var hc: Vector3 = (h["collider"] as Node3D).global_position
+						who = _model_name_at(dressing, hc.x, hc.z)
 				road_total += 1
 				if blocked:
 					road_blocked += 1
@@ -250,26 +261,27 @@ func _run() -> void:
 		var idx := 0
 		var vs_world := PackedStringArray()
 		var vs_self := PackedStringArray()
-		for cs in body.get_children():
+		for cs in shapes:
 			var c3 := cs as CollisionShape3D
+			var own: Node = c3.get_parent()
 			var q := PhysicsShapeQueryParameters3D.new()
 			q.shape = c3.shape
 			q.collision_mask = 1
-			var xf: Transform3D = c3.transform
+			var xf: Transform3D = c3.global_transform
 			if c3.shape is BoxShape3D:
 				var sh := BoxShape3D.new()
 				sh.size = (c3.shape as BoxShape3D).size - Vector3(0.1, 0.1, 0.1)
 				q.shape = sh
 				xf = xf.translated_local(Vector3(0, 0.12, 0))   # ignore terrain skimming the base
 			q.transform = xf
-			var nm := _model_name_at(dressing, c3.transform.origin.x, c3.transform.origin.z)
-			var where := "%s@(%.1f,%.1f)" % [nm, c3.transform.origin.x, c3.transform.origin.z]
+			var nm := _model_name_at(dressing, c3.global_position.x, c3.global_position.z)
+			var where := "%s@(%.1f,%.1f)" % [nm, c3.global_position.x, c3.global_position.z]
 			var hit_world := false
 			var hit_self := false
 			for h in space.intersect_shape(q, 16):
 				var col: Node = h["collider"] as Node
-				if col == body:
-					if int(h["shape"]) != idx:
+				if dressing.is_ancestor_of(col):
+					if col != own:
 						hit_self = true
 				elif not _is_terrain(col):
 					hit_world = true

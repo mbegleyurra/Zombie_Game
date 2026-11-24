@@ -200,11 +200,17 @@ func _run() -> void:
 	print("INFO  city centrelines: %d samples, mean=%.4f variance=%.8f range=[%.4f, %.4f] lowest at %s" % [n, mean, variance, hmin, hmax, str(city_low)])
 	check(variance < 0.0001 and hmax - hmin < 0.05, "city street grid centrelines are one flat height (variance %.8f)" % variance)
 
-	# 5. the baked road tile mesh sits on the ground
-	var roads: MeshInstance3D = w1.find_child("Roads", true, false) as MeshInstance3D
-	check(roads != null and roads.mesh != null and roads.mesh.get_surface_count() > 0, "road tile mesh exists")
-	if roads != null and roads.mesh != null and roads.mesh.get_surface_count() > 0:
-		var vs: PackedVector3Array = roads.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+	# 5. the baked road tile meshes (one MeshInstance3D per segment / junction under "Roads") sit on the ground
+	var roads: Node = w1.find_child("Roads", true, false)
+	var vs := PackedVector3Array()
+	if roads != null:
+		for piece in roads.get_children():
+			var mi := piece as MeshInstance3D
+			if mi != null and mi.mesh != null and mi.mesh.get_surface_count() > 0:
+				for v in (mi.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX] as PackedVector3Array):
+					vs.append(mi.global_transform * v)
+	check(not vs.is_empty(), "road tile meshes exist (%d pieces)" % (roads.get_child_count() if roads else 0))
+	if not vs.is_empty():
 		var below := 0
 		var high := 0
 		var lo := 1.0e9

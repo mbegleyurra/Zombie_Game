@@ -2,32 +2,36 @@ extends RefCounted
 ## KayKit Forest Nature Pack (CC0, free tier) terrain dressing: trees, bushes, rocks and grass tufts.
 ## HAND-AUTHORED: every instance is one row of the FOREST section in data/hand_map/placements.json
 ## ([kind, model, x, z, yaw, scale]); nothing is drawn from a random generator, so the forest is identical on every
-## run and peer. Everything lives under one "KayKitForest" node:
-##   - one MultiMeshInstance3D per (model, 128 m cell), with a visibility range, so the cost stays low;
-##   - ONE StaticBody3D "Collision" (layer 1) holding a cylinder per tree and a box per big rock.
-##     Bushes, grass and small rocks have no collider.
+## run and peer. Every object is its OWN node so it can be selected, moved, copied or deleted in the editor:
+##   KayKitForest/Trees|Bushes|Rocks|Grass/<Model>_<NNNN>  = an instance of a small prop scene
+##   scenes/world/props/vegetation/<Model>.tscn (root carries meta "kind"; child "Mesh" = the model mesh, shared
+##   resource; trees and big rocks also have their own StaticBody3D "Body" + CollisionShape3D, shared shape).
+##   Big rocks use <Model>_Solid.tscn (box collider); small rocks, bushes and grass have no collider.
+## The prop scenes are written once (when missing) and are hand-editable afterwards; the bake never overwrites them.
 ##
 ## Usage (world_builder): var f = KayKitForest.new(self); add_child(f.build()); f.counts has the totals.
 
 const HandMapData = preload("res://tools/worldgen/hand_map_data.gd")
 
 const DIR := "res://assets/kaykit/forest/KayKit_Forest_Nature_Pack_1.0_FREE/Assets/gltf/"
+const PROP_DIR := "res://scenes/world/props/vegetation/"
+const GROUPS := {"tree": "Trees", "bush": "Bushes", "rock": "Rocks", "grass": "Grass"}
 
-const CELL := 128.0           # MultiMesh cell size (frustum culling + visibility range work per cell)
 const BIG_ROCK_H := 0.9       # rocks at least this tall get a box collider
 
 var world
 var terrain
 var node: Node3D
-var body: StaticBody3D
-var counts := {"trees": 0, "bushes": 0, "rocks": 0, "grass": 0, "shapes": 0, "multimeshes": 0, "instances": 0}
+var counts := {"trees": 0, "bushes": 0, "rocks": 0, "grass": 0, "shapes": 0, "prop_scenes": 0, "instances": 0}
 
-## Every queued instance as [kind, x, z] (generator-side only; the baked scene stores no copy: the map and tests read
-## the MultiMesh buffers via scripts/ui/map_ui.gd forest_sites(), so a hand edit to a batch is always reflected).
+## Every placed instance as [kind, x, z] (generator-side only; the baked scene stores no copy: the map and tests read
+## the vegetation nodes via scripts/world/forest_data.gd, so a hand edit is always reflected).
 var sites: Array = []
 
 var _models: Dictionary = {}    # model name -> {mesh, off, tm, size} (empty when the file is missing)
-var _buckets: Dictionary = {}   # "kind|model|cx|cz" -> Array of Transform3D
+var _props: Dictionary = {}     # prop scene name -> PackedScene
+var _mean_scale: Dictionary = {} # tree model -> mean authored scale (sizes its shared trunk collider)
+var _next: Dictionary = {}      # model -> next instance index
 
 
 func _init(p_world) -> void:
@@ -38,12 +42,20 @@ func _init(p_world) -> void:
 func build() -> Node3D:
 	node = Node3D.new()
 	node.name = "KayKitForest"
-	body = StaticBody3D.new()
-	body.name = "Collision"
-	node.add_child(body)
-	for row in HandMapData.section("FOREST"):
+	for kind in GROUPS:
+		var g := Node3D.new()
+		g.name = GROUPS[kind]
+		node.add_child(g)
+	var rows: Array = HandMapData.section("FOREST")
+	var sums := {}
+	for row in rows:
+		if str(row[0]) == "tree":
+			var sm: Array = sums.get(str(row[1]), [0.0, 0])
+			sums[str(row[1])] = [float(sm[0]) + float(row[5]), int(sm[1]) + 1]
+	for k in sums:
+		_mean_scale[k] = float(sums[k][0]) / float(sums[k][1])
+	for row in rows:
 		_place(row as Array)
-	_flush()
 	return node
 
 
@@ -86,83 +98,84 @@ func _collect(n: Node, xf: Transform3D, out: Array) -> void:
 		_collect(ch, t, out)
 
 
-## Queues one instance, scaled uniformly by s, seated on the terrain.
-func _queue(kind: String, mname: String, x: float, z: float, yaw: float, s: float) -> float:
-	var m: Dictionary = _model(mname)
-	var y: float = terrain.height_at(x, z) - 0.04 * s
-	var place := Transform3D(Basis(Vector3.UP, yaw) * Basis.from_scale(Vector3(s, s, s)), Vector3(x, y, z))
-	var xf: Transform3D = place * Transform3D(Basis.IDENTITY, m["off"] as Vector3) * (m["tm"] as Transform3D)
-	var cx: int = clampi(floori((x + terrain.HALF) / CELL), 0, int(ceil(2.0 * terrain.HALF / CELL)) - 1)
-	var cz: int = clampi(floori((z + terrain.HALF) / CELL), 0, int(ceil(2.0 * terrain.HALF / CELL)) - 1)
-	var key := "%s|%s|%d|%d" % [kind, mname, cx, cz]
-	if not _buckets.has(key):
-		_buckets[key] = []
-	(_buckets[key] as Array).append(xf)
-	counts["instances"] += 1
-	sites.append([kind, x, z])
-	return y
+# ------------------------------------------------------------------ prop scenes (written once, then hand-editable)
+
+## The mesh copied out of the model file (materials duplicated in, textures stay the pack's png), tagged with the
+## asset it came from (tests/t_no_primitives.gd). Shared by every instance of the model.
+func _mesh_res(mname: String) -> Mesh:
+	var p: String = PROP_DIR + "res/" + mname + ".res"
+	if ResourceLoader.exists(p):
+		return load(p) as Mesh
+	var src: Mesh = _model(mname)["mesh"]
+	var c: Mesh = src.duplicate()
+	for s in c.get_surface_count():
+		var sm: Material = c.surface_get_material(s)
+		if sm != null and (sm.resource_path == "" or sm.resource_path.contains("::")):
+			c.surface_set_material(s, sm.duplicate())
+	c.set_meta("source_asset", DIR + mname + "_Color1.gltf")
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(PROP_DIR + "res/"))
+	ResourceSaver.save(c, p, ResourceSaver.FLAG_COMPRESS)
+	return load(p) as Mesh
 
 
-func _flush() -> void:
-	for key in _buckets:
-		var arr: Array = _buckets[key]
-		var parts: PackedStringArray = String(key).split("|")
-		var kind: String = parts[0]
-		var m: Dictionary = _model(parts[1])
-		var mm := MultiMesh.new()
-		mm.transform_format = MultiMesh.TRANSFORM_3D
-		mm.mesh = m["mesh"] as Mesh
-		mm.instance_count = arr.size()
-		# Whole-buffer assignment, NOT set_instance_transform: the headless (dummy) renderer the bake runs under drops
-		# per-instance writes, which saved every batch with all-zero transforms. Layout per instance (TRANSFORM_3D):
-		# [x.x, y.x, z.x, o.x,  x.y, y.y, z.y, o.y,  x.z, y.z, z.z, o.z].
-		var buf := PackedFloat32Array()
-		buf.resize(arr.size() * 12)
-		for i in arr.size():
-			var t: Transform3D = arr[i]
-			var b := t.basis
-			var j := i * 12
-			buf[j] = b.x.x; buf[j + 1] = b.y.x; buf[j + 2] = b.z.x; buf[j + 3] = t.origin.x
-			buf[j + 4] = b.x.y; buf[j + 5] = b.y.y; buf[j + 6] = b.z.y; buf[j + 7] = t.origin.y
-			buf[j + 8] = b.x.z; buf[j + 9] = b.y.z; buf[j + 10] = b.z.z; buf[j + 11] = t.origin.z
-		mm.buffer = buf
-		var mmi := MultiMeshInstance3D.new()
-		mmi.name = "%s_%s_%s_%s" % [kind, parts[1], parts[2], parts[3]]
-		mmi.set_meta("kind", kind)
-		mmi.multimesh = mm
+## <Model>.tscn (no collider) or <Model>_Solid.tscn (rock with a box) / trees (always a trunk cylinder). Sizes are for
+## scale 1; each placed instance is scaled uniformly, which scales its collider with it.
+func _prop(kind: String, mname: String, solid: bool) -> PackedScene:
+	var pname: String = mname + ("_Solid" if solid and kind == "rock" else "")
+	if _props.has(pname):
+		return _props[pname]
+	var path: String = PROP_DIR + pname + ".tscn"
+	if not ResourceLoader.exists(path):
+		var m: Dictionary = _model(mname)
+		var sz: Vector3 = m["size"]
+		var root := Node3D.new()
+		root.name = pname
+		root.set_meta("kind", kind)
+		var mi := MeshInstance3D.new()
+		mi.name = "Mesh"
+		mi.mesh = _mesh_res(mname)
+		mi.transform = Transform3D(Basis.IDENTITY, m["off"] as Vector3) * (m["tm"] as Transform3D)
 		match kind:
 			"tree", "rock":
-				mmi.visibility_range_end = 260.0
+				mi.visibility_range_end = 260.0
 			"bush":
-				mmi.visibility_range_end = 150.0
-				mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				mi.visibility_range_end = 150.0
+				mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			_:
-				mmi.visibility_range_end = 110.0
-				mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		mmi.visibility_range_end_margin = 15.0
-		node.add_child(mmi)
-		counts["multimeshes"] += 1
-
-
-func _cyl(x: float, y: float, z: float, r: float, h: float) -> void:
-	var cs := CollisionShape3D.new()
-	var sh := CylinderShape3D.new()
-	sh.radius = r
-	sh.height = h
-	cs.shape = sh
-	cs.position = Vector3(x, y + h * 0.5, z)
-	body.add_child(cs)
-	counts["shapes"] += 1
-
-
-func _box(x: float, y: float, z: float, yaw: float, size: Vector3) -> void:
-	var cs := CollisionShape3D.new()
-	var sh := BoxShape3D.new()
-	sh.size = size
-	cs.shape = sh
-	cs.transform = Transform3D(Basis(Vector3.UP, yaw), Vector3(x, y + size.y * 0.5, z))
-	body.add_child(cs)
-	counts["shapes"] += 1
+				mi.visibility_range_end = 110.0
+				mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		mi.visibility_range_end_margin = 15.0
+		root.add_child(mi)
+		mi.owner = root
+		if solid:
+			var body := StaticBody3D.new()
+			body.name = "Body"
+			root.add_child(body)
+			body.owner = root
+			var cs := CollisionShape3D.new()
+			cs.name = "Shape"
+			if kind == "tree":
+				# Trunk cylinder sized at this model's mean authored scale (the old per-tree clamp, expressed at s = 1).
+				var ms: float = float(_mean_scale.get(mname, 1.0))
+				var cyl := CylinderShape3D.new()
+				cyl.radius = clampf(minf(sz.x, sz.z) * ms * 0.08, 0.25, 0.55) / ms
+				cyl.height = minf(sz.y * ms, 3.5) / ms
+				cs.shape = cyl
+				cs.position = Vector3(0.0, cyl.height * 0.5, 0.0)
+			else:
+				var bs := BoxShape3D.new()
+				bs.size = sz * 0.8
+				cs.shape = bs
+				cs.position = Vector3(0.0, bs.size.y * 0.5, 0.0)
+			body.add_child(cs)
+			cs.owner = root
+		var ps := PackedScene.new()
+		ps.pack(root)
+		ResourceSaver.save(ps, path)
+		root.free()
+		counts["prop_scenes"] += 1
+	_props[pname] = load(path) as PackedScene
+	return _props[pname]
 
 
 # ------------------------------------------------------------------ placement (read from data)
@@ -179,14 +192,22 @@ func _place(row: Array) -> void:
 	if m.is_empty():
 		return
 	var sz: Vector3 = m["size"]
-	var y: float = _queue(kind, mname, x, z, yaw, s)
+	var solid: bool = kind == "tree" or (kind == "rock" and sz.y * s >= BIG_ROCK_H)
+	var inst: Node3D = _prop(kind, mname, solid).instantiate() as Node3D
+	var i: int = int(_next.get(mname, 0)) + 1
+	_next[mname] = i
+	inst.name = "%s_%04d" % [mname, i]
+	var y: float = terrain.height_at(x, z) - 0.04 * s
+	inst.transform = Transform3D(Basis(Vector3.UP, yaw) * Basis.from_scale(Vector3(s, s, s)), Vector3(x, y, z))
+	node.get_node(GROUPS.get(kind, "Grass")).add_child(inst)
+	counts["instances"] += 1
+	sites.append([kind, x, z])
+	if solid:
+		counts["shapes"] += 1
 	match kind:
 		"tree":
-			_cyl(x, y, z, clampf(minf(sz.x, sz.z) * s * 0.08, 0.25, 0.55), minf(sz.y * s, 3.5))
 			counts["trees"] += 1
 		"rock":
-			if sz.y * s >= BIG_ROCK_H:
-				_box(x, y, z, yaw, Vector3(sz.x, sz.y, sz.z) * s * 0.8)
 			counts["rocks"] += 1
 		"bush":
 			counts["bushes"] += 1

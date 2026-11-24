@@ -278,18 +278,16 @@ func _add_dungeon_track() -> void:
 # ------------------------------------------------------------------ props
 
 ## Everything in the wild (trees, rocks, bushes, grass) comes from the KayKit forest; the only thing built here is the
-## roadside: downloaded Kenney street lights along each long road, each with a thin collider.
+## roadside: downloaded Kenney street lights along each long road, each with its own thin collider as a child (the
+## wrapper is an editor group, so it is selected, moved and deleted as one object).
 func _build_props() -> void:
 	_props = Node3D.new()
 	_props.name = "Props"
 	add_child(_props)
-	var body := StaticBody3D.new()
-	body.name = "PropCollision"
-	_props.add_child(body)
-	_build_roadside(body)
+	_build_roadside()
 
 
-func _build_roadside(body: StaticBody3D) -> void:
+func _build_roadside() -> void:
 	for i in terrain.road_a.size():
 		var a: Vector2 = terrain.road_a[i]
 		var b: Vector2 = terrain.road_b[i]
@@ -310,13 +308,18 @@ func _build_roadside(body: StaticBody3D) -> void:
 			var y: float = terrain.height_at(p.x, p.y)
 			m.position = Vector3(p.x, y, p.y)
 			m.rotation.y = yaw
+			m.set_meta("_edit_group_", true)
 			_props.add_child(m)
+			var body := StaticBody3D.new()
+			body.name = "Body"
+			m.add_child(body)
 			var cs := CollisionShape3D.new()
+			cs.name = "Shape"
 			var sh := CylinderShape3D.new()
 			sh.radius = 0.2
 			sh.height = ROADSIDE_H
 			cs.shape = sh
-			cs.position = Vector3(p.x, y + ROADSIDE_H * 0.5, p.y)
+			cs.position = Vector3(0.0, ROADSIDE_H * 0.5, 0.0)
 			body.add_child(cs)
 
 

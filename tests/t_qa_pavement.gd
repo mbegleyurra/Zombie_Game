@@ -33,10 +33,21 @@ func _run() -> void:
 	world.build(1)
 	for _i in 3:
 		await physics_frame
-	var roads := world.find_child("Roads", true, false) as MeshInstance3D
-	var arr: Array = roads.mesh.surface_get_arrays(0)
-	var vs: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
-	var ids: PackedInt32Array = arr[Mesh.ARRAY_INDEX]
+	# Roads is one MeshInstance3D per segment / junction; gather every triangle vertex in world space.
+	var roads: Node = world.find_child("Roads", true, false)
+	var vs := PackedVector3Array()
+	var ids := PackedInt32Array()
+	for piece in roads.get_children():
+		var mi := piece as MeshInstance3D
+		if mi == null or mi.mesh == null:
+			continue
+		var arr: Array = mi.mesh.surface_get_arrays(0)
+		var base: int = vs.size()
+		for v in (arr[Mesh.ARRAY_VERTEX] as PackedVector3Array):
+			vs.append(mi.global_transform * v)
+		for i in (arr[Mesh.ARRAY_INDEX] as PackedInt32Array):
+			ids.append(base + i)
+	check(ids.size() > 0, "road pieces have triangles (%d pieces)" % roads.get_child_count())
 	for pat in ["*tile-low*", "*driveway-short*"]:
 		var strips := world.find_children(pat, "Node3D", true, false)
 		check(strips.size() >= 8, "%s strips placed (%d)" % [pat, strips.size()])

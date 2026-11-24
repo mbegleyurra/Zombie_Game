@@ -1,8 +1,30 @@
 # Baked world (Phase 1 bake + Phase 2 runtime)
 
 The generated Dead Acres world (tools/worldgen/gen_world.gd, HandLayout.HAND_SEED) baked once into editable scenes.
-Open `res://scenes/world/world_baked.tscn` in the editor: every building, model, tree multimesh, loot node and marker
-is a real node you can select and move.
+Open `res://scenes/world/world_baked.tscn` in the editor: every building, model, tree, bush, rock, grass tuft, road
+piece, loot node and marker is a real node you can select, move, copy or delete. There is no MultiMesh anywhere in
+scenes/world (the bake aborts if one appears; tests/t_editable_world.gd checks it).
+
+## Editing by hand
+
+- **Vegetation**: `Vegetation/KayKitForest/{Trees,Bushes,Rocks,Grass}/<Model>_NNNN`, each an instance of
+  `scenes/world/props/vegetation/<Model>.tscn` (rocks with a collider use `<Model>_Solid.tscn`). Every tree and big rock
+  carries its own `Body` StaticBody3D + `Shape` inside the prop scene, so moving / scaling / deleting the node moves
+  its collider too. To add one, instance a prop scene anywhere under `KayKitForest` (the root's meta `kind` makes it
+  count). The map, spawn placement (`kaykit_resources.blocked_by_dressing`) and tests read the nodes through
+  `scripts/world/forest_data.gd`, so they follow every edit; there is no stored copy of the positions.
+  Editing a prop scene (e.g. a bigger trunk collider) changes every instance of that model.
+- **Kenney dressing and roadside lights**: each model wrapper owns its collider (`Body`/`Shape` child) and is an
+  editor group (`_edit_group_`), so one click selects the whole object.
+- **Roads**: `Roads/Road_NNN` (one per road segment) and `Roads/Junction_NNN` (one per junction tile), each a
+  MeshInstance3D at its own centre. Move or delete a piece freely. Reshaping a piece means editing its mesh in a 3D tool
+  or re-baking. Roads have no collision; `road_distance` uses Markers meta `roads`, which is NOT updated by moving a
+  piece.
+- **Terrain**: 64 `Terrain/Chunk_X_Z` baked mesh nodes, each with its own trimesh collider. Move or delete a chunk in
+  the editor. Godot has no built-in mesh sculpting, so changing the ground shape means editing
+  `res/terrain_mesh_NNNN.res` in a 3D tool (or a terrain plugin) and replacing `res/terrain_shape_NNNN.res` with a
+  matching trimesh (Mesh > Create Trimesh Static Body). `res/heightmap.res` does not follow such edits (see Heightmap
+  format).
 
 ## Phase 2: how the game uses it
 
@@ -33,19 +55,20 @@ Re-baking is deterministic: the only file that differs between two runs is marke
 |---|---|
 | `scenes/world/world_baked.tscn` | Root `World` (Node3D): instances the 8 sub-scenes below + `DayNight` (day_night.gd, time_hours = 9). Written as plain text, no overrides. |
 | `baked/terrain.tscn` | `Terrain`: 64 `Chunk_X_Z` MeshInstance3D (64 m each, mesh = `res/terrain_mesh_NNNN.res`, material `res/mat_*.tres`, visibility_range_end 300), each with child `Collision` StaticBody3D + CollisionShape3D (trimesh `res/terrain_shape_NNNN.res`). No terrain.gd script. |
-| `baked/roads.tscn` | `Roads`: the single terrain-hugging road mesh (`res/roads_mesh_0000.res`), no collision (as before). The bake raises any road vertex below heightmap height + 0.041 m onto it (120 vertices, mostly the dungeon approach cut the 1 m grid cannot follow; `road_vertices_raised` in the manifest). |
+| `baked/roads.tscn` | `Roads`: 123 terrain-hugging road pieces (62 `Road_NNN` + 61 `Junction_NNN`, meshes `res/roads_mesh_NNNN.res`), no collision (as before). The bake raises any road vertex below heightmap height + 0.041 m onto it (120 vertices, mostly the dungeon approach cut the 1 m grid cannot follow; `road_vertices_raised` in the manifest). |
 | `baked/buildings.tscn` | `Buildings`: the 12 location roots (`hospital_0` ... `farm_11`, meta loc_id/location_type/location_name) with all factory geometry and authored graveyard/farm models, plus `HandWorld` (23 cottages, 24 city towers, CityInteriors, street lamps, street cars, storefront props, `Collision` body). Loot containers were moved OUT to markers.tscn. 2890 model instances. |
-| `baked/vegetation.tscn` | `KayKitForest`: 316 MultiMeshInstance3D (`res/vegetation_multimesh_NNNN.res`, 2450 instances: trees, bushes, rocks, grass) + `Collision` (564 shapes). Meta `sites` = [kind, x, z] list. |
-| `baked/props.tscn` | `Props` (roadside street lights + `PropCollision`) and `KenneyDressing` (155 models + `Collision` with 131 shapes). |
+| `baked/vegetation.tscn` | `KayKitForest`: 2450 prop-scene instances in `Trees` (520), `Bushes` (260), `Rocks` (170), `Grass` (1500); 564 per-object colliders (trees + big rocks). |
+| `scenes/world/props/vegetation/` | 34 prop scenes (one per model, `_Solid` = with collider) + `res/` with the 26 shared model meshes (meta `source_asset`). Written once by the bake when missing, never overwritten: hand edits survive a re-bake. |
+| `baked/props.tscn` | `Props` (roadside street lights, each with its own collider) and `KenneyDressing` (155 models, 131 of them with their own collider). |
 | `baked/dungeon.tscn` | `Dungeon`: walls, floors, stairs, surface gate, torches/lights, 12 `Door_N` (dungeon_door.gd) and its `Collision`. Containers, pickups and guard markers were moved to markers.tscn. |
 | `baked/vehicles.tscn` | `Vehicles`: 10 drivable `Car_N` (vehicle.gd, exported `kind`) at the authored spawn (height + 0.7), zero velocity. |
 | `baked/markers.tscn` | `Markers`: all gameplay data (see below). |
 | `baked/res/heightmap.res` | Height sampling without generation (see below). |
 | `baked/res/groundmap.res` | Map tint image; alpha channel = forest density. Read by baked_terrain.gd and the map UI. |
-| `baked/res/*.res, *.tres` | 64 terrain meshes, 64 terrain trimesh shapes, 1 roads mesh, 2 dungeon meshes, 26 vegetation meshes, 316 multimeshes, 29 materials. |
+| `baked/res/*.res, *.tres` | 64 terrain meshes, 64 terrain trimesh shapes, 123 road piece meshes, 2 dungeon meshes, 29 materials. |
 | `baked/res/bake_manifest.json` | Builder counts + per-scene node/semantic counts, used by verify_bake.gd. |
 
-Total size: 14.4 MB (buildings.tscn 1.66 MB, vegetation 0.36 MB, markers 0.32 MB, props 0.14 MB, dungeon 0.12 MB).
+Total size: about 16 MB under baked/ plus 0.44 MB of vegetation prop scenes (vegetation.tscn 0.66 MB).
 
 ## markers.tscn
 
@@ -91,7 +114,7 @@ Behaviour of the generated path is unchanged: t_handmap, t_dungeon_access and t_
 3. **DayNight** is a fresh day_night.gd node (sun, moon and environment are built in `_ready`), not baked.
 4. **Terrain generator data** (flat pads, road beds) is not saved. Only its results are: meshes, collision, heightmap, groundmap and the road list (Markers meta `roads`). `road_distance` and `forest_density` are served from those by baked_terrain.gd; `is_clear` / `patch_at` have no baked equivalent.
 5. **12 dungeon doorway models are saved as plain nodes**, not as glb instances, because their door leaf was moved into the door's Hinge. All other imported models are instances of their .glb/.gltf (2890 + 173 + 233 + 115).
-6. **Imported sub-resources** (56 meshes and materials that the builders pulled out of models, e.g. forest meshes for multimeshes) are copied into `res/`. Swapping the source glb does not update those copies. Each copied mesh carries meta `source_asset` = the .glb/.gltf it came from; tests/t_no_primitives.gd uses it to tell asset meshes from code-generated ones.
-7. **Copied metadata**: HandWorld meta `footprints` / `citykit`, CityInteriors meta `rooms` / `placed` and vegetation meta `sites` are derived lists. They do not follow nodes you move in the editor.
+6. **Imported sub-resources** (meshes and materials that the builders pulled out of models, e.g. the forest meshes in `scenes/world/props/vegetation/res/`) are copied out of the model files. Swapping the source glb does not update those copies. Each copied mesh carries meta `source_asset` = the .glb/.gltf it came from; tests/t_no_primitives.gd uses it to tell asset meshes from code-generated ones.
+7. **Copied metadata**: HandWorld meta `footprints` / `citykit`, CityInteriors meta `rooms` / `placed` and Markers meta `roads` are derived lists. They do not follow nodes you move in the editor. (Vegetation has no copied list: it is read from the nodes.)
 8. Zombie and skeleton spawners read the `zombie_spawn` / `skeleton_spawn` markers (same rows, same order as the old placements.json sections) via spawn_markers.gd.
 9. Inline arrays left in .tscn: only 6-point roof hulls (ConvexPolygonShape3D) and the metadata lists above. No mesh or terrain arrays.

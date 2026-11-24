@@ -172,17 +172,18 @@ static func feed_for(item_id: String) -> Array:
 
 
 ## True if (x, z) lies inside (or within `pad` of) any Kenney-dressing or KayKit-forest collider (read-only query).
+## Every object carries its own collider, so all shapes under each group are checked (any depth).
 static func blocked_by_dressing(world: Node, p: Vector2, pad: float) -> bool:
-	for path in ["KenneyDressing/Collision", "KayKitForest/Collision"]:
+	for path in ["KenneyDressing", "KayKitForest"]:
 		if _blocked_by_body(world.get_node_or_null(path), p, pad):
 			return true
 	return false
 
 
-static func _blocked_by_body(body: Node, p: Vector2, pad: float) -> bool:
-	if body == null:
+static func _blocked_by_body(group: Node, p: Vector2, pad: float) -> bool:
+	if group == null:
 		return false
-	for c in body.get_children():
+	for c in group.find_children("*", "CollisionShape3D", true, false):
 		var cs := c as CollisionShape3D
 		if cs == null or cs.shape == null:
 			continue

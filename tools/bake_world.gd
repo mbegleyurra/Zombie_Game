@@ -2,9 +2,10 @@ extends SceneTree
 ## Bakes the generated world into hand-editable scenes under res://scenes/world/baked/.
 ## Run:  godot --headless --path . --script res://tools/bake_world.gd
 ## Runs the bake-only generator (tools/worldgen/gen_world.gd) once, then splits the result into sub-scenes, saves big
-## meshes / shapes / multimeshes as
-## .res files in baked/res/, imported models as instances of their source .glb/.gltf, data as Marker3D nodes,
-## and a heightmap. Writes baked/res/bake_manifest.json with the counts tools/verify_bake.gd checks.
+## meshes / shapes as .res files in baked/res/, imported models as instances of their source .glb/.gltf, vegetation as
+## one prop-scene instance per object (scenes/world/props/vegetation/), roads as one mesh node per segment / junction,
+## data as Marker3D nodes, and a heightmap. Writes baked/res/bake_manifest.json with the counts tools/verify_bake.gd
+## checks. A MultiMesh anywhere in the output aborts the bake: every world object must be its own editable node.
 
 const OUT := "res://scenes/world/baked/"
 const RES := OUT + "res/"
@@ -19,7 +20,7 @@ var subs := {}            # scene name -> Node3D root
 var flatten := {}         # instance roots whose internals were edited (a child moved out): saved as plain nodes
 var res_count := {}       # file prefix -> counter
 var dup_map := {}         # original resource instance id -> saved copy
-var stats := {"meshes": 0, "materials": 0, "shapes": 0, "multimeshes": 0, "imported_copies": 0, "meta_node_refs": 0}
+var stats := {"meshes": 0, "materials": 0, "shapes": 0, "imported_copies": 0, "meta_node_refs": 0}
 var scripts_seen := {}
 var road_segments: Array = []   # [ax, az, bx, bz] per terrain road segment
 var flat_pads: Array = []       # [x, z, radius, blend, height] per terrain flat pad
@@ -72,8 +73,8 @@ func _run() -> void:
 		_strip_runtime(sub)
 		_own(sub, sub)
 		_externalize(sub, s)
-		if stats.has("bad_multimeshes"):
-			push_error("[Bake] %d multimesh(es) without a full non-zero transform buffer; aborting" % int(stats["bad_multimeshes"]))
+		if stats.has("multimeshes_found"):
+			push_error("[Bake] %d MultiMeshInstance3D node(s) in the output; aborting" % int(stats["multimeshes_found"]))
 			quit(1)
 			return
 		manifest["scenes"][s] = {"nodes": _count(sub), "semantic": semantic_counts(sub)}
@@ -391,18 +392,9 @@ func _externalize(n: Node, scene: String) -> void:
 				var om: Material = mi.get_surface_override_material(s)
 				if om != null:
 					mi.set_surface_override_material(s, _material(om, scene))
-		elif ch is MultiMeshInstance3D and (ch as MultiMeshInstance3D).multimesh != null:
-			var mmi := ch as MultiMeshInstance3D
-			var mm: MultiMesh = mmi.multimesh
-			if mm.resource_path == "":
-				mm.mesh = _mesh(mm.mesh, scene)
-				if not ForestData.buffer_ok(mm):
-					push_error("[Bake] %s: multimesh buffer empty or zero (%d floats for %d instances)" % [ch.get_path(), mm.buffer.size(), mm.instance_count])
-					stats["bad_multimeshes"] = int(stats.get("bad_multimeshes", 0)) + 1
-				var p := _res_path("%s_multimesh" % scene, "res")
-				ResourceSaver.save(mm, p, ResourceSaver.FLAG_COMPRESS)
-				mm.take_over_path(p)
-				stats["multimeshes"] += 1
+		elif ch is MultiMeshInstance3D:
+			push_error("[Bake] %s is a MultiMeshInstance3D (not editable per object)" % ch.get_path())
+			stats["multimeshes_found"] = int(stats.get("multimeshes_found", 0)) + 1
 		elif ch is CollisionShape3D and (ch as CollisionShape3D).shape != null:
 			var sh: Shape3D = (ch as CollisionShape3D).shape
 			if sh.resource_path == "" and (sh is ConcavePolygonShape3D or (sh is ConvexPolygonShape3D and (sh as ConvexPolygonShape3D).points.size() > 64)):
@@ -434,10 +426,20 @@ func _grid_height(x: float, z: float) -> float:
 ## follow the steepest carved cuts (the dungeon approach drops ~1 m per 0.5 m), so a few road vertices ended up inside
 ## the visible ground. Raise any vertex below grid height + 0.04 m to that height; vertices above it are untouched.
 func _seat_roads() -> void:
-	var roads := subs["roads"].get_node_or_null("Roads") as MeshInstance3D
-	if roads == null or not (roads.mesh is ArrayMesh):
-		push_error("[Bake] Roads mesh missing")
+	var holder: Node = subs["roads"].get_node_or_null("Roads")
+	if holder == null or holder.get_child_count() == 0:
+		push_error("[Bake] Roads pieces missing")
 		return
+	var raised := 0
+	for piece in holder.get_children():
+		if piece is MeshInstance3D and (piece as MeshInstance3D).mesh is ArrayMesh:
+			raised += _seat_road_piece(piece as MeshInstance3D)
+	stats["road_vertices_raised"] = raised
+	stats["road_pieces"] = holder.get_child_count()
+	print("[Bake] roads: %d pieces, raised %d vertices onto the baked ground" % [holder.get_child_count(), raised])
+
+
+func _seat_road_piece(roads: MeshInstance3D) -> int:
 	var src := roads.mesh as ArrayMesh
 	var xf: Transform3D = roads.global_transform
 	var inv: Transform3D = xf.affine_inverse()
@@ -457,8 +459,7 @@ func _seat_roads() -> void:
 		out.surface_set_material(s, src.surface_get_material(s))
 	out.resource_name = src.resource_name
 	roads.mesh = out
-	stats["road_vertices_raised"] = raised
-	print("[Bake] roads: raised %d vertices onto the baked ground" % raised)
+	return raised
 
 
 func _bake_heightmap() -> void:
@@ -534,7 +535,7 @@ func _count(n: Node) -> int:
 
 ## Counts shared with verify_bake.gd: computed the same way on the live tree and on the loaded scene.
 static func semantic_counts(sub: Node) -> Dictionary:
-	var out := {"loot_containers": 0, "ground_loot": 0, "vehicles": 0, "multimeshes": 0, "mm_instances": 0,
+	var out := {"loot_containers": 0, "ground_loot": 0, "vehicles": 0, "multimeshes": 0, "veg_nodes": 0,
 		"collision_shapes": 0, "glb_instances": 0, "markers": 0}
 	var stack: Array = [sub]
 	while not stack.is_empty():
@@ -549,9 +550,10 @@ static func semantic_counts(sub: Node) -> Dictionary:
 			out["ground_loot"] += 1
 		elif sp.ends_with("vehicle.gd"):
 			out["vehicles"] += 1
-		if n is MultiMeshInstance3D and (n as MultiMeshInstance3D).multimesh != null:
+		if n is MultiMeshInstance3D:
 			out["multimeshes"] += 1
-			out["mm_instances"] += (n as MultiMeshInstance3D).multimesh.instance_count
+		if n != sub and ForestData.KINDS.has(str(n.get_meta("kind", ""))) and n.scene_file_path.begins_with("res://scenes/world/props/vegetation/"):
+			out["veg_nodes"] += 1
 		if n is CollisionShape3D:
 			out["collision_shapes"] += 1
 		if n is Marker3D:

@@ -1,0 +1,12 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://scenes/world/props/vegetation/res/Rock_3_A.res" id="1_bilin"]
+
+[node name="Rock_3_A" type="Node3D" unique_id=290436086]
+metadata/kind = "rock"
+
+[node name="Mesh" type="MeshInstance3D" parent="." unique_id=91040438]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.051373124, 0.46530244, 0.0111607015)
+visibility_range_end = 260.0
+visibility_range_end_margin = 15.0
+mesh = ExtResource("1_bilin")

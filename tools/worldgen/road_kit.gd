@@ -3,8 +3,10 @@ extends RefCounted
 ## the driveways / dungeon track. The tiles follow the existing HandLayout polylines (plus the extra segments the
 ## world builder appended to terrain.road_a/b), so every road the layout and the tests know about is drawn.
 ##
-## All tiles are baked into ONE mesh with the road kit's own colormap material, every vertex lifted onto the terrain
-## height, and given NO collision: the terrain chunks stay the drivable ground (vehicle ground contact is untouched).
+## Tiles are merged PER PIECE: one MeshInstance3D per road segment ("Road_NNN") and per junction tile ("Junction_NNN")
+## under a "Roads" Node3D, each positioned at its own centre, so every piece can be selected, moved or deleted in the
+## editor. The road kit's own colormap material, every vertex lifted onto the terrain height, and NO collision: the
+## terrain chunks stay the drivable ground (vehicle ground contact is untouched).
 ## Junction tiles (end / bend / T / crossroad) come from the polyline graph; straight tiles fill the rest. City
 ## corners also get light poles, traffic lights and stop signs from the same kit. Deterministic, no RNG.
 
@@ -33,10 +35,8 @@ var missing: Array = []
 var counts := {"tiles": 0, "junctions": 0}
 var _cache := {}
 var _mat: Material
-var _v := PackedVector3Array()
-var _n := PackedVector3Array()
-var _uv := PackedVector2Array()
-var _idx := PackedInt32Array()
+var _pieces: Array = []      ## [{name, v, n, uv, idx}] in build order
+var _cur: Dictionary = {}
 var _verts := {}             ## vertex key -> {"p": Vector2, "dirs": [Vector2], "w": float, "city": bool}
 var _segs := {}              ## "keyA|keyB" -> true (de-duplicates overlapping polylines)
 var _seg_list: Array = []    ## [a, b, width, city]
@@ -50,19 +50,51 @@ func _init(p_world, p_kit) -> void:
 func build() -> void:
 	_collect_network()
 	var trim := {}
+	var nj := 0
 	for k in _verts:
 		var v: Dictionary = _verts[k]
+		_begin("Junction_%03d" % nj)
 		if _junction(v["p"], v["dirs"], float(v["w"]), bool(v["city"])):
 			trim[k] = float(v["w"]) * 0.5
+			nj += 1
+	var ns := 0
 	for s in _seg_list:
+		_begin("Road_%03d" % ns)
+		ns += 1
 		_segment(s[0], s[1], float(s[2]), bool(s[3]), float(trim.get(_key(s[0]), 0.0)), float(trim.get(_key(s[1]), 0.0)))
-	var mi := MeshInstance3D.new()
-	mi.name = "Roads"
-	mi.mesh = _to_mesh()
-	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	kit.node.add_child(mi)
+	var roads := Node3D.new()
+	roads.name = "Roads"
+	kit.node.add_child(roads)
+	for p in _pieces:
+		if (p["v"] as PackedVector3Array).is_empty():
+			continue
+		var mi := MeshInstance3D.new()
+		mi.name = p["name"]
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		mi.position = _centre(p["v"])
+		mi.mesh = _to_mesh(p, mi.position)
+		roads.add_child(mi)
 	_city_props()
 	kit.missing.append_array(missing)
+
+
+## Starts a new piece (an empty piece is skipped when the meshes are made).
+func _begin(nm: String) -> void:
+	if not _cur.is_empty() and (_cur["v"] as PackedVector3Array).is_empty():
+		_pieces.pop_back()
+	_cur = {"name": nm, "v": PackedVector3Array(), "n": PackedVector3Array(), "uv": PackedVector2Array(), "idx": PackedInt32Array()}
+	_pieces.append(_cur)
+
+
+## Footprint centre on the ground: the node origin of a piece.
+func _centre(vs: PackedVector3Array) -> Vector3:
+	var lo := vs[0]
+	var hi := vs[0]
+	for v in vs:
+		lo = lo.min(v)
+		hi = hi.max(v)
+	var c := (lo + hi) * 0.5
+	return Vector3(c.x, lo.y, c.z)
 
 
 # ------------------------------------------------------------------ network
@@ -246,31 +278,41 @@ func _add_tile(file: String, pos: Vector2, yaw: float, sx: float, sz: float) -> 
 	var uvs: PackedVector2Array = arrays[Mesh.ARRAY_TEX_UV]
 	var ids: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
 	var basis := Basis(Vector3.UP, yaw)
-	var base: int = _v.size()
+	var pv: PackedVector3Array = _cur["v"]
+	var pn: PackedVector3Array = _cur["n"]
+	var puv: PackedVector2Array = _cur["uv"]
+	var pidx: PackedInt32Array = _cur["idx"]
+	var base: int = pv.size()
 	for i in vs.size():
 		var lv: Vector3 = xf * vs[i]
 		var w: Vector3 = basis * Vector3(lv.x * sx, 0.0, lv.z * sz)
 		var wx: float = pos.x + w.x
 		var wz: float = pos.y + w.z
-		_v.append(Vector3(wx, world.get_height(wx, wz) + LIFT + lv.y, wz))
-		_n.append((basis * (xf.basis * ns[i])).normalized())
-		_uv.append(uvs[i])
+		pv.append(Vector3(wx, world.get_height(wx, wz) + LIFT + lv.y, wz))
+		pn.append((basis * (xf.basis * ns[i])).normalized())
+		puv.append(uvs[i])
 	for i in ids:
-		_idx.append(base + i)
+		pidx.append(base + i)
+	_cur["v"] = pv
+	_cur["n"] = pn
+	_cur["uv"] = puv
+	_cur["idx"] = pidx
 	counts["tiles"] = int(counts["tiles"]) + 1
 	tile_kinds[file] = int(tile_kinds.get(file, 0)) + 1
 
 
-func _to_mesh() -> ArrayMesh:
+## One piece as a mesh, vertices relative to the piece's node origin.
+func _to_mesh(p: Dictionary, origin: Vector3) -> ArrayMesh:
 	var mesh := ArrayMesh.new()
-	if _v.is_empty():
-		return mesh
+	var vs: PackedVector3Array = p["v"]
+	for i in vs.size():
+		vs[i] -= origin
 	var arr: Array = []
 	arr.resize(Mesh.ARRAY_MAX)
-	arr[Mesh.ARRAY_VERTEX] = _v
-	arr[Mesh.ARRAY_NORMAL] = _n
-	arr[Mesh.ARRAY_TEX_UV] = _uv
-	arr[Mesh.ARRAY_INDEX] = _idx
+	arr[Mesh.ARRAY_VERTEX] = vs
+	arr[Mesh.ARRAY_NORMAL] = p["n"]
+	arr[Mesh.ARRAY_TEX_UV] = p["uv"]
+	arr[Mesh.ARRAY_INDEX] = p["idx"]
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
 	if _mat != null:
 		mesh.surface_set_material(0, _mat)

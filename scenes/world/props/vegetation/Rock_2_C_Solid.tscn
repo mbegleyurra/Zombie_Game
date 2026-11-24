@@ -1,0 +1,21 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://scenes/world/props/vegetation/res/Rock_2_C.res" id="1_jf3v6"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_d1c4t"]
+size = Vector3(1.03621, 1.0609616, 1.0362098)
+
+[node name="Rock_2_C_Solid" type="Node3D" unique_id=284033218]
+metadata/kind = "rock"
+
+[node name="Mesh" type="MeshInstance3D" parent="." unique_id=1867694938]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.026558e-05, -4.047247e-05, 0)
+visibility_range_end = 260.0
+visibility_range_end_margin = 15.0
+mesh = ExtResource("1_jf3v6")
+
+[node name="Body" type="StaticBody3D" parent="." unique_id=337514652]
+
+[node name="Shape" type="CollisionShape3D" parent="Body" unique_id=295072226]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5304808, 0)
+shape = SubResource("BoxShape3D_d1c4t")

@@ -16,7 +16,7 @@
       "bushes": 260,
       "grass": 1500,
       "instances": 2450,
-      "multimeshes": 316,
+      "prop_scenes": 34,
       "rocks": 170,
       "shapes": 564,
       "trees": 520
@@ -35,8 +35,8 @@
         "ground_loot": 0,
         "loot_containers": 0,
         "markers": 0,
-        "mm_instances": 0,
         "multimeshes": 0,
+        "veg_nodes": 0,
         "vehicles": 0
       }
     },
@@ -48,8 +48,8 @@
         "ground_loot": 0,
         "loot_containers": 0,
         "markers": 0,
-        "mm_instances": 0,
         "multimeshes": 0,
+        "veg_nodes": 0,
         "vehicles": 0
       }
     },
@@ -61,34 +61,34 @@
         "ground_loot": 141,
         "loot_containers": 109,
         "markers": 454,
-        "mm_instances": 0,
         "multimeshes": 0,
+        "veg_nodes": 0,
         "vehicles": 0
       }
     },
     "props": {
-      "nodes": 751,
+      "nodes": 898,
       "semantic": {
         "collision_shapes": 149,
         "glb_instances": 173,
         "ground_loot": 0,
         "loot_containers": 0,
         "markers": 0,
-        "mm_instances": 0,
         "multimeshes": 0,
+        "veg_nodes": 0,
         "vehicles": 0
       }
     },
     "roads": {
-      "nodes": 1,
+      "nodes": 124,
       "semantic": {
         "collision_shapes": 0,
         "glb_instances": 0,
         "ground_loot": 0,
         "loot_containers": 0,
         "markers": 0,
-        "mm_instances": 0,
         "multimeshes": 0,
+        "veg_nodes": 0,
         "vehicles": 0
       }
     },
@@ -100,21 +100,21 @@
         "ground_loot": 0,
         "loot_containers": 0,
         "markers": 0,
-        "mm_instances": 0,
         "multimeshes": 0,
+        "veg_nodes": 0,
         "vehicles": 0
       }
     },
     "vegetation": {
-      "nodes": 882,
+      "nodes": 6033,
       "semantic": {
         "collision_shapes": 564,
-        "glb_instances": 0,
+        "glb_instances": 2450,
         "ground_loot": 0,
         "loot_containers": 0,
         "markers": 0,
-        "mm_instances": 2450,
-        "multimeshes": 316,
+        "multimeshes": 0,
+        "veg_nodes": 2450,
         "vehicles": 0
       }
     },
@@ -126,8 +126,8 @@
         "ground_loot": 0,
         "loot_containers": 0,
         "markers": 0,
-        "mm_instances": 0,
         "multimeshes": 0,
+        "veg_nodes": 0,
         "vehicles": 10
       }
     }
@@ -141,12 +141,12 @@
   ],
   "stats": {
     "flattened_instances": 12,
-    "imported_copies": 56,
-    "materials": 29,
-    "meshes": 93,
+    "imported_copies": 4,
+    "materials": 3,
+    "meshes": 189,
     "meta_node_refs": 0,
-    "multimeshes": 316,
-    "renamed_auto": 6124,
+    "renamed_auto": 5411,
+    "road_pieces": 123,
     "road_vertices_raised": 120,
     "shapes": 64
   }

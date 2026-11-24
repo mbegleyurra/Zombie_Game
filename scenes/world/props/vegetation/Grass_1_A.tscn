@@ -1,0 +1,13 @@
+[gd_scene format=3]
+
+[ext_resource type="ArrayMesh" path="res://scenes/world/props/vegetation/res/Grass_1_A.res" id="1_8i550"]
+
+[node name="Grass_1_A" type="Node3D" unique_id=2000372217]
+metadata/kind = "grass"
+
+[node name="Mesh" type="MeshInstance3D" parent="." unique_id=2097981574]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.6507845e-06, 0.02, 0.002499029)
+cast_shadow = 0
+visibility_range_end = 110.0
+visibility_range_end_margin = 15.0
+mesh = ExtResource("1_8i550")
