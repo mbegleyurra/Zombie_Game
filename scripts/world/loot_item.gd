@@ -13,9 +13,9 @@ const PickupVisuals = preload("res://scripts/world/pickup_visuals.gd")
 const SELF_PATH := "res://scripts/world/loot_item.gd"
 const ITEM_LAYER := 8
 
-var item_id: String = "scrap"
-var count: int = 1
-var loot_id: int = -1
+@export var item_id: String = "scrap"
+@export var count: int = 1
+@export var loot_id: int = -1
 
 var _visual: Node3D
 var _t: float = 0.0

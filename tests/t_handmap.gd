@@ -1,13 +1,15 @@
 extends SceneTree
-## Hand-authored world data. Run:
+## Hand-authored world data, as BAKED into scenes/world/baked/. Run:
 ##   xvfb-run -a godot --headless --path . --script res://tests/t_handmap.gd
-## Checks: (1) two builds (different seeds) give identical placements: every node transform, every multimesh
+## The authored rows (data/hand_map/placements.json, read through the bake-only tools/worldgen/hand_map_data.gd) must
+## match the baked markers one for one.
+## Checks: (1) two world loads (different seeds) give identical placements: every node transform, every multimesh
 ## instance, every loot item/container with its contents, and a terrain height grid; (2) the authored data sections
-## exist with real counts; (3) no RandomNumberGenerator / randf / randi / noise / seed use in world placement code.
+## exist with real counts and the baked scene carries every row; (3) no RandomNumberGenerator / randf / randi / noise / seed use in world placement code.
 
-const HandMapData = preload("res://scripts/world/hand_map_data.gd")
+const HandMapData = preload("res://tools/worldgen/hand_map_data.gd")
 
-const SCAN_DIRS := ["res://scripts/world"]
+const SCAN_DIRS := ["res://scripts/world", "res://tools/worldgen"]
 const SCAN_FILES := ["res://scripts/zombies/spawner.gd", "res://scripts/zombies/skeleton_spawner.gd"]
 ## item_db keeps roll_table/pick_one for gameplay and tests; nothing in world placement calls them.
 const SCAN_SKIP := ["item_db.gd"]
@@ -76,7 +78,6 @@ func _signature(world: Node3D, counts: Dictionary) -> String:
 			z += 12.5
 		x += 12.5
 	sig.append("H|%d|%s" % [hs.size(), "|".join(hs).md5_text()])
-	sig.append("PP|%d" % world.prop_points.size())
 	counts["height_samples"] = hs.size()
 	var dump := OS.get_environment("HM_DUMP")
 	if dump != "":
@@ -126,6 +127,17 @@ func _run() -> void:
 		print("      data %-16s %d rows" % [sec, n])
 		check(n > 0, "authored data section %s is not empty" % sec)
 	check(FileAccess.file_exists("res://data/hand_map/terrain.bin"), "authored terrain grid file exists")
+	var wc := _make(1)
+	await process_frame
+	for pair in [["ZOMBIE_SPAWNS", "zombie_spawn"], ["SKELETON_SPAWNS", "skeleton_spawn"], ["VEHICLES", "vehicles"]]:
+		var rows: int = HandMapData.section(pair[0]).size()
+		var baked: int = 0
+		for n in get_nodes_in_group(pair[1]):
+			if wc.is_ancestor_of(n):
+				baked += 1
+		check(baked == rows, "baked %s nodes match authored %s rows (%d / %d)" % [pair[1], pair[0], baked, rows])
+	wc.queue_free()
+	await process_frame
 
 	var hits: Array = []
 	var files := 0

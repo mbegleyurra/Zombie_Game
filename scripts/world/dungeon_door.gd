@@ -1,12 +1,13 @@
 extends StaticBody3D
-## An interactable dungeon door. Built by DungeonBuilder._door at every doorway: it reuses the leaf mesh
+## An interactable dungeon door. Baked into scenes/world/baked/dungeon.tscn as Door_N (the bake-only
+## tools/worldgen/dungeon_builder.gd originally built it with setup()): it reuses the leaf mesh
 ## ("wall_doorway_door") that ships inside wall_doorway.gltf, swings it on its hinge, and moves ONE leaf collider with
 ## the door state: closed = the leaf fills the opening, open = the leaf stands against the side wall (the opening is
 ## about 1.5 m clear). The open leaf keeps its collider so it can still be aimed at and closed with E.
 ## Contract (same as loot containers): group "interactable", interact(by) -> bool, get_prompt() -> String.
 ## Multiplayer: a client asks the host (_rpc_request), the host broadcasts _rpc_state to everyone, and a peer that
-## joins late is sent the state of every open door when Net.peer_scene_ready fires. Door nodes are named Door_N and
-## built in the same order on every peer, so their node paths match.
+## joins late is sent the state of every open door when Net.peer_scene_ready fires. Every peer loads the same baked
+## scene, so the Door_N node paths match. The exported is_open is the state the door starts in.
 
 signal toggled(door, open)
 
@@ -15,8 +16,8 @@ const LEAF_CX := 0.82            # leaf centre, measured from the hinge along th
 const SWING := -PI * 0.5
 const ANIM_TIME := 0.35
 
-var is_open: bool = false
-var hinge_x: float = -0.82
+@export var is_open: bool = false
+@export var hinge_x: float = -0.82
 
 var _pivot: Node3D
 var _shape: CollisionShape3D
@@ -55,6 +56,10 @@ func _shape_xf(open: bool) -> Transform3D:
 func _ready() -> void:
 	add_to_group("interactable")
 	add_to_group("dungeon_door")
+	if _pivot == null:   # loaded from a baked scene: setup() did not run, the hinge and leaf are saved children
+		_pivot = get_node_or_null("Hinge") as Node3D
+		_shape = get_node_or_null("Leaf") as CollisionShape3D
+		apply_open_state(is_open, false)   # same state: syncs hinge + collider to the exported flag, no toggled signal
 	var net := get_node_or_null("/root/Net")
 	if net != null and net.has_signal("peer_scene_ready"):
 		net.peer_scene_ready.connect(_on_peer_ready)

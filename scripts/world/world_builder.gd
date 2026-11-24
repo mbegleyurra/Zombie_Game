@@ -1,116 +1,196 @@
 extends Node3D
-## Builds the whole Dead Acres world from the HANDCRAFTED layout in hand_layout.gd:
-## terrain, trees/rocks, locations (farms, gas stations, hospital, the city), loot, day/night, spawn points.
-## The layout (roads, locations, houses, city blocks) is fixed data, and the relief/decoration seed is the constant
-## HandLayout.HAND_SEED: build(seed) ignores its argument, so the world is identical on every peer and every run.
+## Loads the Dead Acres world from the BAKED scenes (scenes/world/world_baked.tscn and scenes/world/baked/*.tscn).
+## Nothing is generated at runtime: terrain, buildings, vegetation, props, the dungeon, cars, loot and every spawn point
+## are saved nodes, so the world is identical on every peer and every run, and edits made in the editor are what the
+## game plays. The bake-only generator that produced the scenes lives in tools/worldgen/ (see baked/BAKE_NOTES.md).
 ##
 ## Public API:
-##   build(seed)                      build everything (call once)
-##   get_height(x, z) -> float        terrain height
-##   get_spawn_point(i) -> Vector3    player spawn slot (wraps around)
-##   get_locations(type="") -> Array  [{id,type,name,pos:Vector3,rot,radius,node}]
+##   build(seed)                      load everything (call once; the seed is ignored)
+##   get_height(x, z) -> float        baked heightmap (bilinear), else a downward physics ray
+##   get_spawn_point(i) -> Vector3    player_spawn marker slot (wraps around)
+##   get_locations(type="") -> Array  [{id,type,name,pos:Vector3,pos2,rot,radius,node}] from the location markers
 ##   nearest_location(pos,type="")    closest location dict or {}
 ##   next_loot_id() / register_loot(node) / get_loot(id)
 ##   spawn_ground_item(item_id, count, pos, loot_id=-1) -> Node
 ##   apply_loot_removed(id) / apply_container_opened(id)   network-sync helpers
 ## Signals: built, loot_picked_up(loot_id, by), container_opened(loot_id, by)
-## Nodes: day_night (day_night.gd), terrain (terrain.gd). Groups used: "interactable", "loot_item", "loot_container".
+## Nodes: day_night (day_night.gd), terrain (the baked Terrain node, read-only queries via baked_terrain.gd),
+## markers (baked Markers). Groups used: "interactable", "loot_item", "loot_container".
 
 signal built
 signal loot_picked_up(loot_id: int, by)
 signal container_opened(loot_id: int, by)
 
-const MeshUtil = preload("res://scripts/world/mesh_util.gd")
-const TerrainGen = preload("res://scripts/world/terrain.gd")
-const BuildingFactory = preload("res://scripts/world/building_factory.gd")
-const DayNight = preload("res://scripts/world/day_night.gd")
+const BAKED_SCENE := "res://scenes/world/world_baked.tscn"
+const MANIFEST := "res://scenes/world/baked/res/bake_manifest.json"
+const BakedTerrain = preload("res://scripts/world/baked_terrain.gd")
 const LootItem = preload("res://scripts/world/loot_item.gd")
-const PropFactory = preload("res://scripts/world/prop_factory.gd")
-const ModelUtil = preload("res://scripts/world/model_util.gd")
-const KenneyDressing = preload("res://scripts/world/kenney_dressing.gd")
-const KayKitForest = preload("res://scripts/world/kaykit_forest.gd")
-const VehicleSpawner = preload("res://scripts/vehicles/vehicle_spawner.gd")
-const HandLayout = preload("res://scripts/world/hand_layout.gd")
-const HandBuilder = preload("res://scripts/world/hand_builder.gd")
-const HandMapData = preload("res://scripts/world/hand_map_data.gd")
-const KENNEY_GY := "res://assets/kenney/graveyard/"
+const HALF := 256.0
+const MASK_WORLD := 1
+## Sub-scene roots that only hold content: their children are moved up under World so node paths stay as they were
+## before the bake (World/KayKitForest, World/Props, World/KenneyDressing, World/Dungeon, World/Vehicles/Car_N,
+## World/HandWorld, World/<location>_<id>, World/Roads). Terrain and Markers stay as they are.
+const HOIST := ["Roads", "Buildings", "Vegetation", "Props", "Dungeon", "Vehicles"]
+## World-level metadata the baked Markers root carries (the generator used to set it on the world).
+const WORLD_META := ["dungeon_site", "hand_footprints", "citykit", "spawn_center", "roads", "flats"]
 
-const ROADSIDE_MODEL := "res://assets/kenney/city-kit-roads/light-square.glb"
-const ROADSIDE_H := 6.0
-
-var world_seed: int = 1337
+## Kept for API compatibility (main.gd / network pass it in); it no longer changes anything.
+var world_seed: int = 0
 var start_hour: float = 9.0
 var terrain: Node3D
 var day_night: Node3D
-var material: StandardMaterial3D
+var markers: Node3D
 var locations: Array = []
 var loot_by_id: Dictionary = {}
 var spawn_center := Vector2.ZERO
-## XZ of procedural trees, rocks and roadside wrecks, so the Kenney dressing can keep clear of them.
-var prop_points := PackedVector2Array()
+## Builder counts recorded by the bake (baked/res/bake_manifest.json "builder"), for tests and logs.
 var dressing_counts: Dictionary = {}
 var forest_counts: Dictionary = {}
 
+var _spawns: Array = []          # player_spawn markers, ordered by meta "slot"
 var _loot_counter: int = 0
 var _dyn_counter: int = 1000000
-var _props: Node3D
-var _factory
 var _is_built: bool = false
 
 
-func build(p_seed: int) -> void:
+func build(p_seed: int = 0) -> void:
 	if _is_built:
 		return
 	_is_built = true
-	world_seed = HandLayout.HAND_SEED   # handcrafted world: the seed argument no longer changes anything
+	world_seed = p_seed
 	var t0: int = Time.get_ticks_msec()
-	material = MeshUtil.make_material()
-	terrain = TerrainGen.new()
-	terrain.name = "Terrain"
-	add_child(terrain)
-	terrain.setup(world_seed)
-	_plan_locations()
-	load("res://scripts/world/dungeon_builder.gd").attach(self)
-	_add_dungeon_track()
-	terrain.build_chunks(material)
-	var t1: int = Time.get_ticks_msec()
-	_build_props()
-	var t2: int = Time.get_ticks_msec()
-	_build_locations()
-	var hand = HandBuilder.new(self)
-	add_child(hand.build())
-	print("[World] hand world: %s" % [str(hand.counts)])
-	var t3: int = Time.get_ticks_msec()
-	var dressing = KenneyDressing.new(self)
-	add_child(dressing.build())
-	dressing_counts = dressing.counts
-	print("[World] kenney dressing: %s" % [str(dressing_counts)])
-	var vehicles = VehicleSpawner.new(self)
-	add_child(vehicles.build())
-	print("[World] drivable vehicles: %d" % vehicles.cars.size())
-	var forest = KayKitForest.new(self)
-	add_child(forest.build())
-	forest_counts = forest.counts
-	print("[World] kaykit forest: %s" % [str(forest_counts)])
-	day_night = DayNight.new()
-	day_night.name = "DayNight"
-	day_night.time_hours = start_hour
-	add_child(day_night)
-	print("[World] seed=%d terrain=%dms props=%dms locations=%dms total=%dms loot_nodes=%d locations=%d" % [
-		world_seed, t1 - t0, t2 - t1, t3 - t2, Time.get_ticks_msec() - t0, loot_by_id.size(), locations.size()])
+	var packed := load(BAKED_SCENE) as PackedScene
+	if packed == null:
+		push_error("[World] missing baked world %s" % BAKED_SCENE)
+		return
+	var baked: Node = packed.instantiate()
+	_adopt(baked)
+	baked.free()
+	terrain = get_node_or_null("Terrain") as Node3D
+	markers = get_node_or_null("Markers") as Node3D
+	day_night = get_node_or_null("DayNight") as Node3D
+	if markers != null:
+		for k in WORLD_META:
+			if markers.has_meta(k):
+				set_meta(k, markers.get_meta(k))
+	spawn_center = get_meta("spawn_center", Vector2.ZERO) as Vector2
+	if terrain != null:
+		terrain.load_data(get_meta("roads", []) as Array, get_meta("flats", []) as Array)
+	_read_markers()
+	_register_baked_loot()
+	_read_manifest()
+	print("[World] baked world loaded in %dms: loot_nodes=%d locations=%d spawns=%d" % [
+		Time.get_ticks_msec() - t0, loot_by_id.size(), locations.size(), _spawns.size()])
 	built.emit()
+
+
+## Moves the baked scene's nodes under this World (hoisting content holders), before they enter the tree, so _ready
+## runs once in place. The Terrain node gets baked_terrain.gd for its read-only height / road queries.
+func _adopt(baked: Node) -> void:
+	for top in baked.get_children():
+		baked.remove_child(top)
+		if String(top.name) in HOIST:
+			for c in top.get_children():
+				top.remove_child(c)
+				add_child(c)
+			top.free()
+			continue
+		if top.name == &"Terrain" and top.get_script() == null:
+			top.set_script(BakedTerrain)
+		if top.name == &"DayNight":
+			top.set("time_hours", start_hour)
+		add_child(top)
+
+
+func _read_markers() -> void:
+	locations.clear()
+	_spawns.clear()
+	if markers == null:
+		return
+	var locs: Array = []
+	var loc_root: Node = markers.get_node_or_null("Locations")
+	if loc_root != null:
+		for m in loc_root.get_children():
+			if m is Node3D and m.is_in_group("location"):
+				locs.append(m)
+	locs.sort_custom(func(a, b): return int(a.get_meta("id", 0)) < int(b.get_meta("id", 0)))
+	for m in locs:
+		var mk := m as Node3D
+		var p: Vector3 = local_xf(mk).origin
+		var type: String = str(mk.get_meta("type", ""))
+		var id: int = int(mk.get_meta("id", locations.size()))
+		locations.append({
+			"id": id, "type": type, "name": str(mk.get_meta("name", "")),
+			"pos": p, "pos2": Vector2(p.x, p.z), "rot": local_xf(mk).basis.get_euler().y,
+			"radius": float(mk.get_meta("radius", 20.0)),
+			"node": get_node_or_null("%s_%d" % [type, id]),
+		})
+	var sp: Node = markers.get_node_or_null("PlayerSpawns")
+	if sp != null:
+		for m in sp.get_children():
+			if m is Node3D and m.is_in_group("player_spawn"):
+				_spawns.append(m)
+	_spawns.sort_custom(func(a, b): return int(a.get_meta("slot", 0)) < int(b.get_meta("slot", 0)))
+
+
+## Every baked pickup and container is registered by its saved loot_id (stable, identical on every peer).
+func _register_baked_loot() -> void:
+	# Walk the whole world (not only Markers), so a crate or pickup placed anywhere in the editor is registered too.
+	for n in find_children("*", "", true, false):
+		if not (n.is_in_group("loot_container") or n.is_in_group("loot_item")) or not ("loot_id" in n):
+			continue
+		if int(n.loot_id) < 0:
+			continue
+		if loot_by_id.has(int(n.loot_id)):
+			push_error("[World] duplicate baked loot_id %d (%s)" % [int(n.loot_id), n.name])
+		register_loot(n)
+		_loot_counter = maxi(_loot_counter, int(n.loot_id))
+
+
+func _read_manifest() -> void:
+	if not FileAccess.file_exists(MANIFEST):
+		return
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(MANIFEST))
+	if parsed is Dictionary and (parsed as Dictionary).get("builder") is Dictionary:
+		var b: Dictionary = parsed["builder"]
+		dressing_counts = b.get("dressing", {}) as Dictionary
+		forest_counts = b.get("forest", {}) as Dictionary
+
+
+## Transform of `n` relative to this World, composed from local transforms (valid before the world is in the tree).
+func local_xf(n: Node) -> Transform3D:
+	var t := Transform3D.IDENTITY
+	while n != null and n != self:
+		if n is Node3D:
+			t = (n as Node3D).transform * t
+		n = n.get_parent()
+	return t
 
 
 # ------------------------------------------------------------------ API
 
 func get_height(x: float, z: float) -> float:
-	return terrain.height_at(x, z)
+	if terrain != null and terrain.has_method("has_height") and terrain.has_height(x, z):
+		return terrain.height_at(x, z)
+	return _ray_height(x, z)
+
+
+## Highest world-collision hit straight down at (x, z), or 0 when nothing is there (or physics is not ready).
+func _ray_height(x: float, z: float) -> float:
+	if not is_inside_tree():
+		return 0.0
+	var space := get_world_3d().direct_space_state
+	if space == null:
+		return 0.0
+	var q := PhysicsRayQueryParameters3D.create(Vector3(x, 500.0, z), Vector3(x, -500.0, z), MASK_WORLD)
+	var hit := space.intersect_ray(q)
+	return float((hit["position"] as Vector3).y) if not hit.is_empty() else 0.0
 
 
 func get_spawn_point(i: int = 0) -> Vector3:
-	var a: float = TAU * float(posmod(i, 8)) / 8.0
-	var p := spawn_center + Vector2(cos(a), sin(a)) * 5.0
-	return Vector3(p.x, terrain.height_at(p.x, p.y) + 0.8, p.y)
+	if _spawns.is_empty():
+		return Vector3(spawn_center.x, get_height(spawn_center.x, spawn_center.y) + 0.8, spawn_center.y)
+	return local_xf(_spawns[posmod(i, _spawns.size())] as Node3D).origin
 
 
 func get_locations(type: String = "") -> Array:
@@ -141,9 +221,9 @@ func next_loot_id() -> int:
 
 func register_loot(n) -> void:
 	loot_by_id[n.loot_id] = n
-	if n.has_signal("picked_up"):
+	if n.has_signal("picked_up") and not n.picked_up.is_connected(_on_item_picked):
 		n.picked_up.connect(_on_item_picked)
-	if n.has_signal("opened"):
+	if n.has_signal("opened") and not n.opened.is_connected(_on_container_opened):
 		n.opened.connect(_on_container_opened)
 
 
@@ -160,8 +240,8 @@ func spawn_ground_item(item_id: String, count: int, pos: Vector3, loot_id: int =
 		_dyn_counter += 1
 		loot_id = _dyn_counter
 	var item = LootItem.create(item_id, count, loot_id)
+	item.position = pos   # World sits at the origin; works before the world enters the tree
 	add_child(item)
-	item.global_position = pos
 	register_loot(item)
 	return item
 
@@ -186,207 +266,3 @@ func _on_item_picked(item, by) -> void:
 
 func _on_container_opened(c, by) -> void:
 	container_opened.emit(c.loot_id, by)
-
-
-# ------------------------------------------------------------------ planning
-
-## Builds the location list, ground pads and roads from HandLayout (fixed data, no RNG).
-func _plan_locations() -> void:
-	spawn_center = HandLayout.SPAWN
-	for e in HandLayout.LOCATIONS:
-		locations.append({
-			"id": locations.size(), "type": str(e[0]), "name": str(e[1]),
-			"pos2": Vector2(float(e[2]), float(e[3])), "pos": Vector3.ZERO, "rot": float(e[4]),
-			"radius": float(e[5]), "node": null,
-		})
-	# Flat pads first (spawn, the city, every location); cottage pads follow the roads (below); the mesh is built after this.
-	terrain.add_flat(spawn_center, 14.0, 24.0, terrain.height_at(spawn_center.x, spawn_center.y))
-	# The street grid (plus a margin for the verge) is the city pad's exact-height core: the round pad also reaches
-	# countryside such as the Hartley Farm gate, which must keep its own height.
-	var city_core := Rect2(HandLayout.CITY_MIN - Vector2(8.0, 8.0), (HandLayout.CITY_MAX - HandLayout.CITY_MIN) + Vector2(16.0, 16.0))
-	terrain.add_flat(HandLayout.CITY_CENTER, HandLayout.CITY_FLAT_R, HandLayout.CITY_FLAT_BLEND, HandLayout.CITY_HEIGHT, city_core)
-	for l in locations:
-		var p2: Vector2 = l["pos2"]
-		terrain.add_flat(p2, float(l["radius"]), 18.0, terrain.height_at(p2.x, p2.y))
-	# Roads: countryside polylines, the city street grid, then a driveway for every countryside location.
-	for s in HandLayout.road_segments():
-		terrain.add_road(s[0], s[1])
-	# Driveways snap to the nearest road of ANY kind. Country roads alone sent the Harlan Freight driveway across the
-	# whole city (through three towers) to City Link; its gate stands 0.5 m from the city's east street instead.
-	var country: Array = HandLayout.road_segments()
-	for l in locations:
-		var p2: Vector2 = l["pos2"]
-		if HandLayout.in_city(p2):
-			continue
-		var dir := Vector2(sin(float(l["rot"])), cos(float(l["rot"])))   # Basis(UP, rot) * +Z, the gate side
-		var gate: Vector2 = p2 + dir * HandLayout.GATE_DIST
-		var best: Vector2 = gate
-		var best_d := INF
-		for s in country:
-			var q: Vector2 = Geometry2D.get_closest_point_to_segment(gate, s[0], s[1])
-			if gate.distance_to(q) < best_d:
-				best_d = gate.distance_to(q)
-				best = q
-		if best_d > 1.0:
-			terrain.add_road(gate, best)
-		terrain.add_road(gate, p2 + dir * 10.0)
-	# Cottage pads last, at the level of the road bed in front of the house (natural height when no road reaches it):
-	# the pad and the road then agree, so the footprint stays level and the road stays level beside it.
-	for h in HandLayout.HOUSES:
-		var hp := Vector2(float(h[0]), float(h[1]))
-		var hh: float = terrain.road_bed_height(hp.x, hp.y)
-		if is_nan(hh):
-			hh = terrain.height_at(hp.x, hp.y)
-		terrain.add_flat(hp, HandLayout.HOUSE_PAD, 6.0, hh, Rect2(), false)
-
-
-## Dirt track from the nearest road to the dungeon's ruined surface gate, so the entrance is always reachable.
-## Runs after the dungeon site is picked (the site search avoids roads, so it can land far from them).
-func _add_dungeon_track() -> void:
-	var site: Dictionary = get_meta("dungeon_site", {}) as Dictionary
-	if not site.has("origin"):
-		return
-	var gate := Vector2(float((site["origin"] as Vector2).x), float(site["gz"]) - 18.0)
-	var best: Vector2 = gate
-	var best_d := INF
-	for i in terrain.road_a.size():
-		var q: Vector2 = Geometry2D.get_closest_point_to_segment(gate, terrain.road_a[i], terrain.road_b[i])
-		if gate.distance_to(q) < best_d:
-			best_d = gate.distance_to(q)
-			best = q
-	if best_d > 1.0:
-		terrain.add_road(best, gate)
-
-
-
-# ------------------------------------------------------------------ props
-
-## Everything in the wild (trees, rocks, bushes, grass) comes from the KayKit forest; the only thing built here is the
-## roadside: downloaded Kenney street lights along each long road, each with a thin collider.
-func _build_props() -> void:
-	_props = Node3D.new()
-	_props.name = "Props"
-	add_child(_props)
-	var body := StaticBody3D.new()
-	body.name = "PropCollision"
-	_props.add_child(body)
-	_build_roadside(body)
-
-
-func _build_roadside(body: StaticBody3D) -> void:
-	for i in terrain.road_a.size():
-		var a: Vector2 = terrain.road_a[i]
-		var b: Vector2 = terrain.road_b[i]
-		var d: Vector2 = b - a
-		var length: float = d.length()
-		if length < 60.0:
-			continue
-		var dir: Vector2 = d / length
-		var side := Vector2(-dir.y, dir.x)
-		var yaw: float = atan2(-dir.y, dir.x)
-		var s: float = 30.0
-		while s < length - 30.0:
-			var p: Vector2 = a + dir * s + side * 4.5
-			s += 36.0
-			var m: Node3D = ModelUtil.load_fit(ROADSIDE_MODEL, ROADSIDE_H)
-			if m == null:
-				continue
-			var y: float = terrain.height_at(p.x, p.y)
-			m.position = Vector3(p.x, y, p.y)
-			m.rotation.y = yaw
-			_props.add_child(m)
-			var cs := CollisionShape3D.new()
-			var sh := CylinderShape3D.new()
-			sh.radius = 0.2
-			sh.height = ROADSIDE_H
-			cs.shape = sh
-			cs.position = Vector3(p.x, y + ROADSIDE_H * 0.5, p.y)
-			body.add_child(cs)
-
-
-# ------------------------------------------------------------------ locations
-
-func _build_locations() -> void:
-	_factory = BuildingFactory.new(self, material)
-	for l in locations:
-		var p2: Vector2 = l["pos2"]
-		var pos := Vector3(p2.x, terrain.height_at(p2.x, p2.y), p2.y)
-		l["pos"] = pos
-		var root := Node3D.new()
-		root.name = "%s_%d" % [str(l["type"]), int(l["id"])]
-		root.position = pos
-		root.rotation.y = float(l["rot"])
-		root.set_meta("location_name", l["name"])
-		root.set_meta("location_type", l["type"])
-		add_child(root)
-		l["node"] = root
-		var lid: int = int(l["id"])
-		root.set_meta("loc_id", lid)
-		match str(l["type"]):
-			"hospital":
-				_factory.build_hospital(root)
-			"gas_station":
-				_factory.build_gas_station(root)
-			"police_station":
-				_factory.build_police_station(root)
-			"warehouse":
-				_factory.build_warehouse(root)
-			"church":
-				_factory.build_church(root)
-				_build_authored_models(root, lid)
-			_:
-				_factory.build_farm(root)
-				_build_authored_models(root, lid)
-
-
-# ------------------------------------------------------------------ Kenney graveyard / farm dressing
-
-## Puts one Kenney model on the ground at a location-local offset, with a box collider on layer 1.
-func _place_model(root: Node3D, file: String, height: float, local: Vector3, yaw: float, solid: bool = true) -> Node3D:
-	var m: Node3D = ModelUtil.load_fit(KENNEY_GY + file, height)
-	if m == null:
-		return null
-	var wp: Vector3 = root.transform * local
-	m.position = Vector3(local.x, terrain.height_at(wp.x, wp.z) - root.position.y, local.z)
-	m.rotation.y = yaw
-	root.add_child(m)
-	if solid:
-		var body := StaticBody3D.new()
-		var cs := CollisionShape3D.new()
-		var bs := BoxShape3D.new()
-		var sz: Vector3 = m.get_meta("size") as Vector3
-		bs.size = Vector3(sz.x, sz.y, sz.z) * 0.9
-		cs.shape = bs
-		cs.position = Vector3(0, sz.y * 0.5, 0)
-		body.position = m.position
-		body.rotation.y = yaw
-		body.add_child(cs)
-		root.add_child(body)
-	return m
-
-
-## Graveyard stones, crypt, pines, wall, urns, pumpkins (church) and hay bales / pumpkins (farm): every model is one
-## authored LOCAL row [location_id, file, height, local_x, local_z, yaw, solid, post_radius, local_y]; no random draws.
-func _build_authored_models(root: Node3D, loc_id: int) -> void:
-	for row in HandMapData.for_loc("LOCAL", loc_id):
-		var r: Array = row
-		var m: Node3D = _place_model(root, str(r[1]), float(r[2]), Vector3(float(r[3]), float(r[8]), float(r[4])), float(r[5]), bool(r[6]))
-		if float(r[7]) > 0.0:
-			_add_post_collision(root, m, float(r[7]))
-
-
-## Thin cylinder collider for a slim model (lightpost) whose full bounding box would be too wide.
-func _add_post_collision(root: Node3D, m: Node3D, radius: float) -> void:
-	if m == null:
-		return
-	var sz: Vector3 = m.get_meta("size") as Vector3
-	var body := StaticBody3D.new()
-	var cs := CollisionShape3D.new()
-	var sh := CylinderShape3D.new()
-	sh.radius = radius
-	sh.height = sz.y
-	cs.shape = sh
-	cs.position = Vector3(0, sz.y * 0.5, 0)
-	body.position = m.position
-	body.add_child(cs)
-	root.add_child(body)

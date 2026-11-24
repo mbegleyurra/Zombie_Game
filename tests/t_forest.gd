@@ -7,6 +7,7 @@ extends SceneTree
 ## bushes/grass do not.
 
 var fails := 0
+const ForestData = preload("res://scripts/world/forest_data.gd")
 
 
 func check(cond: bool, label: String) -> void:
@@ -39,8 +40,8 @@ func _sig(w: Node3D) -> String:
 	for c in f.get_node("Collision").get_children():
 		var t: Transform3D = (c as CollisionShape3D).transform
 		parts.append("%.2f,%.2f,%.2f,%.3f" % [t.origin.x, t.origin.y, t.origin.z, t.basis.get_euler().y])
-	# the headless renderer cannot read MultiMesh transforms back, so hash the recorded sites
-	for s in (f.get_meta("sites") as Array):
+	# instance positions decoded from the MultiMesh buffers (what is actually saved and rendered)
+	for s in ForestData.sites(f):
 		parts.append("%s %.2f,%.2f" % [s[0], float(s[1]), float(s[2])])
 	return "\n".join(parts).md5_text()
 
@@ -74,7 +75,7 @@ func _run() -> void:
 		for ch in f.get_children():
 			if ch is MultiMeshInstance3D:
 				mm_total += (ch as MultiMeshInstance3D).multimesh.instance_count
-		for s in (f.get_meta("sites") as Array):
+		for s in ForestData.sites(f):
 			total += 1
 			var kind: String = s[0]
 			var sx: float = s[1]

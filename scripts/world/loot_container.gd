@@ -1,6 +1,8 @@
 extends StaticBody3D
 ## A searchable container (cupboard, fridge, crate, shelf, locker, ...). Group "interactable" + "loot_container".
-## Contents are rolled in setup() from (world_seed, loot_id), so every peer gets identical contents.
+## Contents are the exported `contents` ([{id, count}]) baked into scenes/world/baked/markers.tscn, so every peer loads
+## identical contents. A container created at runtime (setup()) or placed in the editor with empty contents gets a
+## default roll of its `table`, seeded only by (loot_id, table) so every peer rolls the same items.
 ## Player interaction contract:
 ##   c.get_prompt() -> String
 ##   c.interact(player) -> bool   (gives contents via player.add_item(id, count) if present; leftovers drop on the ground)
@@ -11,7 +13,7 @@ signal opened(container, by)
 const ItemDB = preload("res://scripts/world/item_db.gd")
 const LootItem = preload("res://scripts/world/loot_item.gd")
 const ModelFit = preload("res://scripts/world/model_util.gd")
-const HandMapData = preload("res://scripts/world/hand_map_data.gd")
+
 
 ## kind -> [downloaded model]. All Kenney (mini-shop, mini-arcade, survival, graveyard).
 const K := "res://assets/kenney/"
@@ -47,12 +49,15 @@ const KINDS := {
 	"pallet_crate": {"size": Vector3(1.2, 1.1, 1.2), "color": Color(0.6, 0.45, 0.25), "label": "Pallet Crate"},
 }
 
-var loot_id: int = -1
-var kind: String = "crate"
-var table: String = "wild"
-var is_open: bool = false
-var contents: Array = []   # [{"id": String, "count": int}]
+@export var loot_id: int = -1
+@export var kind: String = "crate"
+@export var table: String = "wild"
+@export var is_open: bool = false
+@export var contents: Array = []   # [{"id": String, "count": int}]
 
+## True while `contents` is the default roll (not authored or baked); the bake replaces a default roll with the
+## authored row for this loot id.
+var contents_rolled := false
 var _body_model: Node3D
 var _base_color: Color = Color(0.7, 0.55, 0.3)
 static var _overlay: StandardMaterial3D
@@ -67,8 +72,9 @@ static func _open_overlay() -> StandardMaterial3D:
 	return _overlay
 
 
-## Call BEFORE adding to the tree. Builds visuals/collision and loads the AUTHORED contents for this loot id from
-## data/hand_map/placements.json (CONTAINERS rows). world_seed is kept for API compatibility and is not used.
+## Call BEFORE adding to the tree. Builds visuals/collision and, if `contents` is empty, rolls the default contents
+## (roll_default_contents). Baked containers do not run this: their exported `contents` are loaded as saved. The bake
+## tool overwrites the roll with the authored row. world_seed is kept for API compatibility and is not used.
 func setup(p_loot_id: int, p_kind: String, p_table: String, world_seed: int) -> void:
 	loot_id = p_loot_id
 	kind = p_kind if KINDS.has(p_kind) else "crate"
@@ -77,11 +83,8 @@ func setup(p_loot_id: int, p_kind: String, p_table: String, world_seed: int) -> 
 	var def: Dictionary = KINDS[kind]
 	var size: Vector3 = def["size"]
 	_base_color = def["color"]
-	contents = []
-	var row: Array = HandMapData.container(loot_id)
-	if not row.is_empty():
-		for it in (row[3] as Array):
-			contents.append({"id": str((it as Array)[0]), "count": int((it as Array)[1])})
+	if contents.is_empty():
+		roll_default_contents()
 
 	# Visual is a downloaded Kenney model fitted to the container's footprint (no primitive meshes).
 	var spec: Array = MODELS.get(kind, MODELS["crate"]) as Array
@@ -103,6 +106,20 @@ func setup(p_loot_id: int, p_kind: String, p_table: String, world_seed: int) -> 
 func _ready() -> void:
 	add_to_group("interactable")
 	add_to_group("loot_container")
+	if _body_model == null:   # loaded from a baked scene: setup() did not run, the model is the saved "Body" child
+		_body_model = get_node_or_null("Body") as Node3D
+		if is_open:   # a container baked (or hand-set) as already searched
+			_set_open(true)
+		elif contents.is_empty():   # placed in the editor without contents: same default roll as setup()
+			roll_default_contents()
+
+
+## Deterministic default contents from the loot table, seeded by (loot_id, table) only.
+func roll_default_contents() -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("%d|%s" % [loot_id, table])
+	contents = ItemDB.roll_table(table, rng)
+	contents_rolled = true
 
 
 func get_prompt() -> String:

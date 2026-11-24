@@ -1,0 +1,124 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/vehicles/vehicle.gd" id="1_44g5v"]
+
+[node name="Vehicles" type="Node3D" unique_id=1824710564]
+
+[node name="Vehicles" type="Node3D" parent="." unique_id=1656496776]
+
+[node name="Car_0" type="VehicleBody3D" parent="Vehicles" unique_id=986342016 groups=["vehicles"]]
+transform = Transform3D(-0.15754454, 0, 0.9875119, 0, 1, 0, -0.9875119, 0, -0.15754454, -146.587, -0.044773985, 32.925)
+mass = 1312.5
+center_of_mass_mode = 1
+center_of_mass = Vector3(0, 0.25, 0)
+freeze_mode = 1
+linear_damp = 0.05
+angular_damp = 0.6
+brake = 25.0
+script = ExtResource("1_44g5v")
+kind = "suv"
+
+[node name="Car_1" type="VehicleBody3D" parent="Vehicles" unique_id=274801377 groups=["vehicles"]]
+transform = Transform3D(-0.18316373, 0, 0.9830824, 0, 1, 0, -0.9830824, 0, -0.18316373, -76.224, -6.0977945, 18.942)
+mass = 1207.5
+center_of_mass_mode = 1
+center_of_mass = Vector3(0, 0.25, 0)
+freeze_mode = 1
+linear_damp = 0.05
+angular_damp = 0.6
+brake = 25.0
+script = ExtResource("1_44g5v")
+
+[node name="Car_2" type="VehicleBody3D" parent="Vehicles" unique_id=479631456 groups=["vehicles"]]
+transform = Transform3D(0.16898158, 0, -0.9856192, 0, 1, 0, 0.9856192, 0, 0.16898158, 130.54, 2.7278316, 0.414)
+mass = 1312.5
+center_of_mass_mode = 1
+center_of_mass = Vector3(0, 0.25, 0)
+freeze_mode = 1
+linear_damp = 0.05
+angular_damp = 0.6
+brake = 25.0
+script = ExtResource("1_44g5v")
+kind = "suv"
+
+[node name="Car_3" type="VehicleBody3D" parent="Vehicles" unique_id=1368141379 groups=["vehicles"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.117, -1.6343913, -33.399)
+mass = 1435.0
+center_of_mass_mode = 1
+center_of_mass = Vector3(0, 0.25, 0)
+freeze_mode = 1
+linear_damp = 0.05
+angular_damp = 0.6
+brake = 25.0
+script = ExtResource("1_44g5v")
+kind = "van"
+
+[node name="Car_4" type="VehicleBody3D" parent="Vehicles" unique_id=627199902 groups=["vehicles"]]
+transform = Transform3D(-0.99999994, 0, 0.00040730633, 0, 1, 0, -0.00040730633, 0, -0.99999994, 22.878, 1.3168949, 90.305)
+mass = 1207.5
+center_of_mass_mode = 1
+center_of_mass = Vector3(0, 0.25, 0)
+freeze_mode = 1
+linear_damp = 0.05
+angular_damp = 0.6
+brake = 25.0
+script = ExtResource("1_44g5v")
+
+[node name="Car_5" type="VehicleBody3D" parent="Vehicles" unique_id=728451101 groups=["vehicles"]]
+transform = Transform3D(-0.00020365318, 0, 1, 0, 1, 0, -1, 0, -0.00020365318, 125.299, 3.3700159, 55.389)
+mass = 1225.0
+center_of_mass_mode = 1
+center_of_mass = Vector3(0, 0.25, 0)
+freeze_mode = 1
+linear_damp = 0.05
+angular_damp = 0.6
+brake = 25.0
+script = ExtResource("1_44g5v")
+kind = "police"
+
+[node name="Car_6" type="VehicleBody3D" parent="Vehicles" unique_id=543840615 groups=["vehicles"]]
+transform = Transform3D(-0.99999994, 0, 0.00040730633, 0, 1, 0, -0.00040730633, 0, -0.99999994, 159.452, -1.4942441, 79.792)
+mass = 1207.5
+center_of_mass_mode = 1
+center_of_mass = Vector3(0, 0.25, 0)
+freeze_mode = 1
+linear_damp = 0.05
+angular_damp = 0.6
+brake = 25.0
+script = ExtResource("1_44g5v")
+kind = "taxi"
+
+[node name="Car_7" type="VehicleBody3D" parent="Vehicles" unique_id=270541717 groups=["vehicles"]]
+transform = Transform3D(-0.00020365318, 0, -1, 0, 1, 0, 1, 0, -0.00020365318, 114.813, -2.6542175, 125.401)
+mass = 1575.0
+center_of_mass_mode = 1
+center_of_mass = Vector3(0, 0.25, 0)
+freeze_mode = 1
+linear_damp = 0.05
+angular_damp = 0.6
+brake = 25.0
+script = ExtResource("1_44g5v")
+kind = "delivery"
+
+[node name="Car_8" type="VehicleBody3D" parent="Vehicles" unique_id=1722795674 groups=["vehicles"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 71.149, 3.9921372, 85.569)
+mass = 1207.5
+center_of_mass_mode = 1
+center_of_mass = Vector3(0, 0.25, 0)
+freeze_mode = 1
+linear_damp = 0.05
+angular_damp = 0.6
+brake = 25.0
+script = ExtResource("1_44g5v")
+
+[node name="Car_9" type="VehicleBody3D" parent="Vehicles" unique_id=1790002572 groups=["vehicles"]]
+transform = Transform3D(0.09465446, 0, -0.99551016, 0, 1, 0, 0.99551016, 0, 0.09465446, -3.2, 1.4788662, 129.373)
+mass = 1172.5
+center_of_mass_mode = 1
+center_of_mass = Vector3(0, 0.25, 0)
+freeze_mode = 1
+linear_damp = 0.05
+angular_damp = 0.6
+brake = 25.0
+script = ExtResource("1_44g5v")
+kind = "hatchback-sports"

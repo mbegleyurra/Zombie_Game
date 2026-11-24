@@ -1,0 +1,2351 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://assets/kenney/city-kit-roads/light-square.glb" id="1_ilxqf"]
+[ext_resource type="PackedScene" path="res://assets/kenney/cars/police.glb" id="2_r24f0"]
+[ext_resource type="PackedScene" path="res://assets/kenney/cars/ambulance.glb" id="3_rgp6g"]
+[ext_resource type="PackedScene" path="res://assets/kenney/cars/cone.glb" id="4_jxvvy"]
+[ext_resource type="PackedScene" path="res://assets/kenney/survival/barrel-open.glb" id="5_a83u1"]
+[ext_resource type="PackedScene" path="res://assets/kenney/survival/barrel.glb" id="6_wycjs"]
+[ext_resource type="PackedScene" path="res://assets/kenney/survival/box-large.glb" id="7_fjcra"]
+[ext_resource type="PackedScene" path="res://assets/kenney/survival/box.glb" id="8_simj8"]
+[ext_resource type="PackedScene" path="res://assets/kenney/cars/delivery.glb" id="9_8ciwx"]
+[ext_resource type="PackedScene" path="res://assets/kenney/cars/sedan-sports.glb" id="10_4jh6x"]
+[ext_resource type="PackedScene" path="res://assets/kenney/cars/garbage-truck.glb" id="11_tms8m"]
+[ext_resource type="PackedScene" path="res://assets/kenney/cars/hatchback-sports.glb" id="12_j8vqn"]
+[ext_resource type="PackedScene" path="res://assets/kenney/cars/van.glb" id="13_xqn31"]
+[ext_resource type="PackedScene" path="res://assets/kenney/cars/suv.glb" id="14_x4vep"]
+[ext_resource type="PackedScene" path="res://assets/kenney/survival/signpost.glb" id="15_0caix"]
+[ext_resource type="PackedScene" path="res://assets/kenney/survival/tent.glb" id="16_nes8b"]
+[ext_resource type="PackedScene" path="res://assets/kenney/survival/campfire-pit.glb" id="17_3mhwv"]
+[ext_resource type="PackedScene" path="res://assets/kenney/survival/bedroll.glb" id="18_eevhx"]
+[ext_resource type="PackedScene" path="res://assets/kenney/survival/bucket.glb" id="19_upj8f"]
+[ext_resource type="PackedScene" path="res://assets/kenney/survival/tree-log-small.glb" id="20_1i7f4"]
+[ext_resource type="PackedScene" path="res://assets/kenney/survival/tree-tall.glb" id="21_ssxra"]
+[ext_resource type="PackedScene" path="res://assets/kenney/survival/tree-autumn.glb" id="22_xlmm1"]
+[ext_resource type="PackedScene" path="res://assets/kenney/survival/tree.glb" id="23_6jc5a"]
+[ext_resource type="PackedScene" path="res://assets/kenney/survival/tree-autumn-tall.glb" id="24_1s3f4"]
+[ext_resource type="PackedScene" path="res://assets/kenney/survival/rock-c.glb" id="25_u505x"]
+[ext_resource type="PackedScene" path="res://assets/kenney/survival/rock-b.glb" id="26_bwyfc"]
+[ext_resource type="PackedScene" path="res://assets/kenney/survival/rock-a.glb" id="27_asksh"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_m36h5"]
+height = 6.0
+radius = 0.2
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_puh3p"]
+height = 6.0
+radius = 0.2
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_7u531"]
+height = 6.0
+radius = 0.2
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_bmxu4"]
+height = 6.0
+radius = 0.2
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_uc11l"]
+height = 6.0
+radius = 0.2
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_kjp8m"]
+height = 6.0
+radius = 0.2
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_b6fns"]
+height = 6.0
+radius = 0.2
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_cwkew"]
+height = 6.0
+radius = 0.2
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_fy0m8"]
+height = 6.0
+radius = 0.2
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_uarok"]
+height = 6.0
+radius = 0.2
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_vdnb3"]
+height = 6.0
+radius = 0.2
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_g2cp3"]
+height = 6.0
+radius = 0.2
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_gycs8"]
+height = 6.0
+radius = 0.2
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_vr7a3"]
+height = 6.0
+radius = 0.2
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_61p3y"]
+height = 6.0
+radius = 0.2
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_ruei4"]
+height = 6.0
+radius = 0.2
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_fqx55"]
+height = 6.0
+radius = 0.2
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_o8hry"]
+height = 6.0
+radius = 0.2
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_g2rwd"]
+size = Vector3(1.5576922, 1.35, 3.2192304)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_hq781"]
+size = Vector3(1.7249998, 2.07, 3.7374995)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_5iy6m"]
+size = Vector3(0.55687493, 0.80999994, 0.55687493)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_jhqve"]
+size = Vector3(0.55687493, 0.80999994, 0.55687493)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_4n2no"]
+size = Vector3(0.63, 0.63, 1.26)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_7bsre"]
+size = Vector3(0.45, 0.45, 0.45)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_376s8"]
+size = Vector3(0.55687493, 0.80999994, 0.55687493)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_6c8mh"]
+size = Vector3(0.55687493, 0.80999994, 0.55687493)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_7sgcj"]
+size = Vector3(0.63, 0.63, 1.26)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_q7nkg"]
+size = Vector3(0.45, 0.45, 0.45)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_2spq0"]
+size = Vector3(2.0454547, 2.25, 4.431818)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_3ncjr"]
+size = Vector3(0.55687493, 0.80999994, 0.55687493)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_mgasa"]
+size = Vector3(0.55687493, 0.80999994, 0.55687493)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_kh5xo"]
+size = Vector3(0.71999997, 0.71999997, 1.4399999)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_yraim"]
+size = Vector3(0.54, 0.54, 0.54)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_beeqs"]
+size = Vector3(1.7249998, 2.07, 3.7374995)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ti31i"]
+size = Vector3(1.5576922, 1.35, 3.2192304)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_hotst"]
+size = Vector3(1.4359092, 1.215, 2.816591)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_lsm7w"]
+size = Vector3(2.6999998, 2.6999998, 5.8218746)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_fbty1"]
+size = Vector3(1.435909, 1.215, 3.1479545)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_v2foa"]
+size = Vector3(2.1000001, 1.8900001, 3.8500001)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_gbujs"]
+size = Vector3(1.4359092, 1.215, 2.816591)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_apcqj"]
+size = Vector3(1.435909, 1.215, 3.1479545)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_bk1nx"]
+size = Vector3(1.8173075, 1.5749999, 3.2711535)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_10h7a"]
+size = Vector3(2.1000001, 1.8900001, 3.8500001)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_86u5a"]
+size = Vector3(1.4359092, 1.215, 2.816591)
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_wae25"]
+height = 2.1999998
+radius = 0.12
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_y2dxa"]
+height = 2.1999998
+radius = 0.12
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_oecav"]
+height = 2.1999998
+radius = 0.12
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_2oomk"]
+height = 2.1999998
+radius = 0.12
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_lp5eg"]
+size = Vector3(1.7460753, 1.53, 1.7468159)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_cgnxj"]
+size = Vector3(0.55687493, 0.80999994, 0.55687493)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_e8tjw"]
+size = Vector3(0.55687493, 0.80999994, 0.55687493)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ao7ko"]
+size = Vector3(0.63, 0.63, 1.26)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_delrm"]
+size = Vector3(0.40510386, 0.45, 1.0554352)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_evhk0"]
+size = Vector3(1.7460753, 1.53, 1.7468159)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_mxp3g"]
+size = Vector3(0.55687493, 0.80999994, 0.55687493)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ptjxl"]
+size = Vector3(0.55687493, 0.80999994, 0.55687493)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_bt6eb"]
+size = Vector3(0.63, 0.63, 1.26)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_jxwra"]
+size = Vector3(0.40510386, 0.45, 1.0554352)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_4vdtl"]
+size = Vector3(1.7460753, 1.53, 1.7468159)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_dpmwh"]
+size = Vector3(0.55687493, 0.80999994, 0.55687493)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_re6ku"]
+size = Vector3(0.55687493, 0.80999994, 0.55687493)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_a2lyk"]
+size = Vector3(0.63, 0.63, 1.26)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_u61sn"]
+size = Vector3(0.40510386, 0.45, 1.0554352)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_brd1d"]
+size = Vector3(1.7460753, 1.53, 1.7468159)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_umktw"]
+size = Vector3(0.55687493, 0.80999994, 0.55687493)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_desal"]
+size = Vector3(0.55687493, 0.80999994, 0.55687493)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_s4khn"]
+size = Vector3(0.63, 0.63, 1.26)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_uttps"]
+size = Vector3(0.40510386, 0.45, 1.0554352)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_clyp2"]
+size = Vector3(1.7460753, 1.53, 1.7468159)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ewili"]
+size = Vector3(0.55687493, 0.80999994, 0.55687493)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_oud7e"]
+size = Vector3(0.55687493, 0.80999994, 0.55687493)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_6cai4"]
+size = Vector3(0.63, 0.63, 1.26)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_jwyyh"]
+size = Vector3(0.40510386, 0.45, 1.0554352)
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_hxi0n"]
+height = 4.821
+radius = 0.44483256
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_msskj"]
+height = 5.9890003
+radius = 0.45
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_a5ujf"]
+height = 6.112
+radius = 0.45
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_qcdwc"]
+height = 5.3840003
+radius = 0.45
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_ao4iy"]
+height = 4.8329997
+radius = 0.44593978
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_sehsj"]
+height = 4.739
+radius = 0.43726644
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_5iw3q"]
+height = 6.789
+radius = 0.45
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_68luu"]
+height = 4.613
+radius = 0.45
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_vygir"]
+height = 6.9119997
+radius = 0.45
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_q0oca"]
+height = 4.747
+radius = 0.4380046
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_v5ku4"]
+height = 4.952
+radius = 0.45
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_kxq25"]
+height = 6.7130003
+radius = 0.45
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_rqjx3"]
+height = 5.9760003
+radius = 0.45
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_rk6ut"]
+height = 5.7739997
+radius = 0.45
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_owuvi"]
+height = 6.962
+radius = 0.45
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_tm6wl"]
+height = 4.6749997
+radius = 0.45
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_evlpg"]
+height = 4.714
+radius = 0.4349597
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_vjci1"]
+height = 5.3739996
+radius = 0.45
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_wb3p7"]
+height = 5.462
+radius = 0.45
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_r7ah5"]
+height = 6.9550004
+radius = 0.45
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_vbwr7"]
+height = 5.472
+radius = 0.45
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_uywt3"]
+height = 6.743
+radius = 0.45
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_gi2jf"]
+height = 4.755
+radius = 0.45
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_e562s"]
+height = 5.652
+radius = 0.45
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_sovrf"]
+height = 5.633
+radius = 0.45
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_jljdg"]
+height = 6.45
+radius = 0.45
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_u8pbj"]
+height = 5.455
+radius = 0.45
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_qm0xt"]
+height = 6.656
+radius = 0.45
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_vitqh"]
+height = 4.723
+radius = 0.45
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_4tvl4"]
+height = 5.702
+radius = 0.45
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_b3mru"]
+height = 6.747
+radius = 0.45
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_ie33l"]
+height = 6.595
+radius = 0.45
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_571qm"]
+height = 6.6059995
+radius = 0.45
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_eror3"]
+height = 5.9960003
+radius = 0.45
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_psfad"]
+height = 6.2749996
+radius = 0.45
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_mpofy"]
+height = 6.427
+radius = 0.45
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_blqxg"]
+size = Vector3(1.7191008, 1.1187, 1.2413484)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_7y250"]
+size = Vector3(1.1382301, 0.7407, 0.8219065)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_y4g0i"]
+size = Vector3(2.7365606, 1.3725, 2.3761168)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_5no14"]
+size = Vector3(2.426118, 1.2168, 2.1065638)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_1v0js"]
+size = Vector3(1.8029624, 1.2753, 2.0185893)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_winag"]
+size = Vector3(1.4922847, 0.9711, 1.0775664)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_sfb7o"]
+size = Vector3(2.102199, 1.3679999, 1.5179803)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ir5hq"]
+size = Vector3(1.7838765, 1.2617999, 1.9972209)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_7re53"]
+size = Vector3(2.9088295, 1.4589, 2.525695)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_rew48"]
+size = Vector3(1.2848376, 0.6444, 1.1156063)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_a1vc5"]
+size = Vector3(1.3665359, 0.9666, 1.5299681)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_almjp"]
+size = Vector3(2.0717723, 1.3482, 1.4960096)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_skdyj"]
+size = Vector3(1.8131412, 1.2824999, 2.0299857)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_pibxo"]
+size = Vector3(2.0218115, 1.4300998, 2.263612)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_nsya6"]
+size = Vector3(2.1436899, 1.395, 1.5479405)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_pdc21"]
+size = Vector3(1.6914405, 1.1007, 1.2213751)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_abchi"]
+size = Vector3(2.0109193, 1.3086, 1.4520681)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_5wqk3"]
+size = Vector3(1.2329361, 0.8721, 1.3803903)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_yqr05"]
+size = Vector3(1.064982, 0.7533001, 1.1923494)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_1klys"]
+size = Vector3(1.8809149, 1.224, 1.3581929)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_r1krs"]
+size = Vector3(1.7910182, 1.1655, 1.2932794)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_8nbar"]
+size = Vector3(2.0994267, 1.4849999, 2.3505096)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ornbw"]
+size = Vector3(1.2917459, 0.8406, 0.932759)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_iwj5w"]
+size = Vector3(0.96700877, 0.68399996, 1.082659)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_1ggg2"]
+size = Vector3(1.7647407, 1.1483998, 1.2743045)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_272sf"]
+size = Vector3(1.3602052, 0.6822, 1.1810468)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_n6lnq"]
+size = Vector3(1.6499496, 1.0737, 1.191415)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_fx8ka"]
+size = Vector3(2.4045842, 1.2059999, 2.0878663)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_riktu"]
+size = Vector3(1.8424062, 1.3032, 2.0627503)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ox1ls"]
+size = Vector3(2.1246479, 1.0656, 1.8448014)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_4vqo2"]
+size = Vector3(2.1192644, 1.0629, 1.8401271)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_bejdi"]
+size = Vector3(1.9818758, 1.2896999, 1.431096)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_yjkp5"]
+size = Vector3(2.9213905, 1.4651998, 2.536602)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_dad0l"]
+size = Vector3(2.0676172, 1.4625, 2.3148959)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_xmvmo"]
+size = Vector3(1.313096, 0.92880005, 1.4701371)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_vagd8"]
+size = Vector3(1.4194226, 0.7119, 1.2324646)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_t1ru7"]
+size = Vector3(2.0408974, 1.4436, 2.2849805)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_t5lhe"]
+size = Vector3(2.110878, 1.4930999, 2.3633306)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_tcvo7"]
+size = Vector3(1.6724422, 0.83879995, 1.4521579)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_i7sut"]
+size = Vector3(1.4589008, 0.7317, 1.266743)
+
+[node name="Props" type="Node3D" unique_id=1104874974]
+
+[node name="Props" type="Node3D" parent="." unique_id=1588405411]
+
+[node name="PropCollision" type="StaticBody3D" parent="Props" unique_id=1619305921]
+
+[node name="ColCylinder_0" type="CollisionShape3D" parent="Props/PropCollision" unique_id=897481751]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -164.66583, 4.723248, 39.703766)
+shape = SubResource("CylinderShape3D_m36h5")
+
+[node name="ColCylinder_1" type="CollisionShape3D" parent="Props/PropCollision" unique_id=653936004]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -89.683655, -3.3630967, 26.918678)
+shape = SubResource("CylinderShape3D_puh3p")
+
+[node name="ColCylinder_2" type="CollisionShape3D" parent="Props/PropCollision" unique_id=1531941469]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14.882215, -0.4151647, 17.62891)
+shape = SubResource("CylinderShape3D_7u531")
+
+[node name="ColCylinder_3" type="CollisionShape3D" parent="Props/PropCollision" unique_id=627448558]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 54.272377, 5.098236, 13.95781)
+shape = SubResource("CylinderShape3D_bmxu4")
+
+[node name="ColCylinder_4" type="CollisionShape3D" parent="Props/PropCollision" unique_id=1806617975]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 125.329, 5.0232105, 5.366386)
+shape = SubResource("CylinderShape3D_uc11l")
+
+[node name="ColCylinder_5" type="CollisionShape3D" parent="Props/PropCollision" unique_id=1412868337]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 0.90317845, -30)
+shape = SubResource("CylinderShape3D_kjp8m")
+
+[node name="ColCylinder_6" type="CollisionShape3D" parent="Props/PropCollision" unique_id=979087397]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.5, 4.6145678, 42)
+shape = SubResource("CylinderShape3D_b6fns")
+
+[node name="ColCylinder_7" type="CollisionShape3D" parent="Props/PropCollision" unique_id=1092312605]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.5, 3.8838577, 78)
+shape = SubResource("CylinderShape3D_cwkew")
+
+[node name="ColCylinder_8" type="CollisionShape3D" parent="Props/PropCollision" unique_id=1856431994]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.5, 3.1531465, 114)
+shape = SubResource("CylinderShape3D_fy0m8")
+
+[node name="ColCylinder_9" type="CollisionShape3D" parent="Props/PropCollision" unique_id=50090293]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 6.8583965, 59.5)
+shape = SubResource("CylinderShape3D_uarok")
+
+[node name="ColCylinder_10" type="CollisionShape3D" parent="Props/PropCollision" unique_id=1077116680]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 155.5, 0.096669436, 85)
+shape = SubResource("CylinderShape3D_vdnb3")
+
+[node name="ColCylinder_11" type="CollisionShape3D" parent="Props/PropCollision" unique_id=431826147]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 130, -2.03308, 120.5)
+shape = SubResource("CylinderShape3D_g2cp3")
+
+[node name="ColCylinder_12" type="CollisionShape3D" parent="Props/PropCollision" unique_id=1658357599]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 74.5, 5.9340386, 95)
+shape = SubResource("CylinderShape3D_gycs8")
+
+[node name="ColCylinder_13" type="CollisionShape3D" parent="Props/PropCollision" unique_id=1687845167]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.2915053, 3.8614483, 124.36454)
+shape = SubResource("CylinderShape3D_vr7a3")
+
+[node name="ColCylinder_14" type="CollisionShape3D" parent="Props/PropCollision" unique_id=1368804030]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -85.5, -2.3702178, -7.6000004)
+shape = SubResource("CylinderShape3D_61p3y")
+
+[node name="ColCylinder_15" type="CollisionShape3D" parent="Props/PropCollision" unique_id=1043061476]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -85.5, -1.1694007, -43.6)
+shape = SubResource("CylinderShape3D_ruei4")
+
+[node name="ColCylinder_16" type="CollisionShape3D" parent="Props/PropCollision" unique_id=424245273]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -59.853474, -1.2094221, -99.38182)
+shape = SubResource("CylinderShape3D_fqx55")
+
+[node name="ColCylinder_17" type="CollisionShape3D" parent="Props/PropCollision" unique_id=1862048997]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -153.2949, 1.7215935, 63.708755)
+shape = SubResource("CylinderShape3D_o8hry")
+
+[node name="light-square2_0" type="Node3D" parent="Props" unique_id=1867711576]
+transform = Transform3D(0.98744065, 0, 0.1579905, 0, 1, 0, -0.1579905, 0, 0.98744065, -164.66583, 1.7232479, 39.703766)
+metadata/size = Vector3(0.5, 6, 2.3750002)
+
+[node name="light-square2" type="Node3D" parent="Props/light-square2_0" unique_id=482260742 instance=ExtResource("1_ilxqf")]
+transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0.93750006)
+
+[node name="light-square2_1" type="Node3D" parent="Props" unique_id=554424743]
+transform = Transform3D(0.98302025, 0, 0.18349712, 0, 1, 0, -0.18349712, 0, 0.98302025, -89.683655, -6.3630967, 26.918678)
+metadata/size = Vector3(0.5, 6, 2.3750002)
+
+[node name="light-square2" type="Node3D" parent="Props/light-square2_1" unique_id=945647959 instance=ExtResource("1_ilxqf")]
+transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0.93750006)
+
+[node name="light-square2_2" type="Node3D" parent="Props" unique_id=2054675205]
+transform = Transform3D(0.9995802, 0, 0.02897334, 0, 1, 0, -0.02897334, 0, 0.9995802, -14.882215, -3.4151647, 17.62891)
+metadata/size = Vector3(0.5, 6, 2.3750002)
+
+[node name="light-square2" type="Node3D" parent="Props/light-square2_2" unique_id=349538170 instance=ExtResource("1_ilxqf")]
+transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0.93750006)
+
+[node name="light-square2_3" type="Node3D" parent="Props" unique_id=2491537]
+transform = Transform3D(0.9964483, 0, 0.084206894, 0, 1, 0, -0.084206894, 0, 0.9964483, 54.272377, 2.0982363, 13.95781)
+metadata/size = Vector3(0.5, 6, 2.3750002)
+
+[node name="light-square2" type="Node3D" parent="Props/light-square2_3" unique_id=1268205795 instance=ExtResource("1_ilxqf")]
+transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0.93750006)
+
+[node name="light-square2_4" type="Node3D" parent="Props" unique_id=135467856]
+transform = Transform3D(0.9856222, 0, 0.16896382, 0, 1, 0, -0.16896382, 0, 0.9856222, 125.329, 2.0232103, 5.366386)
+metadata/size = Vector3(0.5, 6, 2.3750002)
+
+[node name="light-square2" type="Node3D" parent="Props/light-square2_4" unique_id=120310714 instance=ExtResource("1_ilxqf")]
+transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0.93750006)
+
+[node name="light-square2_5" type="Node3D" parent="Props" unique_id=1062741746]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 4.5, -2.0968215, -30)
+metadata/size = Vector3(0.5, 6, 2.3750002)
+
+[node name="light-square2" type="Node3D" parent="Props/light-square2_5" unique_id=775073382 instance=ExtResource("1_ilxqf")]
+transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0.93750006)
+
+[node name="light-square2_6" type="Node3D" parent="Props" unique_id=298240247]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 19.5, 1.6145679, 42)
+metadata/size = Vector3(0.5, 6, 2.3750002)
+
+[node name="light-square2" type="Node3D" parent="Props/light-square2_6" unique_id=1332005988 instance=ExtResource("1_ilxqf")]
+transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0.93750006)
+
+[node name="light-square2_7" type="Node3D" parent="Props" unique_id=1279091111]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 19.5, 0.8838578, 78)
+metadata/size = Vector3(0.5, 6, 2.3750002)
+
+[node name="light-square2" type="Node3D" parent="Props/light-square2_7" unique_id=1206131832 instance=ExtResource("1_ilxqf")]
+transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0.93750006)
+
+[node name="light-square2_8" type="Node3D" parent="Props" unique_id=570906185]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 19.5, 0.15314652, 114)
+metadata/size = Vector3(0.5, 6, 2.3750002)
+
+[node name="light-square2" type="Node3D" parent="Props/light-square2_8" unique_id=931029006 instance=ExtResource("1_ilxqf")]
+transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0.93750006)
+
+[node name="light-square2_9" type="Node3D" parent="Props" unique_id=277652062]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 3.8583965, 59.5)
+metadata/size = Vector3(0.5, 6, 2.3750002)
+
+[node name="light-square2" type="Node3D" parent="Props/light-square2_9" unique_id=1703681278 instance=ExtResource("1_ilxqf")]
+transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0.93750006)
+
+[node name="light-square2_10" type="Node3D" parent="Props" unique_id=1836646482]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 155.5, -2.9033306, 85)
+metadata/size = Vector3(0.5, 6, 2.3750002)
+
+[node name="light-square2" type="Node3D" parent="Props/light-square2_10" unique_id=175510307 instance=ExtResource("1_ilxqf")]
+transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0.93750006)
+
+[node name="light-square2_11" type="Node3D" parent="Props" unique_id=1348695715]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 130, -5.03308, 120.5)
+metadata/size = Vector3(0.5, 6, 2.3750002)
+
+[node name="light-square2" type="Node3D" parent="Props/light-square2_11" unique_id=1771462711 instance=ExtResource("1_ilxqf")]
+transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0.93750006)
+
+[node name="light-square2_12" type="Node3D" parent="Props" unique_id=16887650]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 74.5, 2.9340386, 95)
+metadata/size = Vector3(0.5, 6, 2.3750002)
+
+[node name="light-square2" type="Node3D" parent="Props/light-square2_12" unique_id=377810963 instance=ExtResource("1_ilxqf")]
+transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0.93750006)
+
+[node name="light-square2_13" type="Node3D" parent="Props" unique_id=572663034]
+transform = Transform3D(-0.99549544, 0, -0.09480917, 0, 1, 0, 0.09480917, 0, -0.99549544, -6.2915053, 0.8614483, 124.36454)
+metadata/size = Vector3(0.5, 6, 2.3750002)
+
+[node name="light-square2" type="Node3D" parent="Props/light-square2_13" unique_id=2067769284 instance=ExtResource("1_ilxqf")]
+transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0.93750006)
+
+[node name="light-square2_14" type="Node3D" parent="Props" unique_id=357295420]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -85.5, -5.370218, -7.6000004)
+metadata/size = Vector3(0.5, 6, 2.3750002)
+
+[node name="light-square2" type="Node3D" parent="Props/light-square2_14" unique_id=1033286886 instance=ExtResource("1_ilxqf")]
+transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0.93750006)
+
+[node name="light-square2_15" type="Node3D" parent="Props" unique_id=252895175]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -85.5, -4.1694007, -43.6)
+metadata/size = Vector3(0.5, 6, 2.3750002)
+
+[node name="light-square2" type="Node3D" parent="Props/light-square2_15" unique_id=1328499506 instance=ExtResource("1_ilxqf")]
+transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0.93750006)
+
+[node name="light-square2_16" type="Node3D" parent="Props" unique_id=1642631844]
+transform = Transform3D(0.9662349, 0, 0.25766265, 0, 1, 0, -0.25766265, 0, 0.9662349, -59.853474, -4.209422, -99.38182)
+metadata/size = Vector3(0.5, 6, 2.3750002)
+
+[node name="light-square2" type="Node3D" parent="Props/light-square2_16" unique_id=1564569886 instance=ExtResource("1_ilxqf")]
+transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0.93750006)
+
+[node name="light-square2_17" type="Node3D" parent="Props" unique_id=114103254]
+transform = Transform3D(0.1579906, 0, -0.98744065, 0, 1, 0, 0.98744065, 0, 0.1579906, -153.2949, -1.2784065, 63.708755)
+metadata/size = Vector3(0.5, 6, 2.3750002)
+
+[node name="light-square2" type="Node3D" parent="Props/light-square2_17" unique_id=1441579804 instance=ExtResource("1_ilxqf")]
+transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0.93750006)
+
+[node name="KenneyDressing" type="Node3D" parent="." unique_id=1846541926]
+
+[node name="Collision" type="StaticBody3D" parent="KenneyDressing" unique_id=407121691]
+
+[node name="ColBox_0" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=911481535]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 53.5, 2.81, -79)
+shape = SubResource("BoxShape3D_g2rwd")
+
+[node name="ColBox_1" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1231991584]
+transform = Transform3D(-0.00020365318, 0, 1, 0, 1, 0, -1, 0, -0.00020365318, 99, 3.15, -75.5)
+shape = SubResource("BoxShape3D_hq781")
+
+[node name="ColBox_2" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1658141660]
+transform = Transform3D(-0.47888938, 0, -0.87787527, 0, 1, 0, 0.87787527, 0, -0.47888938, 56.4, 2.45, -17.7)
+shape = SubResource("BoxShape3D_5iy6m")
+
+[node name="ColBox_3" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=2050505814]
+transform = Transform3D(-0.08111441, 0, 0.9967048, 0, 1, 0, -0.9967048, 0, -0.08111441, 57.3, 2.45, -17.9)
+shape = SubResource("BoxShape3D_jhqve")
+
+[node name="ColBox_4" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1375976805]
+transform = Transform3D(-0.22056063, 0, -0.97537327, 0, 1, 0, 0.97537327, 0, -0.22056063, 59.2, 2.35, -17.7)
+shape = SubResource("BoxShape3D_4n2no")
+
+[node name="ColBox_5" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=824769357]
+transform = Transform3D(-0.15476425, 0, -0.98795146, 0, 1, 0, 0.98795146, 0, -0.15476425, 60.2, 2.25, -17.6)
+shape = SubResource("BoxShape3D_7bsre")
+
+[node name="ColBox_6" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=905672863]
+transform = Transform3D(-0.7126046, 0, 0.7015659, 0, 1, 0, -0.7015659, 0, -0.7126046, 161.4, 2.45, -35.7)
+shape = SubResource("BoxShape3D_376s8")
+
+[node name="ColBox_7" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1109854215]
+transform = Transform3D(-0.8661211, 0, -0.49983418, 0, 1, 0, 0.49983418, 0, -0.8661211, 162.3, 2.45, -35.9)
+shape = SubResource("BoxShape3D_6c8mh")
+
+[node name="ColBox_8" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1044446605]
+transform = Transform3D(0.9708606, 0, 0.23964483, 0, 1, 0, -0.23964483, 0, 0.9708606, 164.2, 2.35, -35.7)
+shape = SubResource("BoxShape3D_7sgcj")
+
+[node name="ColBox_9" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=2085092648]
+transform = Transform3D(0.57090783, 0, -0.82101417, 0, 1, 0, 0.82101417, 0, 0.57090783, 165.2, 2.25, -35.6)
+shape = SubResource("BoxShape3D_q7nkg")
+
+[node name="ColBox_10" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1056849759]
+transform = Transform3D(0.999992, 0, -0.0039999895, 0, 1, 0, 0.0039999895, 0, 0.999992, 163, 3.2475393, -152.5)
+shape = SubResource("BoxShape3D_2spq0")
+
+[node name="ColBox_11" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1595765503]
+transform = Transform3D(0.4264921, 0, -0.9044913, 0, 1, 0, 0.9044913, 0, 0.4264921, 184.8, 2.1058087, -134.7)
+shape = SubResource("BoxShape3D_3ncjr")
+
+[node name="ColBox_12" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=623050495]
+transform = Transform3D(0.5717285, 0, -0.82044286, 0, 1, 0, 0.82044286, 0, 0.5717285, 185.3, 2.1058087, -135.5)
+shape = SubResource("BoxShape3D_mgasa")
+
+[node name="ColBox_13" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1032818567]
+transform = Transform3D(0.97840756, 0, -0.20668492, 0, 1, 0, 0.20668492, 0, 0.97840756, 174.6, 2.0558088, -156.7)
+shape = SubResource("BoxShape3D_kh5xo")
+
+[node name="ColBox_14" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=111136484]
+transform = Transform3D(0.09564985, 0, 0.99541503, 0, 1, 0, -0.99541503, 0, 0.09564985, 175.7, 1.9558089, -156.7)
+shape = SubResource("BoxShape3D_yraim")
+
+[node name="ColBox_15" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1597497339]
+transform = Transform3D(-0.11097466, 0, 0.99382323, 0, 1, 0, -0.99382323, 0, -0.11097466, -167.184, 3.083404, 32.479)
+shape = SubResource("BoxShape3D_beeqs")
+
+[node name="ColBox_16" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1508072300]
+transform = Transform3D(-0.013203281, 0, 0.99991286, 0, 1, 0, -0.99991286, 0, -0.013203281, -84.479, -5.6467156, 18.383)
+shape = SubResource("BoxShape3D_ti31i")
+
+[node name="ColBox_17" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=974018048]
+transform = Transform3D(-0.99344146, 0, -0.11434207, 0, 1, 0, 0.11434207, 0, -0.99344146, -3.424, -3.4757288, -59.386)
+shape = SubResource("BoxShape3D_hotst")
+
+[node name="ColBox_18" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=893279024]
+transform = Transform3D(0.99480253, 0, 0.101823226, 0, 1, 0, -0.101823226, 0, 0.99480253, 27.216, 2.260391, 85.027)
+shape = SubResource("BoxShape3D_lsm7w")
+
+[node name="ColBox_19" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=702455825]
+transform = Transform3D(0.98722726, 0, -0.15931821, 0, 1, 0, 0.15931821, 0, 0.98722726, 26.689, 1.7049794, 70.801)
+shape = SubResource("BoxShape3D_fbty1")
+
+[node name="ColBox_20" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1977919792]
+transform = Transform3D(0.18178001, 0, 0.98333925, 0, 1, 0, -0.98333925, 0, 0.18178001, 119.033, 3.988841, 52.151)
+shape = SubResource("BoxShape3D_v2foa")
+
+[node name="ColBox_21" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=2090397226]
+transform = Transform3D(0.9855848, 0, 0.16918235, 0, 1, 0, -0.16918235, 0, 0.9855848, 162.633, -0.75855607, 74.205)
+shape = SubResource("BoxShape3D_gbujs")
+
+[node name="ColBox_22" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1874009991]
+transform = Transform3D(-0.11792862, 0, -0.9930221, 0, 1, 0, 0.9930221, 0, -0.11792862, 98.207, -0.8434889, 128.138)
+shape = SubResource("BoxShape3D_apcqj")
+
+[node name="ColBox_23" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=412345471]
+transform = Transform3D(-0.9993306, 0, -0.03658447, 0, 1, 0, 0.03658447, 0, -0.9993306, 67.494, 4.7046404, 79.617)
+shape = SubResource("BoxShape3D_bk1nx")
+
+[node name="ColBox_24" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=2026942457]
+transform = Transform3D(-0.07812403, 0, -0.99694365, 0, 1, 0, 0.99694365, 0, -0.07812403, -11.59, 2.1021008, 132.108)
+shape = SubResource("BoxShape3D_10h7a")
+
+[node name="ColBox_25" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=2131943988]
+transform = Transform3D(-0.99187106, 0, 0.1272468, 0, 1, 0, -0.1272468, 0, -0.99187106, -93.231, -3.9775922, -26.591)
+shape = SubResource("BoxShape3D_86u5a")
+
+[node name="ColCylinder_0" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1876987566]
+transform = Transform3D(0.8906607, 0, -0.45466852, 0, 1, 0, 0.45466852, 0, 0.8906607, 36.364, 3.1, -62.357)
+shape = SubResource("CylinderShape3D_wae25")
+
+[node name="ColCylinder_1" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1408613478]
+transform = Transform3D(0.19650908, 0, -0.980502, 0, 1, 0, 0.980502, 0, 0.19650908, 32.348, 3.2346907, -2.39)
+shape = SubResource("CylinderShape3D_y2dxa")
+
+[node name="ColCylinder_2" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1926033854]
+transform = Transform3D(0.9486044, 0, 0.3164644, 0, 1, 0, -0.3164644, 0, 0.9486044, -13.77, -2.9072099, -53.958)
+shape = SubResource("CylinderShape3D_oecav")
+
+[node name="ColCylinder_3" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=933398539]
+transform = Transform3D(0.22777925, 0, 0.9737128, 0, 1, 0, -0.9737128, 0, 0.22777925, -94.958, -3.5417833, -26.364)
+shape = SubResource("CylinderShape3D_2oomk")
+
+[node name="ColBox_26" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=2049906267]
+transform = Transform3D(-0.48398566, 0, 0.87507594, 0, 1, 0, -0.87507594, 0, -0.48398566, -150.007, 7.5130687, -166.343)
+shape = SubResource("BoxShape3D_lp5eg")
+
+[node name="ColBox_27" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=380545627]
+transform = Transform3D(-0.45128405, 0, 0.89238036, 0, 1, 0, -0.89238036, 0, -0.45128405, -153.363, 7.020134, -167.204)
+shape = SubResource("BoxShape3D_cgnxj")
+
+[node name="ColBox_28" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1493380983]
+transform = Transform3D(-0.52200806, 0, 0.85294056, 0, 1, 0, -0.85294056, 0, -0.52200806, -154.105, 6.8959336, -167.705)
+shape = SubResource("BoxShape3D_e8tjw")
+
+[node name="ColBox_29" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=2092994712]
+transform = Transform3D(-0.8029354, 0, 0.596066, 0, 1, 0, -0.596066, 0, -0.8029354, -151.092, 6.867048, -162.975)
+shape = SubResource("BoxShape3D_ao7ko")
+
+[node name="ColBox_30" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=431154643]
+transform = Transform3D(-0.9987797, 0, -0.04938723, 0, 1, 0, 0.04938723, 0, -0.9987797, -148.859, 6.1353583, -163.086)
+shape = SubResource("BoxShape3D_delrm")
+
+[node name="ColBox_31" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1304279295]
+transform = Transform3D(0.8955257, 0, -0.44500986, 0, 1, 0, 0.44500986, 0, 0.8955257, -19.18, 0.24157263, 89.486)
+shape = SubResource("BoxShape3D_evhk0")
+
+[node name="ColBox_32" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=2062900241]
+transform = Transform3D(0.8774937, 0, -0.47958815, 0, 1, 0, 0.47958815, 0, 0.8774937, -15.849, 0.77582705, 88.532)
+shape = SubResource("BoxShape3D_mxp3g")
+
+[node name="ColBox_33" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1470242562]
+transform = Transform3D(0.8108547, 0, -0.5852475, 0, 1, 0, 0.5852475, 0, 0.8108547, -14.956, 0.9080029, 88.589)
+shape = SubResource("BoxShape3D_ptjxl")
+
+[node name="ColBox_34" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1798609921]
+transform = Transform3D(0.9951837, 0, -0.098027684, 0, 1, 0, 0.098027684, 0, 0.9951837, -19.947, 0.04999017, 86.032)
+shape = SubResource("BoxShape3D_bt6eb")
+
+[node name="ColBox_35" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=876934754]
+transform = Transform3D(0.83104366, 0, 0.5562072, 0, 1, 0, -0.5562072, 0, 0.83104366, -21.817, -0.3742524, 87.257)
+shape = SubResource("BoxShape3D_jxwra")
+
+[node name="ColBox_36" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1550918729]
+transform = Transform3D(0.3975052, 0, 0.9175999, 0, 1, 0, -0.9175999, 0, 0.3975052, -179.354, 1.507059, -76.074)
+shape = SubResource("BoxShape3D_4vdtl")
+
+[node name="ColBox_37" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1959967752]
+transform = Transform3D(0.4030035, 0, 0.91519845, 0, 1, 0, -0.91519845, 0, 0.4030035, -180.513, 1.5243284, -79.34)
+shape = SubResource("BoxShape3D_dpmwh")
+
+[node name="ColBox_38" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=553314672]
+transform = Transform3D(0.35862672, 0, 0.93348104, 0, 1, 0, -0.93348104, 0, 0.35862672, -180.512, 1.7308921, -80.235)
+shape = SubResource("BoxShape3D_re6ku")
+
+[node name="ColBox_39" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1131209872]
+transform = Transform3D(0.04078504, 0, 0.9991679, 0, 1, 0, -0.9991679, 0, 0.04078504, -182.754, 1.1230403, -75.095)
+shape = SubResource("BoxShape3D_a2lyk")
+
+[node name="ColBox_40" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1765060739]
+transform = Transform3D(-0.7353641, 0, 0.67767227, 0, 1, 0, -0.67767227, 0, -0.7353641, -181.414, 0.88080794, -73.304)
+shape = SubResource("BoxShape3D_u61sn")
+
+[node name="ColBox_41" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1538333558]
+transform = Transform3D(0.4879995, 0, 0.8728439, 0, 1, 0, -0.8728439, 0, 0.4879995, -125.099, 1.1515698, -80.384)
+shape = SubResource("BoxShape3D_brd1d")
+
+[node name="ColBox_42" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=113991856]
+transform = Transform3D(0.42213243, 0, 0.9065342, 0, 1, 0, -0.9065342, 0, 0.42213243, -126.386, 1.2632571, -83.602)
+shape = SubResource("BoxShape3D_umktw")
+
+[node name="ColBox_43" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=971795639]
+transform = Transform3D(0.4347821, 0, 0.9005357, 0, 1, 0, -0.9005357, 0, 0.4347821, -126.42, 1.379246, -84.496)
+shape = SubResource("BoxShape3D_desal")
+
+[node name="ColBox_44" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1258628862]
+transform = Transform3D(-0.07214096, 0, 0.99739444, 0, 1, 0, -0.99739444, 0, -0.07214096, -128.458, 0.8394068, -79.271)
+shape = SubResource("BoxShape3D_s4khn")
+
+[node name="ColBox_45" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1454739753]
+transform = Transform3D(-0.67222035, 0, 0.74035114, 0, 1, 0, -0.74035114, 0, -0.67222035, -127.049, -0.039140634, -77.535)
+shape = SubResource("BoxShape3D_uttps")
+
+[node name="ColBox_46" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=393977402]
+transform = Transform3D(-0.7133057, 0, 0.700853, 0, 1, 0, -0.700853, 0, -0.7133057, -182.902, 0.14910801, 143.328)
+shape = SubResource("BoxShape3D_clyp2")
+
+[node name="ColBox_47" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1723821783]
+transform = Transform3D(-0.6781215, 0, 0.7349498, 0, 1, 0, -0.7349498, 0, -0.6781215, -186.366, 0.3765086, 143.445)
+shape = SubResource("BoxShape3D_ewili")
+
+[node name="ColBox_48" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=733028183]
+transform = Transform3D(-0.7579754, 0, 0.65228313, 0, 1, 0, -0.65228313, 0, -0.7579754, -187.218, 0.5326771, 143.173)
+shape = SubResource("BoxShape3D_oud7e")
+
+[node name="ColBox_49" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1076671334]
+transform = Transform3D(-0.8922048, 0, 0.451631, 0, 1, 0, -0.451631, 0, -0.8922048, -182.996, -0.32891217, 146.865)
+shape = SubResource("BoxShape3D_6cai4")
+
+[node name="ColBox_50" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=644662154]
+transform = Transform3D(-0.8904754, 0, -0.45503137, 0, 1, 0, 0.45503137, 0, -0.8904754, -180.885, -0.8856223, 146.13)
+shape = SubResource("BoxShape3D_jwyyh")
+
+[node name="ColCylinder_4" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=249009718]
+transform = Transform3D(0.9873861, 0, 0.15833089, 0, 1, 0, -0.15833089, 0, 0.9873861, -181.754, 13.114783, -155.253)
+shape = SubResource("CylinderShape3D_hxi0n")
+
+[node name="ColCylinder_5" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1090267000]
+transform = Transform3D(-0.99598926, 0, 0.0894728, 0, 1, 0, -0.0894728, 0, -0.99598926, -89.716, 7.9005237, 98.363)
+shape = SubResource("CylinderShape3D_msskj")
+
+[node name="ColCylinder_6" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=527034117]
+transform = Transform3D(-0.98713267, 0, 0.15990332, 0, 1, 0, -0.15990332, 0, -0.98713267, 197.498, 2.1610765, -109.159)
+shape = SubResource("CylinderShape3D_a5ujf")
+
+[node name="ColCylinder_7" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=490299744]
+transform = Transform3D(-0.7162327, 0, -0.6978615, 0, 1, 0, 0.6978615, 0, -0.7162327, 174.317, 6.7697663, 5.61)
+shape = SubResource("CylinderShape3D_qcdwc")
+
+[node name="ColCylinder_8" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=302017788]
+transform = Transform3D(0.6674628, 0, 0.7446431, 0, 1, 0, -0.7446431, 0, 0.6674628, -192.757, 2.1121204, -52.779)
+shape = SubResource("CylinderShape3D_ao4iy")
+
+[node name="ColCylinder_9" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1921669574]
+transform = Transform3D(-0.4762534, 0, -0.8793081, 0, 1, 0, 0.8793081, 0, -0.4762534, -81.568, 3.4824312, 169.334)
+shape = SubResource("CylinderShape3D_sehsj")
+
+[node name="ColCylinder_10" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=786933286]
+transform = Transform3D(-0.5313588, 0, 0.84714687, 0, 1, 0, -0.84714687, 0, -0.5313588, -206.658, 7.5346823, 97.601)
+shape = SubResource("CylinderShape3D_5iw3q")
+
+[node name="ColCylinder_11" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=106214387]
+transform = Transform3D(0.9612803, 0, -0.27557242, 0, 1, 0, 0.27557242, 0, 0.9612803, -39.214, 1.5271912, -188.534)
+shape = SubResource("CylinderShape3D_68luu")
+
+[node name="ColCylinder_12" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=538792371]
+transform = Transform3D(-0.4425038, 0, -0.8967666, 0, 1, 0, 0.8967666, 0, -0.4425038, -177.724, 7.8525133, -209.186)
+shape = SubResource("CylinderShape3D_vygir")
+
+[node name="ColCylinder_13" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=167049215]
+transform = Transform3D(-0.717498, 0, 0.69656056, 0, 1, 0, -0.69656056, 0, -0.717498, -203.124, 3.4142547, -75.345)
+shape = SubResource("CylinderShape3D_q0oca")
+
+[node name="ColCylinder_14" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=803977823]
+transform = Transform3D(-0.21940418, 0, 0.97563404, 0, 1, 0, -0.97563404, 0, -0.21940418, -147.633, 5.598599, -77.815)
+shape = SubResource("CylinderShape3D_v5ku4")
+
+[node name="ColCylinder_15" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=658931395]
+transform = Transform3D(0.96100414, 0, -0.27653393, 0, 1, 0, 0.27653393, 0, 0.96100414, -126.983, 3.0921297, 177.556)
+shape = SubResource("CylinderShape3D_kxq25")
+
+[node name="ColCylinder_16" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1845286291]
+transform = Transform3D(0.9885932, 0, -0.15061006, 0, 1, 0, 0.15061006, 0, 0.9885932, -22.576, 3.2405577, 80.965)
+shape = SubResource("CylinderShape3D_rqjx3")
+
+[node name="ColCylinder_17" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=52925725]
+transform = Transform3D(-0.9247541, 0, -0.3805652, 0, 1, 0, 0.3805652, 0, -0.9247541, -155.943, 12.263345, -148.51)
+shape = SubResource("CylinderShape3D_rk6ut")
+
+[node name="ColCylinder_18" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1043293652]
+transform = Transform3D(0.74317044, 0, 0.66910213, 0, 1, 0, -0.66910213, 0, 0.74317044, -90.303, 4.2162104, 83.713)
+shape = SubResource("CylinderShape3D_owuvi")
+
+[node name="ColCylinder_19" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=321722264]
+transform = Transform3D(0.9884702, 0, 0.15141536, 0, 1, 0, -0.15141536, 0, 0.9884702, -154.931, 10.281038, -175.58)
+shape = SubResource("CylinderShape3D_tm6wl")
+
+[node name="ColCylinder_20" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1776419980]
+transform = Transform3D(-0.7140062, 0, 0.7001394, 0, 1, 0, -0.7001394, 0, -0.7140062, -199.335, 9.63146, -165.183)
+shape = SubResource("CylinderShape3D_evlpg")
+
+[node name="ColCylinder_21" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=584552769]
+transform = Transform3D(-0.5433219, 0, -0.83952445, 0, 1, 0, 0.83952445, 0, -0.5433219, -165.759, 6.4227643, 57.605)
+shape = SubResource("CylinderShape3D_vjci1")
+
+[node name="ColCylinder_22" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=2006718642]
+transform = Transform3D(0.8424402, 0, 0.53878987, 0, 1, 0, -0.53878987, 0, 0.8424402, -205.362, 2.876706, -55.839)
+shape = SubResource("CylinderShape3D_wb3p7")
+
+[node name="ColCylinder_23" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1660056797]
+transform = Transform3D(-0.9375048, 0, -0.34797227, 0, 1, 0, 0.34797227, 0, -0.9375048, -78.71, 6.704499, 197.082)
+shape = SubResource("CylinderShape3D_r7ah5")
+
+[node name="ColCylinder_24" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=858274831]
+transform = Transform3D(-0.21665719, 0, -0.9762477, 0, 1, 0, 0.9762477, 0, -0.21665719, -188.355, 8.639472, 71.673)
+shape = SubResource("CylinderShape3D_vbwr7")
+
+[node name="ColCylinder_25" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=137743526]
+transform = Transform3D(0.90979767, 0, 0.41505203, 0, 1, 0, -0.41505203, 0, 0.90979767, -45.084, 3.1401603, -185.298)
+shape = SubResource("CylinderShape3D_uywt3")
+
+[node name="ColCylinder_26" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=706740681]
+transform = Transform3D(-0.6352937, 0, -0.7722706, 0, 1, 0, 0.7722706, 0, -0.6352937, 154.504, 5.3791757, -180.547)
+shape = SubResource("CylinderShape3D_gi2jf")
+
+[node name="ColCylinder_27" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1904818471]
+transform = Transform3D(-0.93035835, 0, -0.3666515, 0, 1, 0, 0.3666515, 0, -0.93035835, -84.253, 9.732741, 100.836)
+shape = SubResource("CylinderShape3D_e562s")
+
+[node name="ColCylinder_28" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1349819305]
+transform = Transform3D(0.9987907, 0, -0.04916527, 0, 1, 0, 0.04916527, 0, 0.9987907, -172.669, 6.322682, -24.711)
+shape = SubResource("CylinderShape3D_sovrf")
+
+[node name="ColCylinder_29" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1897348958]
+transform = Transform3D(0.20122759, 0, -0.9795445, 0, 1, 0, 0.9795445, 0, 0.20122759, 14.385, 2.3587484, 172.076)
+shape = SubResource("CylinderShape3D_jljdg")
+
+[node name="ColCylinder_30" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=46894104]
+transform = Transform3D(-0.7266198, 0, -0.68703985, 0, 1, 0, 0.68703985, 0, -0.7266198, -102.331, 2.3732035, 153.537)
+shape = SubResource("CylinderShape3D_u8pbj")
+
+[node name="ColCylinder_31" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1029677787]
+transform = Transform3D(0.8062564, 0, 0.5915662, 0, 1, 0, -0.5915662, 0, 0.8062564, 169.447, 5.90426, -177.823)
+shape = SubResource("CylinderShape3D_qm0xt")
+
+[node name="ColCylinder_32" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1760552073]
+transform = Transform3D(0.83194906, 0, -0.55485207, 0, 1, 0, 0.55485207, 0, 0.83194906, 157.965, 3.767143, 24.849)
+shape = SubResource("CylinderShape3D_vitqh")
+
+[node name="ColCylinder_33" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=265249097]
+transform = Transform3D(0.317992, 0, -0.9480934, 0, 1, 0, 0.9480934, 0, 0.317992, 12.236, 4.4236927, 107.992)
+shape = SubResource("CylinderShape3D_4tvl4")
+
+[node name="ColCylinder_34" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1351063390]
+transform = Transform3D(-0.9700384, 0, -0.24295157, 0, 1, 0, 0.24295157, 0, -0.9700384, -208.351, 11.315957, -160.869)
+shape = SubResource("CylinderShape3D_b3mru")
+
+[node name="ColCylinder_35" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=918987086]
+transform = Transform3D(0.9198886, 0, 0.39217976, 0, 1, 0, -0.39217976, 0, 0.9198886, -198.406, 2.9750328, -49.191)
+shape = SubResource("CylinderShape3D_ie33l")
+
+[node name="ColCylinder_36" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=281432542]
+transform = Transform3D(0.5855925, 0, -0.8106056, 0, 1, 0, 0.8106056, 0, 0.5855925, -62.909, 4.4431605, 146.45)
+shape = SubResource("CylinderShape3D_571qm")
+
+[node name="ColCylinder_37" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1909052724]
+transform = Transform3D(-0.7368431, 0, -0.6760638, 0, 1, 0, 0.6760638, 0, -0.7368431, 42.369, 2.332137, -201.847)
+shape = SubResource("CylinderShape3D_eror3")
+
+[node name="ColCylinder_38" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=804438256]
+transform = Transform3D(-0.22427958, 0, 0.97452486, 0, 1, 0, -0.97452486, 0, -0.22427958, -179.352, 9.114553, -176.194)
+shape = SubResource("CylinderShape3D_psfad")
+
+[node name="ColCylinder_39" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=388396485]
+transform = Transform3D(0.77303475, 0, -0.6343637, 0, 1, 0, 0.6343637, 0, 0.77303475, -44.882, 1.908126, -201.724)
+shape = SubResource("CylinderShape3D_mpofy")
+
+[node name="ColBox_51" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1069982558]
+transform = Transform3D(0.42756405, 0, 0.9039851, 0, 1, 0, -0.9039851, 0, 0.42756405, -180.416, 3.1791406, -6.951)
+shape = SubResource("BoxShape3D_blqxg")
+
+[node name="ColBox_52" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=433631188]
+transform = Transform3D(0.21589744, 0, -0.97641605, 0, 1, 0, 0.97641605, 0, 0.21589744, -108.405, 3.3650148, -172.141)
+shape = SubResource("BoxShape3D_7y250")
+
+[node name="ColBox_53" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=482280935]
+transform = Transform3D(-0.83886987, 0, 0.544332, 0, 1, 0, -0.544332, 0, -0.83886987, -192.197, 12.962894, -134.888)
+shape = SubResource("BoxShape3D_y4g0i")
+
+[node name="ColBox_54" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=438762648]
+transform = Transform3D(0.6247383, 0, 0.7808342, 0, 1, 0, -0.7808342, 0, 0.6247383, -169.168, 10.28118, -143.669)
+shape = SubResource("BoxShape3D_5no14")
+
+[node name="ColBox_55" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1814518403]
+transform = Transform3D(-0.9935553, 0, 0.11334841, 0, 1, 0, -0.11334841, 0, -0.9935553, 205.536, 0.5979216, -24.699)
+shape = SubResource("BoxShape3D_1v0js")
+
+[node name="ColBox_56" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=850026141]
+transform = Transform3D(-0.33479643, 0, -0.9422905, 0, 1, 0, 0.9422905, 0, -0.33479643, -145.346, 4.8567085, -116.904)
+shape = SubResource("BoxShape3D_winag")
+
+[node name="ColBox_57" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=517443449]
+transform = Transform3D(0.23458958, 0, 0.97209454, 0, 1, 0, -0.97209454, 0, 0.23458958, 122.012, 8.21607, 29.746)
+shape = SubResource("BoxShape3D_sfb7o")
+
+[node name="ColBox_58" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1770692536]
+transform = Transform3D(0.90687007, 0, 0.4214104, 0, 1, 0, -0.4214104, 0, 0.90687007, 193.568, 2.2939, -32.879)
+shape = SubResource("BoxShape3D_ir5hq")
+
+[node name="ColBox_59" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1662974639]
+transform = Transform3D(-0.3319678, 0, -0.9432907, 0, 1, 0, 0.9432907, 0, -0.3319678, 43.665, 4.57318, 23.476)
+shape = SubResource("BoxShape3D_7re53")
+
+[node name="ColBox_60" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=349515576]
+transform = Transform3D(0.8741151, 0, -0.4857188, 0, 1, 0, 0.4857188, 0, 0.8741151, 38.693, 2.0451016, -184.036)
+shape = SubResource("BoxShape3D_rew48")
+
+[node name="ColBox_61" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=223035471]
+transform = Transform3D(0.9681195, 0, -0.2504888, 0, 1, 0, 0.2504888, 0, 0.9681195, -102.708, -0.2737584, 98.685)
+shape = SubResource("BoxShape3D_a1vc5")
+
+[node name="ColBox_62" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1028999227]
+transform = Transform3D(0.6016864, 0, -0.7987324, 0, 1, 0, 0.7987324, 0, 0.6016864, -133.648, 3.6435623, -162.299)
+shape = SubResource("BoxShape3D_almjp")
+
+[node name="ColBox_63" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=383700261]
+transform = Transform3D(0.28941062, 0, -0.95720506, 0, 1, 0, 0.95720506, 0, 0.28941062, -157.343, 4.138582, -100.803)
+shape = SubResource("BoxShape3D_skdyj")
+
+[node name="ColBox_64" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=809077594]
+transform = Transform3D(0.76536685, 0, -0.64359426, 0, 1, 0, 0.64359426, 0, 0.76536685, 197.476, 5.197421, -17.764)
+shape = SubResource("BoxShape3D_pibxo")
+
+[node name="ColBox_65" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=939032888]
+transform = Transform3D(0.48275363, 0, 0.8757562, 0, 1, 0, -0.8757562, 0, 0.48275363, -154.156, 7.8077354, -185.734)
+shape = SubResource("BoxShape3D_nsya6")
+
+[node name="ColBox_66" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=394583213]
+transform = Transform3D(0.84980285, 0, -0.5271006, 0, 1, 0, 0.5271006, 0, 0.84980285, 143.755, 5.6089234, 30.045)
+shape = SubResource("BoxShape3D_pdc21")
+
+[node name="ColBox_67" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=680513569]
+transform = Transform3D(0.5086455, 0, -0.86097604, 0, 1, 0, 0.86097604, 0, 0.5086455, 192.945, 0.67889726, -51.455)
+shape = SubResource("BoxShape3D_abchi")
+
+[node name="ColBox_68" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=372463304]
+transform = Transform3D(-0.2966699, 0, 0.9549801, 0, 1, 0, -0.9549801, 0, -0.2966699, -106.988, 0.36168468, -109.568)
+shape = SubResource("BoxShape3D_5wqk3")
+
+[node name="ColBox_69" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1973888511]
+transform = Transform3D(-0.5466758, 0, -0.83734435, 0, 1, 0, 0.83734435, 0, -0.5466758, -127.385, 2.9064243, -112.434)
+shape = SubResource("BoxShape3D_yqr05")
+
+[node name="ColBox_70" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=973589784]
+transform = Transform3D(-0.13181886, 0, 0.9912738, 0, 1, 0, -0.9912738, 0, -0.13181886, -153.496, -0.35413694, 184.601)
+shape = SubResource("BoxShape3D_1klys")
+
+[node name="ColBox_71" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=892877214]
+transform = Transform3D(0.8080275, 0, 0.58914477, 0, 1, 0, -0.58914477, 0, 0.8080275, -200.144, 3.7352645, 151.35)
+shape = SubResource("BoxShape3D_r1krs")
+
+[node name="ColBox_72" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=2034692254]
+transform = Transform3D(0.35845372, 0, -0.9335475, 0, 1, 0, 0.9335475, 0, 0.35845372, -172.257, 7.9676213, -177.513)
+shape = SubResource("BoxShape3D_8nbar")
+
+[node name="ColBox_73" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=170161586]
+transform = Transform3D(-0.85169095, 0, 0.5240444, 0, 1, 0, -0.5240444, 0, -0.85169095, -135.448, 4.854899, -137.688)
+shape = SubResource("BoxShape3D_ornbw")
+
+[node name="ColBox_74" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1604094312]
+transform = Transform3D(0.603283, 0, -0.7975272, 0, 1, 0, 0.7975272, 0, 0.603283, 187.666, 1.8714029, -200.437)
+shape = SubResource("BoxShape3D_iwj5w")
+
+[node name="ColBox_75" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1691865189]
+transform = Transform3D(-0.879687, 0, 0.47555315, 0, 1, 0, -0.47555315, 0, -0.879687, -140.206, 3.749519, -82.216)
+shape = SubResource("BoxShape3D_1ggg2")
+
+[node name="ColBox_76" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=2086625680]
+transform = Transform3D(0.95233357, 0, 0.30505863, 0, 1, 0, -0.30505863, 0, 0.95233357, -204.314, 6.26879, 110.659)
+shape = SubResource("BoxShape3D_272sf")
+
+[node name="ColBox_77" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1877233399]
+transform = Transform3D(-0.98763704, 0, -0.15675816, 0, 1, 0, 0.15675816, 0, -0.98763704, -74.472, 1.2544538, 157.711)
+shape = SubResource("BoxShape3D_n6lnq")
+
+[node name="ColBox_78" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=782266118]
+transform = Transform3D(0.5129441, 0, -0.85842204, 0, 1, 0, 0.85842204, 0, 0.5129441, -86.534, 1.3309859, 208.289)
+shape = SubResource("BoxShape3D_fx8ka")
+
+[node name="ColBox_79" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=885915307]
+transform = Transform3D(0.84297854, 0, 0.5379472, 0, 1, 0, -0.5379472, 0, 0.84297854, -154.476, 1.0197262, 1.976)
+shape = SubResource("BoxShape3D_riktu")
+
+[node name="ColBox_80" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1942602763]
+transform = Transform3D(-0.27672932, 0, -0.96094793, 0, 1, 0, 0.96094793, 0, -0.27672932, -123.367, 1.5103015, -137.655)
+shape = SubResource("BoxShape3D_ox1ls")
+
+[node name="ColBox_81" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1618059265]
+transform = Transform3D(-0.039193645, 0, 0.99923164, 0, 1, 0, -0.99923164, 0, -0.039193645, -55.668, -0.3791863, 191.314)
+shape = SubResource("BoxShape3D_4vqo2")
+
+[node name="ColBox_82" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=385083238]
+transform = Transform3D(0.37537038, 0, 0.9268749, 0, 1, 0, -0.9268749, 0, 0.37537038, -171.872, 1.8094697, -52.063)
+shape = SubResource("BoxShape3D_bejdi")
+
+[node name="ColBox_83" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=2000662502]
+transform = Transform3D(-0.0753175, 0, -0.9971596, 0, 1, 0, 0.9971596, 0, -0.0753175, 14.789, -0.055731766, 184.762)
+shape = SubResource("BoxShape3D_yjkp5")
+
+[node name="ColBox_84" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1986007760]
+transform = Transform3D(-0.32441103, 0, -0.94591624, 0, 1, 0, 0.94591624, 0, -0.32441103, 84.431, 1.6924703, 134.026)
+shape = SubResource("BoxShape3D_dad0l")
+
+[node name="ColBox_85" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=808918816]
+transform = Transform3D(0.14113829, 0, -0.9899899, 0, 1, 0, 0.9899899, 0, 0.14113829, -91.525, 1.8119911, -161.153)
+shape = SubResource("BoxShape3D_xmvmo")
+
+[node name="ColBox_86" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=929193454]
+transform = Transform3D(-0.8426596, 0, 0.5384467, 0, 1, 0, -0.5384467, 0, -0.8426596, -11.702, 2.223465, 59.892)
+shape = SubResource("BoxShape3D_vagd8")
+
+[node name="ColBox_87" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=1296393506]
+transform = Transform3D(-0.06634031, 0, -0.9977971, 0, 1, 0, 0.9977971, 0, -0.06634031, 176.551, 3.1719904, 26.272)
+shape = SubResource("BoxShape3D_t1ru7")
+
+[node name="ColBox_88" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=264496852]
+transform = Transform3D(-0.9830111, 0, 0.18354611, 0, 1, 0, -0.18354611, 0, -0.9830111, 13.14, 3.122431, 49.939)
+shape = SubResource("BoxShape3D_t5lhe")
+
+[node name="ColBox_89" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=638209790]
+transform = Transform3D(-0.7508771, 0, -0.660442, 0, 1, 0, 0.660442, 0, -0.7508771, -135.062, 4.947325, -168.239)
+shape = SubResource("BoxShape3D_tcvo7")
+
+[node name="ColBox_90" type="CollisionShape3D" parent="KenneyDressing/Collision" unique_id=2070937424]
+transform = Transform3D(-0.9458502, 0, 0.32460356, 0, 1, 0, -0.32460356, 0, -0.9458502, -189.219, 0.6598979, -57.009)
+shape = SubResource("BoxShape3D_i7sut")
+
+[node name="police_0" type="Node3D" parent="KenneyDressing" unique_id=1614487045]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 53.5, 2.06, -79)
+metadata/size = Vector3(1.7307692, 1.5000001, 3.5769227)
+
+[node name="police" type="Node3D" parent="KenneyDressing/police_0" unique_id=1722897075 instance=ExtResource("2_r24f0")]
+transform = Transform3D(1.1538461, 0, 0, 0, 1.1538461, 0, 0, 0, 1.1538461, 0, 0, 1.3754918e-07)
+
+[node name="ambulance_0" type="Node3D" parent="KenneyDressing" unique_id=208396166]
+transform = Transform3D(-0.00020365318, 0, 1, 0, 1, 0, -1, 0, -0.00020365318, 99, 2, -75.5)
+metadata/size = Vector3(1.9166665, 2.3, 4.152777)
+
+[node name="ambulance" type="Node3D" parent="KenneyDressing/ambulance_0" unique_id=802387458 instance=ExtResource("3_rgp6g")]
+transform = Transform3D(1.2777777, 0, 0, 0, 1.2777777, 0, 0, 0, 1.2777777, 0, 0, 0.031944413)
+
+[node name="cone2_0" type="Node3D" parent="KenneyDressing" unique_id=1755137233]
+transform = Transform3D(0.6105828, 0, 0.7919524, 0, 1, 0, -0.7919524, 0, 0.6105828, 94.4, 2, -77.8)
+metadata/size = Vector3(0.44, 0.55, 0.44)
+
+[node name="cone2" type="Node3D" parent="KenneyDressing/cone2_0" unique_id=276979692 instance=ExtResource("4_jxvvy")]
+transform = Transform3D(0.9239922, 0, 0, 0, 0.9239922, 0, 0, 0, 0.9239922, 0, 0, 0)
+
+[node name="cone2_1" type="Node3D" parent="KenneyDressing" unique_id=357366770]
+transform = Transform3D(0.94949144, 0, -0.3137929, 0, 1, 0, 0.3137929, 0, 0.94949144, 94.9, 2, -76)
+metadata/size = Vector3(0.44, 0.55, 0.44)
+
+[node name="cone2" type="Node3D" parent="KenneyDressing/cone2_1" unique_id=2099771624 instance=ExtResource("4_jxvvy")]
+transform = Transform3D(0.9239922, 0, 0, 0, 0.9239922, 0, 0, 0, 0.9239922, 0, 0, 0)
+
+[node name="cone2_2" type="Node3D" parent="KenneyDressing" unique_id=2060996780]
+transform = Transform3D(-0.70128876, 0, 0.71287733, 0, 1, 0, -0.71287733, 0, -0.70128876, 95.3, 2, -74.2)
+metadata/size = Vector3(0.44, 0.55, 0.44)
+
+[node name="cone2" type="Node3D" parent="KenneyDressing/cone2_2" unique_id=586554921 instance=ExtResource("4_jxvvy")]
+transform = Transform3D(0.9239922, 0, 0, 0, 0.9239922, 0, 0, 0, 0.9239922, 0, 0, 0)
+
+[node name="barrel-open2_0" type="Node3D" parent="KenneyDressing" unique_id=1170573275]
+transform = Transform3D(-0.47888938, 0, -0.87787527, 0, 1, 0, 0.87787527, 0, -0.47888938, 56.4, 2, -17.7)
+metadata/size = Vector3(0.6187499, 0.9, 0.6187499)
+
+[node name="barrel-open2" type="Node3D" parent="KenneyDressing/barrel-open2_0" unique_id=516349580 instance=ExtResource("5_a83u1")]
+transform = Transform3D(2.616279, 0, 0, 0, 2.616279, 0, 0, 0, 2.616279, 0, 0, 0)
+
+[node name="barrel2_0" type="Node3D" parent="KenneyDressing" unique_id=1540173670]
+transform = Transform3D(-0.08111441, 0, 0.9967048, 0, 1, 0, -0.9967048, 0, -0.08111441, 57.3, 2, -17.9)
+metadata/size = Vector3(0.6187499, 0.9, 0.6187499)
+
+[node name="barrel2" type="Node3D" parent="KenneyDressing/barrel2_0" unique_id=1083970479 instance=ExtResource("6_wycjs")]
+transform = Transform3D(2.616279, 0, 0, 0, 2.616279, 0, 0, 0, 2.616279, 0, 0, 0)
+
+[node name="box-large2_0" type="Node3D" parent="KenneyDressing" unique_id=354822290]
+transform = Transform3D(-0.22056063, 0, -0.97537327, 0, 1, 0, 0.97537327, 0, -0.22056063, 59.2, 2, -17.7)
+metadata/size = Vector3(0.7, 0.7, 1.4)
+
+[node name="box-large2" type="Node3D" parent="KenneyDressing/box-large2_0" unique_id=1508905664 instance=ExtResource("7_fjcra")]
+transform = Transform3D(2.8, 0, 0, 0, 2.8, 0, 0, 0, 2.8, 0, 0, 0)
+
+[node name="box2_0" type="Node3D" parent="KenneyDressing" unique_id=2028503828]
+transform = Transform3D(-0.15476425, 0, -0.98795146, 0, 1, 0, 0.98795146, 0, -0.15476425, 60.2, 2, -17.6)
+metadata/size = Vector3(0.5, 0.5, 0.5)
+
+[node name="box2" type="Node3D" parent="KenneyDressing/box2_0" unique_id=194995108 instance=ExtResource("8_simj8")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
+
+[node name="barrel-open2_1" type="Node3D" parent="KenneyDressing" unique_id=2077632211]
+transform = Transform3D(-0.7126046, 0, 0.7015659, 0, 1, 0, -0.7015659, 0, -0.7126046, 161.4, 2, -35.7)
+metadata/size = Vector3(0.6187499, 0.9, 0.6187499)
+
+[node name="barrel-open2" type="Node3D" parent="KenneyDressing/barrel-open2_1" unique_id=2000415939 instance=ExtResource("5_a83u1")]
+transform = Transform3D(2.616279, 0, 0, 0, 2.616279, 0, 0, 0, 2.616279, 0, 0, 0)
+
+[node name="barrel2_1" type="Node3D" parent="KenneyDressing" unique_id=509328000]
+transform = Transform3D(-0.8661211, 0, -0.49983418, 0, 1, 0, 0.49983418, 0, -0.8661211, 162.3, 2, -35.9)
+metadata/size = Vector3(0.6187499, 0.9, 0.6187499)
+
+[node name="barrel2" type="Node3D" parent="KenneyDressing/barrel2_1" unique_id=1366041159 instance=ExtResource("6_wycjs")]
+transform = Transform3D(2.616279, 0, 0, 0, 2.616279, 0, 0, 0, 2.616279, 0, 0, 0)
+
+[node name="box-large2_1" type="Node3D" parent="KenneyDressing" unique_id=1712140609]
+transform = Transform3D(0.9708606, 0, 0.23964483, 0, 1, 0, -0.23964483, 0, 0.9708606, 164.2, 2, -35.7)
+metadata/size = Vector3(0.7, 0.7, 1.4)
+
+[node name="box-large2" type="Node3D" parent="KenneyDressing/box-large2_1" unique_id=2018198000 instance=ExtResource("7_fjcra")]
+transform = Transform3D(2.8, 0, 0, 0, 2.8, 0, 0, 0, 2.8, 0, 0, 0)
+
+[node name="box2_1" type="Node3D" parent="KenneyDressing" unique_id=1719921186]
+transform = Transform3D(0.57090783, 0, -0.82101417, 0, 1, 0, 0.82101417, 0, 0.57090783, 165.2, 2, -35.6)
+metadata/size = Vector3(0.5, 0.5, 0.5)
+
+[node name="box2" type="Node3D" parent="KenneyDressing/box2_1" unique_id=1894010209 instance=ExtResource("8_simj8")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
+
+[node name="delivery_0" type="Node3D" parent="KenneyDressing" unique_id=717057527]
+transform = Transform3D(0.999992, 0, -0.0039999895, 0, 1, 0, 0.0039999895, 0, 0.999992, 163, 1.9975393, -152.5)
+metadata/size = Vector3(2.2727275, 2.5, 4.9242425)
+
+[node name="delivery" type="Node3D" parent="KenneyDressing/delivery_0" unique_id=396492895 instance=ExtResource("9_8ciwx")]
+transform = Transform3D(1.5151516, 0, 0, 0, 1.5151516, 0, 0, 0, 1.5151516, 0, 0, 0.037878755)
+
+[node name="barrel2_2" type="Node3D" parent="KenneyDressing" unique_id=1689117646]
+transform = Transform3D(0.4264921, 0, -0.9044913, 0, 1, 0, 0.9044913, 0, 0.4264921, 184.8, 1.6558088, -134.7)
+metadata/size = Vector3(0.6187499, 0.9, 0.6187499)
+
+[node name="barrel2" type="Node3D" parent="KenneyDressing/barrel2_2" unique_id=1346963537 instance=ExtResource("6_wycjs")]
+transform = Transform3D(2.616279, 0, 0, 0, 2.616279, 0, 0, 0, 2.616279, 0, 0, 0)
+
+[node name="barrel-open2_2" type="Node3D" parent="KenneyDressing" unique_id=165213215]
+transform = Transform3D(0.5717285, 0, -0.82044286, 0, 1, 0, 0.82044286, 0, 0.5717285, 185.3, 1.6558088, -135.5)
+metadata/size = Vector3(0.6187499, 0.9, 0.6187499)
+
+[node name="barrel-open2" type="Node3D" parent="KenneyDressing/barrel-open2_2" unique_id=646165501 instance=ExtResource("5_a83u1")]
+transform = Transform3D(2.616279, 0, 0, 0, 2.616279, 0, 0, 0, 2.616279, 0, 0, 0)
+
+[node name="box-large2_2" type="Node3D" parent="KenneyDressing" unique_id=1417049151]
+transform = Transform3D(0.97840756, 0, -0.20668492, 0, 1, 0, 0.20668492, 0, 0.97840756, 174.6, 1.6558088, -156.7)
+metadata/size = Vector3(0.8, 0.8, 1.6)
+
+[node name="box-large2" type="Node3D" parent="KenneyDressing/box-large2_2" unique_id=579904972 instance=ExtResource("7_fjcra")]
+transform = Transform3D(3.2, 0, 0, 0, 3.2, 0, 0, 0, 3.2, 0, 0, 0)
+
+[node name="box2_2" type="Node3D" parent="KenneyDressing" unique_id=199061410]
+transform = Transform3D(0.09564985, 0, 0.99541503, 0, 1, 0, -0.99541503, 0, 0.09564985, 175.7, 1.6558088, -156.7)
+metadata/size = Vector3(0.6, 0.6, 0.6)
+
+[node name="box2" type="Node3D" parent="KenneyDressing/box2_2" unique_id=762999329 instance=ExtResource("8_simj8")]
+transform = Transform3D(2.4, 0, 0, 0, 2.4, 0, 0, 0, 2.4, 0, 0, 0)
+
+[node name="ambulance_1" type="Node3D" parent="KenneyDressing" unique_id=1439167632]
+transform = Transform3D(-0.11097466, 0, 0.99382323, 0, 1, 0, -0.99382323, 0, -0.11097466, -167.184, 1.9334042, 32.479)
+metadata/size = Vector3(1.9166665, 2.3, 4.152777)
+
+[node name="ambulance" type="Node3D" parent="KenneyDressing/ambulance_1" unique_id=584452279 instance=ExtResource("3_rgp6g")]
+transform = Transform3D(1.2777777, 0, 0, 0, 1.2777777, 0, 0, 0, 1.2777777, 0, 0, 0.031944413)
+
+[node name="cone2_3" type="Node3D" parent="KenneyDressing" unique_id=2096162429]
+transform = Transform3D(-0.98226905, 0, 0.18747662, 0, 1, 0, -0.18747662, 0, -0.98226905, -162.941, 1.1908408, 32.408)
+metadata/size = Vector3(0.44, 0.55, 0.44)
+
+[node name="cone2" type="Node3D" parent="KenneyDressing/cone2_3" unique_id=28735549 instance=ExtResource("4_jxvvy")]
+transform = Transform3D(0.9239922, 0, 0, 0, 0.9239922, 0, 0, 0, 0.9239922, 0, 0, 0)
+
+[node name="cone2_4" type="Node3D" parent="KenneyDressing" unique_id=1766225520]
+transform = Transform3D(0.0687421, 0, 0.9976345, 0, 1, 0, -0.9976345, 0, 0.0687421, -161.472, 0.7102431, 31.464)
+metadata/size = Vector3(0.44, 0.55, 0.44)
+
+[node name="cone2" type="Node3D" parent="KenneyDressing/cone2_4" unique_id=1564000285 instance=ExtResource("4_jxvvy")]
+transform = Transform3D(0.9239922, 0, 0, 0, 0.9239922, 0, 0, 0, 0.9239922, 0, 0, 0)
+
+[node name="cone2_5" type="Node3D" parent="KenneyDressing" unique_id=113776635]
+transform = Transform3D(0.7390177, 0, -0.67368597, 0, 1, 0, 0.67368597, 0, 0.7390177, -160.003, 0.36201984, 30.52)
+metadata/size = Vector3(0.44, 0.55, 0.44)
+
+[node name="cone2" type="Node3D" parent="KenneyDressing/cone2_5" unique_id=1663961580 instance=ExtResource("4_jxvvy")]
+transform = Transform3D(0.9239922, 0, 0, 0, 0.9239922, 0, 0, 0, 0.9239922, 0, 0, 0)
+
+[node name="police_1" type="Node3D" parent="KenneyDressing" unique_id=492193325]
+transform = Transform3D(-0.013203281, 0, 0.99991286, 0, 1, 0, -0.99991286, 0, -0.013203281, -84.479, -6.3967156, 18.383)
+metadata/size = Vector3(1.7307692, 1.5000001, 3.5769227)
+
+[node name="police" type="Node3D" parent="KenneyDressing/police_1" unique_id=421213778 instance=ExtResource("2_r24f0")]
+transform = Transform3D(1.1538461, 0, 0, 0, 1.1538461, 0, 0, 0, 1.1538461, 0, 0, 1.3754918e-07)
+
+[node name="cone2_6" type="Node3D" parent="KenneyDressing" unique_id=868521665]
+transform = Transform3D(-0.5481943, 0, 0.836351, 0, 1, 0, -0.836351, 0, -0.5481943, -80.24, -6.6682954, 18.202)
+metadata/size = Vector3(0.44, 0.55, 0.44)
+
+[node name="cone2" type="Node3D" parent="KenneyDressing/cone2_6" unique_id=923764462 instance=ExtResource("4_jxvvy")]
+transform = Transform3D(0.9239922, 0, 0, 0, 0.9239922, 0, 0, 0, 0.9239922, 0, 0, 0)
+
+[node name="cone2_7" type="Node3D" parent="KenneyDressing" unique_id=653555567]
+transform = Transform3D(-0.56645995, 0, 0.8240893, 0, 1, 0, -0.8240893, 0, -0.56645995, -78.795, -6.730725, 17.22)
+metadata/size = Vector3(0.44, 0.55, 0.44)
+
+[node name="cone2" type="Node3D" parent="KenneyDressing/cone2_7" unique_id=458311301 instance=ExtResource("4_jxvvy")]
+transform = Transform3D(0.9239922, 0, 0, 0, 0.9239922, 0, 0, 0, 0.9239922, 0, 0, 0)
+
+[node name="cone2_8" type="Node3D" parent="KenneyDressing" unique_id=1041518142]
+transform = Transform3D(-0.3768459, 0, -0.92627597, 0, 1, 0, 0.92627597, 0, -0.3768459, -77.351, -6.779368, 16.239)
+metadata/size = Vector3(0.44, 0.55, 0.44)
+
+[node name="cone2" type="Node3D" parent="KenneyDressing/cone2_8" unique_id=190206918 instance=ExtResource("4_jxvvy")]
+transform = Transform3D(0.9239922, 0, 0, 0, 0.9239922, 0, 0, 0, 0.9239922, 0, 0, 0)
+
+[node name="sedan-sports_0" type="Node3D" parent="KenneyDressing" unique_id=792610490]
+transform = Transform3D(-0.99344146, 0, -0.11434207, 0, 1, 0, 0.11434207, 0, -0.99344146, -3.424, -4.1507287, -59.386)
+metadata/size = Vector3(1.5954547, 1.35, 3.1295457)
+
+[node name="sedan-sports" type="Node3D" parent="KenneyDressing/sedan-sports_0" unique_id=1920221322 instance=ExtResource("10_4jh6x")]
+transform = Transform3D(1.2272729, 0, 0, 0, 1.2272729, 0, 0, 0, 1.2272729, 0, 0, 0.03068179)
+
+[node name="garbage-truck_0" type="Node3D" parent="KenneyDressing" unique_id=1384266539]
+transform = Transform3D(0.99480253, 0, 0.101823226, 0, 1, 0, -0.101823226, 0, 0.99480253, 27.216, 0.76039094, 85.027)
+metadata/size = Vector3(3, 3, 6.4687495)
+
+[node name="garbage-truck" type="Node3D" parent="KenneyDressing/garbage-truck_0" unique_id=436003379 instance=ExtResource("11_tms8m")]
+transform = Transform3D(1.875, 0, 0, 0, 1.875, 0, 0, 0, 1.875, 0, 0, -0.046874955)
+
+[node name="hatchback-sports_0" type="Node3D" parent="KenneyDressing" unique_id=1005762299]
+transform = Transform3D(0.98722726, 0, -0.15931821, 0, 1, 0, 0.15931821, 0, 0.98722726, 26.689, 1.0299795, 70.801)
+metadata/size = Vector3(1.5954546, 1.35, 3.4977274)
+
+[node name="hatchback-sports" type="Node3D" parent="KenneyDressing/hatchback-sports_0" unique_id=663824535 instance=ExtResource("12_j8vqn")]
+transform = Transform3D(1.2272727, 0, 0, 0, 1.2272727, 0, 0, 0, 1.2272727, 0, 0, 0.030681789)
+
+[node name="van_0" type="Node3D" parent="KenneyDressing" unique_id=90244596]
+transform = Transform3D(0.18178001, 0, 0.98333925, 0, 1, 0, -0.98333925, 0, 0.18178001, 119.033, 2.938841, 52.151)
+metadata/size = Vector3(2.3333335, 2.1000001, 4.277778)
+
+[node name="van" type="Node3D" parent="KenneyDressing/van_0" unique_id=28368524 instance=ExtResource("13_xqn31")]
+transform = Transform3D(1.5555556, 0, 0, 0, 1.5555556, 0, 0, 0, 1.5555556, 0, 0, 0.03888885)
+
+[node name="sedan-sports_1" type="Node3D" parent="KenneyDressing" unique_id=499445101]
+transform = Transform3D(0.9855848, 0, 0.16918235, 0, 1, 0, -0.16918235, 0, 0.9855848, 162.633, -1.4335561, 74.205)
+metadata/size = Vector3(1.5954547, 1.35, 3.1295457)
+
+[node name="sedan-sports" type="Node3D" parent="KenneyDressing/sedan-sports_1" unique_id=1372646669 instance=ExtResource("10_4jh6x")]
+transform = Transform3D(1.2272729, 0, 0, 0, 1.2272729, 0, 0, 0, 1.2272729, 0, 0, 0.03068179)
+
+[node name="hatchback-sports_1" type="Node3D" parent="KenneyDressing" unique_id=908526208]
+transform = Transform3D(-0.11792862, 0, -0.9930221, 0, 1, 0, 0.9930221, 0, -0.11792862, 98.207, -1.5184889, 128.138)
+metadata/size = Vector3(1.5954546, 1.35, 3.4977274)
+
+[node name="hatchback-sports" type="Node3D" parent="KenneyDressing/hatchback-sports_1" unique_id=446075941 instance=ExtResource("12_j8vqn")]
+transform = Transform3D(1.2272727, 0, 0, 0, 1.2272727, 0, 0, 0, 1.2272727, 0, 0, 0.030681789)
+
+[node name="suv_0" type="Node3D" parent="KenneyDressing" unique_id=746749243]
+transform = Transform3D(-0.9993306, 0, -0.03658447, 0, 1, 0, 0.03658447, 0, -0.9993306, 67.494, 3.8296406, 79.617)
+metadata/size = Vector3(2.0192306, 1.75, 3.634615)
+
+[node name="suv" type="Node3D" parent="KenneyDressing/suv_0" unique_id=2043222072 instance=ExtResource("14_x4vep")]
+transform = Transform3D(1.3461537, 0, 0, 0, 1.3461537, 0, 0, 0, 1.3461537, 0, 0, 0)
+
+[node name="van_1" type="Node3D" parent="KenneyDressing" unique_id=892005005]
+transform = Transform3D(-0.07812403, 0, -0.99694365, 0, 1, 0, 0.99694365, 0, -0.07812403, -11.59, 1.0521009, 132.108)
+metadata/size = Vector3(2.3333335, 2.1000001, 4.277778)
+
+[node name="van" type="Node3D" parent="KenneyDressing/van_1" unique_id=1180715382 instance=ExtResource("13_xqn31")]
+transform = Transform3D(1.5555556, 0, 0, 0, 1.5555556, 0, 0, 0, 1.5555556, 0, 0, 0.03888885)
+
+[node name="sedan-sports_2" type="Node3D" parent="KenneyDressing" unique_id=785953789]
+transform = Transform3D(-0.99187106, 0, 0.1272468, 0, 1, 0, -0.1272468, 0, -0.99187106, -93.231, -4.652592, -26.591)
+metadata/size = Vector3(1.5954547, 1.35, 3.1295457)
+
+[node name="sedan-sports" type="Node3D" parent="KenneyDressing/sedan-sports_2" unique_id=581808678 instance=ExtResource("10_4jh6x")]
+transform = Transform3D(1.2272729, 0, 0, 0, 1.2272729, 0, 0, 0, 1.2272729, 0, 0, 0.03068179)
+
+[node name="signpost2_0" type="Node3D" parent="KenneyDressing" unique_id=901057837]
+transform = Transform3D(0.8906607, 0, -0.45466852, 0, 1, 0, 0.45466852, 0, 0.8906607, 36.364, 2, -62.357)
+metadata/size = Vector3(1.0238835, 2.1999998, 0.20551026)
+
+[node name="signpost2" type="Node3D" parent="KenneyDressing/signpost2_0" unique_id=671139294 instance=ExtResource("15_0caix")]
+transform = Transform3D(4.781777, 0, 0, 0, 4.781777, 0, 0, 0, 4.781777, 0.0249434, 0, -0.016683143)
+
+[node name="signpost2_1" type="Node3D" parent="KenneyDressing" unique_id=752165778]
+transform = Transform3D(0.19650908, 0, -0.980502, 0, 1, 0, 0.980502, 0, 0.19650908, 32.348, 2.1346908, -2.39)
+metadata/size = Vector3(1.0238835, 2.1999998, 0.20551026)
+
+[node name="signpost2" type="Node3D" parent="KenneyDressing/signpost2_1" unique_id=595236580 instance=ExtResource("15_0caix")]
+transform = Transform3D(4.781777, 0, 0, 0, 4.781777, 0, 0, 0, 4.781777, 0.0249434, 0, -0.016683143)
+
+[node name="signpost2_2" type="Node3D" parent="KenneyDressing" unique_id=1075544036]
+transform = Transform3D(0.9486044, 0, 0.3164644, 0, 1, 0, -0.3164644, 0, 0.9486044, -13.77, -4.00721, -53.958)
+metadata/size = Vector3(1.0238835, 2.1999998, 0.20551026)
+
+[node name="signpost2" type="Node3D" parent="KenneyDressing/signpost2_2" unique_id=775893370 instance=ExtResource("15_0caix")]
+transform = Transform3D(4.781777, 0, 0, 0, 4.781777, 0, 0, 0, 4.781777, 0.0249434, 0, -0.016683143)
+
+[node name="signpost2_3" type="Node3D" parent="KenneyDressing" unique_id=1698054513]
+transform = Transform3D(0.22777925, 0, 0.9737128, 0, 1, 0, -0.9737128, 0, 0.22777925, -94.958, -4.641783, -26.364)
+metadata/size = Vector3(1.0238835, 2.1999998, 0.20551026)
+
+[node name="signpost2" type="Node3D" parent="KenneyDressing/signpost2_3" unique_id=192998284 instance=ExtResource("15_0caix")]
+transform = Transform3D(4.781777, 0, 0, 0, 4.781777, 0, 0, 0, 4.781777, 0.0249434, 0, -0.016683143)
+
+[node name="tent2_0" type="Node3D" parent="KenneyDressing" unique_id=980421755]
+transform = Transform3D(-0.48398566, 0, 0.87507594, 0, 1, 0, -0.87507594, 0, -0.48398566, -150.007, 6.663069, -166.343)
+metadata/size = Vector3(1.9400836, 1.7, 1.9409066)
+
+[node name="tent2" type="Node3D" parent="KenneyDressing/tent2_0" unique_id=1516221295 instance=ExtResource("16_nes8b")]
+transform = Transform3D(3.4597263, 0, 0, 0, 3.4597263, 0, 0, 0, 3.4597263, 0, 6.4442425e-09, -0.01902856)
+
+[node name="campfire-pit2_0" type="Node3D" parent="KenneyDressing" unique_id=1795395059]
+transform = Transform3D(-0.5338979, 0, 0.845549, 0, 1, 0, -0.845549, 0, -0.5338979, -151.231, 6.7922993, -169.326)
+metadata/size = Vector3(0.891382, 0.35, 0.86398685)
+
+[node name="campfire-pit2" type="Node3D" parent="KenneyDressing/campfire-pit2_0" unique_id=1009951650 instance=ExtResource("17_3mhwv")]
+transform = Transform3D(3.2090814, 0, 0, 0, 3.2090814, 0, 0, 0, 3.2090814, 0, 0, 0)
+
+[node name="bedroll2_0" type="Node3D" parent="KenneyDressing" unique_id=1397259009]
+transform = Transform3D(-0.8574039, 0, 0.51464415, 0, 1, 0, -0.51464415, 0, -0.8574039, -146.987, 5.659115, -165.061)
+metadata/size = Vector3(0.62159556, 0.24999999, 1.2167213)
+
+[node name="bedroll2" type="Node3D" parent="KenneyDressing/bedroll2_0" unique_id=1509409506 instance=ExtResource("18_eevhx")]
+transform = Transform3D(2.0025632, 0, 0, 0, 2.0025632, 0, 0, 0, 2.0025632, 0, 0.10012816, 0)
+
+[node name="barrel2_3" type="Node3D" parent="KenneyDressing" unique_id=1373880794]
+transform = Transform3D(-0.45128405, 0, 0.89238036, 0, 1, 0, -0.89238036, 0, -0.45128405, -153.363, 6.570134, -167.204)
+metadata/size = Vector3(0.6187499, 0.9, 0.6187499)
+
+[node name="barrel2" type="Node3D" parent="KenneyDressing/barrel2_3" unique_id=671805666 instance=ExtResource("6_wycjs")]
+transform = Transform3D(2.616279, 0, 0, 0, 2.616279, 0, 0, 0, 2.616279, 0, 0, 0)
+
+[node name="barrel-open2_3" type="Node3D" parent="KenneyDressing" unique_id=788005254]
+transform = Transform3D(-0.52200806, 0, 0.85294056, 0, 1, 0, -0.85294056, 0, -0.52200806, -154.105, 6.4459333, -167.705)
+metadata/size = Vector3(0.6187499, 0.9, 0.6187499)
+
+[node name="barrel-open2" type="Node3D" parent="KenneyDressing/barrel-open2_3" unique_id=1521594885 instance=ExtResource("5_a83u1")]
+transform = Transform3D(2.616279, 0, 0, 0, 2.616279, 0, 0, 0, 2.616279, 0, 0, 0)
+
+[node name="box-large2_3" type="Node3D" parent="KenneyDressing" unique_id=1348128691]
+transform = Transform3D(-0.8029354, 0, 0.596066, 0, 1, 0, -0.596066, 0, -0.8029354, -151.092, 6.5170474, -162.975)
+metadata/size = Vector3(0.7, 0.7, 1.4)
+
+[node name="box-large2" type="Node3D" parent="KenneyDressing/box-large2_3" unique_id=18925439 instance=ExtResource("7_fjcra")]
+transform = Transform3D(2.8, 0, 0, 0, 2.8, 0, 0, 0, 2.8, 0, 0, 0)
+
+[node name="bucket2_0" type="Node3D" parent="KenneyDressing" unique_id=552396605]
+transform = Transform3D(-0.49445155, 0, 0.8692052, 0, 1, 0, -0.8692052, 0, -0.49445155, -148.294, 6.553671, -168.801)
+metadata/size = Vector3(0.2626426, 0.35, 0.2626426)
+
+[node name="bucket2" type="Node3D" parent="KenneyDressing/bucket2_0" unique_id=807854655 instance=ExtResource("19_upj8f")]
+transform = Transform3D(1.8223225, 0, 0, 0, 1.8223225, 0, 0, 0, 1.8223225, 0, 0, 0)
+
+[node name="tree-log-small2_0" type="Node3D" parent="KenneyDressing" unique_id=403776659]
+transform = Transform3D(-0.9987797, 0, -0.04938723, 0, 1, 0, 0.04938723, 0, -0.9987797, -148.859, 5.8853583, -163.086)
+metadata/size = Vector3(0.4501154, 0.5, 1.1727058)
+
+[node name="tree-log-small2" type="Node3D" parent="KenneyDressing/tree-log-small2_0" unique_id=1929877572 instance=ExtResource("20_1i7f4")]
+transform = Transform3D(1.8041627, 0, 0, 0, 1.8041627, 0, 0, 0, 1.8041627, 0, 0, 0)
+
+[node name="tent2_1" type="Node3D" parent="KenneyDressing" unique_id=334402472]
+transform = Transform3D(0.8955257, 0, -0.44500986, 0, 1, 0, 0.44500986, 0, 0.8955257, -19.18, -0.6084274, 89.486)
+metadata/size = Vector3(1.9400836, 1.7, 1.9409066)
+
+[node name="tent2" type="Node3D" parent="KenneyDressing/tent2_1" unique_id=1284584675 instance=ExtResource("16_nes8b")]
+transform = Transform3D(3.4597263, 0, 0, 0, 3.4597263, 0, 0, 0, 3.4597263, 0, 6.4442425e-09, -0.01902856)
+
+[node name="campfire-pit2_1" type="Node3D" parent="KenneyDressing" unique_id=1488855458]
+transform = Transform3D(0.8887501, 0, -0.45839205, 0, 1, 0, 0.45839205, 0, 0.8887501, -16.615, -0.40093425, 91.441)
+metadata/size = Vector3(0.891382, 0.35, 0.86398685)
+
+[node name="campfire-pit2" type="Node3D" parent="KenneyDressing/campfire-pit2_1" unique_id=1955960227 instance=ExtResource("17_3mhwv")]
+transform = Transform3D(3.2090814, 0, 0, 0, 3.2090814, 0, 0, 0, 3.2090814, 0, 0, 0)
+
+[node name="bedroll2_1" type="Node3D" parent="KenneyDressing" unique_id=1331132663]
+transform = Transform3D(0.9946161, 0, 0.1036284, 0, 1, 0, -0.1036284, 0, 0.9946161, -22.433, -0.7242211, 89.907)
+metadata/size = Vector3(0.62159556, 0.24999999, 1.2167213)
+
+[node name="bedroll2" type="Node3D" parent="KenneyDressing/bedroll2_1" unique_id=154899842 instance=ExtResource("18_eevhx")]
+transform = Transform3D(2.0025632, 0, 0, 0, 2.0025632, 0, 0, 0, 2.0025632, 0, 0.10012816, 0)
+
+[node name="barrel2_4" type="Node3D" parent="KenneyDressing" unique_id=1246803560]
+transform = Transform3D(0.8774937, 0, -0.47958815, 0, 1, 0, 0.47958815, 0, 0.8774937, -15.849, 0.32582703, 88.532)
+metadata/size = Vector3(0.6187499, 0.9, 0.6187499)
+
+[node name="barrel2" type="Node3D" parent="KenneyDressing/barrel2_4" unique_id=308541784 instance=ExtResource("6_wycjs")]
+transform = Transform3D(2.616279, 0, 0, 0, 2.616279, 0, 0, 0, 2.616279, 0, 0, 0)
+
+[node name="barrel-open2_4" type="Node3D" parent="KenneyDressing" unique_id=2093323977]
+transform = Transform3D(0.8108547, 0, -0.5852475, 0, 1, 0, 0.5852475, 0, 0.8108547, -14.956, 0.45800295, 88.589)
+metadata/size = Vector3(0.6187499, 0.9, 0.6187499)
+
+[node name="barrel-open2" type="Node3D" parent="KenneyDressing/barrel-open2_4" unique_id=154078731 instance=ExtResource("5_a83u1")]
+transform = Transform3D(2.616279, 0, 0, 0, 2.616279, 0, 0, 0, 2.616279, 0, 0, 0)
+
+[node name="box-large2_4" type="Node3D" parent="KenneyDressing" unique_id=1859030788]
+transform = Transform3D(0.9951837, 0, -0.098027684, 0, 1, 0, 0.098027684, 0, 0.9951837, -19.947, -0.30000982, 86.032)
+metadata/size = Vector3(0.7, 0.7, 1.4)
+
+[node name="box-large2" type="Node3D" parent="KenneyDressing/box-large2_4" unique_id=816390380 instance=ExtResource("7_fjcra")]
+transform = Transform3D(2.8, 0, 0, 0, 2.8, 0, 0, 0, 2.8, 0, 0, 0)
+
+[node name="bucket2_1" type="Node3D" parent="KenneyDressing" unique_id=208112170]
+transform = Transform3D(0.8160889, 0, -0.5779264, 0, 1, 0, 0.5779264, 0, 0.8160889, -19.414, -1.1163361, 92.473)
+metadata/size = Vector3(0.2626426, 0.35, 0.2626426)
+
+[node name="bucket2" type="Node3D" parent="KenneyDressing/bucket2_1" unique_id=1971820815 instance=ExtResource("19_upj8f")]
+transform = Transform3D(1.8223225, 0, 0, 0, 1.8223225, 0, 0, 0, 1.8223225, 0, 0, 0)
+
+[node name="tree-log-small2_1" type="Node3D" parent="KenneyDressing" unique_id=29617901]
+transform = Transform3D(0.83104366, 0, 0.5562072, 0, 1, 0, -0.5562072, 0, 0.83104366, -21.817, -0.62425244, 87.257)
+metadata/size = Vector3(0.4501154, 0.5, 1.1727058)
+
+[node name="tree-log-small2" type="Node3D" parent="KenneyDressing/tree-log-small2_1" unique_id=570410405 instance=ExtResource("20_1i7f4")]
+transform = Transform3D(1.8041627, 0, 0, 0, 1.8041627, 0, 0, 0, 1.8041627, 0, 0, 0)
+
+[node name="tent2_2" type="Node3D" parent="KenneyDressing" unique_id=330413164]
+transform = Transform3D(0.3975052, 0, 0.9175999, 0, 1, 0, -0.9175999, 0, 0.3975052, -179.354, 0.65705895, -76.074)
+metadata/size = Vector3(1.9400836, 1.7, 1.9409066)
+
+[node name="tent2" type="Node3D" parent="KenneyDressing/tent2_2" unique_id=1833813353 instance=ExtResource("16_nes8b")]
+transform = Transform3D(3.4597263, 0, 0, 0, 3.4597263, 0, 0, 0, 3.4597263, 0, 6.4442425e-09, -0.01902856)
+
+[node name="campfire-pit2_2" type="Node3D" parent="KenneyDressing" unique_id=677215696]
+transform = Transform3D(0.41486672, 0, 0.9098822, 0, 1, 0, -0.9098822, 0, 0.41486672, -177.562, 0.9733201, -78.756)
+metadata/size = Vector3(0.891382, 0.35, 0.86398685)
+
+[node name="campfire-pit2" type="Node3D" parent="KenneyDressing/campfire-pit2_2" unique_id=2100865837 instance=ExtResource("17_3mhwv")]
+transform = Transform3D(3.2090814, 0, 0, 0, 3.2090814, 0, 0, 0, 3.2090814, 0, 0, 0)
+
+[node name="bedroll2_2" type="Node3D" parent="KenneyDressing" unique_id=1879989737]
+transform = Transform3D(-0.09904099, 0, 0.99508333, 0, 1, 0, -0.99508333, 0, -0.09904099, -178.732, 0.6759634, -72.854)
+metadata/size = Vector3(0.62159556, 0.24999999, 1.2167213)
+
+[node name="bedroll2" type="Node3D" parent="KenneyDressing/bedroll2_2" unique_id=1910927122 instance=ExtResource("18_eevhx")]
+transform = Transform3D(2.0025632, 0, 0, 0, 2.0025632, 0, 0, 0, 2.0025632, 0, 0.10012816, 0)
+
+[node name="barrel2_5" type="Node3D" parent="KenneyDressing" unique_id=1460249056]
+transform = Transform3D(0.4030035, 0, 0.91519845, 0, 1, 0, -0.91519845, 0, 0.4030035, -180.513, 1.0743283, -79.34)
+metadata/size = Vector3(0.6187499, 0.9, 0.6187499)
+
+[node name="barrel2" type="Node3D" parent="KenneyDressing/barrel2_5" unique_id=1827184680 instance=ExtResource("6_wycjs")]
+transform = Transform3D(2.616279, 0, 0, 0, 2.616279, 0, 0, 0, 2.616279, 0, 0, 0)
+
+[node name="barrel-open2_5" type="Node3D" parent="KenneyDressing" unique_id=593449316]
+transform = Transform3D(0.35862672, 0, 0.93348104, 0, 1, 0, -0.93348104, 0, 0.35862672, -180.512, 1.2808921, -80.235)
+metadata/size = Vector3(0.6187499, 0.9, 0.6187499)
+
+[node name="barrel-open2" type="Node3D" parent="KenneyDressing/barrel-open2_5" unique_id=318452809 instance=ExtResource("5_a83u1")]
+transform = Transform3D(2.616279, 0, 0, 0, 2.616279, 0, 0, 0, 2.616279, 0, 0, 0)
+
+[node name="box-large2_5" type="Node3D" parent="KenneyDressing" unique_id=456946008]
+transform = Transform3D(0.04078504, 0, 0.9991679, 0, 1, 0, -0.9991679, 0, 0.04078504, -182.754, 0.77304035, -75.095)
+metadata/size = Vector3(0.7, 0.7, 1.4)
+
+[node name="box-large2" type="Node3D" parent="KenneyDressing/box-large2_5" unique_id=2039303780 instance=ExtResource("7_fjcra")]
+transform = Transform3D(2.8, 0, 0, 0, 2.8, 0, 0, 0, 2.8, 0, 0, 0)
+
+[node name="bucket2_2" type="Node3D" parent="KenneyDressing" unique_id=280762318]
+transform = Transform3D(0.53016603, 0, 0.84789383, 0, 1, 0, -0.84789383, 0, 0.53016603, -176.358, 1.0074204, -76.026)
+metadata/size = Vector3(0.2626426, 0.35, 0.2626426)
+
+[node name="bucket2" type="Node3D" parent="KenneyDressing/bucket2_2" unique_id=2102458032 instance=ExtResource("19_upj8f")]
+transform = Transform3D(1.8223225, 0, 0, 0, 1.8223225, 0, 0, 0, 1.8223225, 0, 0, 0)
+
+[node name="tree-log-small2_2" type="Node3D" parent="KenneyDressing" unique_id=63007329]
+transform = Transform3D(-0.7353641, 0, 0.67767227, 0, 1, 0, -0.67767227, 0, -0.7353641, -181.414, 0.63080794, -73.304)
+metadata/size = Vector3(0.4501154, 0.5, 1.1727058)
+
+[node name="tree-log-small2" type="Node3D" parent="KenneyDressing/tree-log-small2_2" unique_id=690459637 instance=ExtResource("20_1i7f4")]
+transform = Transform3D(1.8041627, 0, 0, 0, 1.8041627, 0, 0, 0, 1.8041627, 0, 0, 0)
+
+[node name="tent2_3" type="Node3D" parent="KenneyDressing" unique_id=1101505952]
+transform = Transform3D(0.4879995, 0, 0.8728439, 0, 1, 0, -0.8728439, 0, 0.4879995, -125.099, 0.3015698, -80.384)
+metadata/size = Vector3(1.9400836, 1.7, 1.9409066)
+
+[node name="tent2" type="Node3D" parent="KenneyDressing/tent2_3" unique_id=320358305 instance=ExtResource("16_nes8b")]
+transform = Transform3D(3.4597263, 0, 0, 0, 3.4597263, 0, 0, 0, 3.4597263, 0, 6.4442425e-09, -0.01902856)
+
+[node name="campfire-pit2_3" type="Node3D" parent="KenneyDressing" unique_id=1326859961]
+transform = Transform3D(0.45893517, 0, 0.88846976, 0, 1, 0, -0.88846976, 0, 0.45893517, -123.414, 0.45686522, -83.134)
+metadata/size = Vector3(0.891382, 0.35, 0.86398685)
+
+[node name="campfire-pit2" type="Node3D" parent="KenneyDressing/campfire-pit2_3" unique_id=834321810 instance=ExtResource("17_3mhwv")]
+transform = Transform3D(3.2090814, 0, 0, 0, 3.2090814, 0, 0, 0, 3.2090814, 0, 0, 0)
+
+[node name="bedroll2_3" type="Node3D" parent="KenneyDressing" unique_id=1137464838]
+transform = Transform3D(-0.085100636, 0, 0.99637234, 0, 1, 0, -0.99637234, 0, -0.085100636, -124.351, -0.49259815, -77.19)
+metadata/size = Vector3(0.62159556, 0.24999999, 1.2167213)
+
+[node name="bedroll2" type="Node3D" parent="KenneyDressing/bedroll2_3" unique_id=240443620 instance=ExtResource("18_eevhx")]
+transform = Transform3D(2.0025632, 0, 0, 0, 2.0025632, 0, 0, 0, 2.0025632, 0, 0.10012816, 0)
+
+[node name="barrel2_6" type="Node3D" parent="KenneyDressing" unique_id=898420879]
+transform = Transform3D(0.42213243, 0, 0.9065342, 0, 1, 0, -0.9065342, 0, 0.42213243, -126.386, 0.8132571, -83.602)
+metadata/size = Vector3(0.6187499, 0.9, 0.6187499)
+
+[node name="barrel2" type="Node3D" parent="KenneyDressing/barrel2_6" unique_id=1740118699 instance=ExtResource("6_wycjs")]
+transform = Transform3D(2.616279, 0, 0, 0, 2.616279, 0, 0, 0, 2.616279, 0, 0, 0)
+
+[node name="barrel-open2_6" type="Node3D" parent="KenneyDressing" unique_id=38178306]
+transform = Transform3D(0.4347821, 0, 0.9005357, 0, 1, 0, -0.9005357, 0, 0.4347821, -126.42, 0.929246, -84.496)
+metadata/size = Vector3(0.6187499, 0.9, 0.6187499)
+
+[node name="barrel-open2" type="Node3D" parent="KenneyDressing/barrel-open2_6" unique_id=1901365430 instance=ExtResource("5_a83u1")]
+transform = Transform3D(2.616279, 0, 0, 0, 2.616279, 0, 0, 0, 2.616279, 0, 0, 0)
+
+[node name="box-large2_6" type="Node3D" parent="KenneyDressing" unique_id=1086515394]
+transform = Transform3D(-0.07214096, 0, 0.99739444, 0, 1, 0, -0.99739444, 0, -0.07214096, -128.458, 0.48940682, -79.271)
+metadata/size = Vector3(0.7, 0.7, 1.4)
+
+[node name="box-large2" type="Node3D" parent="KenneyDressing/box-large2_6" unique_id=1608262557 instance=ExtResource("7_fjcra")]
+transform = Transform3D(2.8, 0, 0, 0, 2.8, 0, 0, 0, 2.8, 0, 0, 0)
+
+[node name="bucket2_3" type="Node3D" parent="KenneyDressing" unique_id=176543200]
+transform = Transform3D(0.48887214, 0, 0.87235546, 0, 1, 0, -0.87235546, 0, 0.48887214, -122.104, -0.050035477, -80.454)
+metadata/size = Vector3(0.2626426, 0.35, 0.2626426)
+
+[node name="bucket2" type="Node3D" parent="KenneyDressing/bucket2_3" unique_id=1963658968 instance=ExtResource("19_upj8f")]
+transform = Transform3D(1.8223225, 0, 0, 0, 1.8223225, 0, 0, 0, 1.8223225, 0, 0, 0)
+
+[node name="tree-log-small2_3" type="Node3D" parent="KenneyDressing" unique_id=46339114]
+transform = Transform3D(-0.67222035, 0, 0.74035114, 0, 1, 0, -0.74035114, 0, -0.67222035, -127.049, -0.28914064, -77.535)
+metadata/size = Vector3(0.4501154, 0.5, 1.1727058)
+
+[node name="tree-log-small2" type="Node3D" parent="KenneyDressing/tree-log-small2_3" unique_id=1030969198 instance=ExtResource("20_1i7f4")]
+transform = Transform3D(1.8041627, 0, 0, 0, 1.8041627, 0, 0, 0, 1.8041627, 0, 0, 0)
+
+[node name="tent2_4" type="Node3D" parent="KenneyDressing" unique_id=833073654]
+transform = Transform3D(-0.7133057, 0, 0.700853, 0, 1, 0, -0.700853, 0, -0.7133057, -182.902, -0.70089203, 143.328)
+metadata/size = Vector3(1.9400836, 1.7, 1.9409066)
+
+[node name="tent2" type="Node3D" parent="KenneyDressing/tent2_4" unique_id=1858179890 instance=ExtResource("16_nes8b")]
+transform = Transform3D(3.4597263, 0, 0, 0, 3.4597263, 0, 0, 0, 3.4597263, 0, 6.4442425e-09, -0.01902856)
+
+[node name="campfire-pit2_4" type="Node3D" parent="KenneyDressing" unique_id=535709058]
+transform = Transform3D(-0.72304744, 0, 0.6907984, 0, 1, 0, -0.6907984, 0, -0.72304744, -184.915, -0.2660261, 140.809)
+metadata/size = Vector3(0.891382, 0.35, 0.86398685)
+
+[node name="campfire-pit2" type="Node3D" parent="KenneyDressing/campfire-pit2_4" unique_id=1651259737 instance=ExtResource("17_3mhwv")]
+transform = Transform3D(3.2090814, 0, 0, 0, 3.2090814, 0, 0, 0, 3.2090814, 0, 0, 0)
+
+[node name="bedroll2_4" type="Node3D" parent="KenneyDressing" unique_id=791851793]
+transform = Transform3D(-0.9957164, 0, 0.09246038, 0, 1, 0, -0.09246038, 0, -0.9957164, -179.644, -1.6335212, 143.709)
+metadata/size = Vector3(0.62159556, 0.24999999, 1.2167213)
+
+[node name="bedroll2" type="Node3D" parent="KenneyDressing/bedroll2_4" unique_id=71439889 instance=ExtResource("18_eevhx")]
+transform = Transform3D(2.0025632, 0, 0, 0, 2.0025632, 0, 0, 0, 2.0025632, 0, 0.10012816, 0)
+
+[node name="barrel2_7" type="Node3D" parent="KenneyDressing" unique_id=660475338]
+transform = Transform3D(-0.6781215, 0, 0.7349498, 0, 1, 0, -0.7349498, 0, -0.6781215, -186.366, -0.07349139, 143.445)
+metadata/size = Vector3(0.6187499, 0.9, 0.6187499)
+
+[node name="barrel2" type="Node3D" parent="KenneyDressing/barrel2_7" unique_id=784270255 instance=ExtResource("6_wycjs")]
+transform = Transform3D(2.616279, 0, 0, 0, 2.616279, 0, 0, 0, 2.616279, 0, 0, 0)
+
+[node name="barrel-open2_7" type="Node3D" parent="KenneyDressing" unique_id=1468431817]
+transform = Transform3D(-0.7579754, 0, 0.65228313, 0, 1, 0, -0.65228313, 0, -0.7579754, -187.218, 0.08267712, 143.173)
+metadata/size = Vector3(0.6187499, 0.9, 0.6187499)
+
+[node name="barrel-open2" type="Node3D" parent="KenneyDressing/barrel-open2_7" unique_id=2081483903 instance=ExtResource("5_a83u1")]
+transform = Transform3D(2.616279, 0, 0, 0, 2.616279, 0, 0, 0, 2.616279, 0, 0, 0)
+
+[node name="box-large2_7" type="Node3D" parent="KenneyDressing" unique_id=1993151609]
+transform = Transform3D(-0.8922048, 0, 0.451631, 0, 1, 0, -0.451631, 0, -0.8922048, -182.996, -0.67891216, 146.865)
+metadata/size = Vector3(0.7, 0.7, 1.4)
+
+[node name="box-large2" type="Node3D" parent="KenneyDressing/box-large2_7" unique_id=1788830361 instance=ExtResource("7_fjcra")]
+transform = Transform3D(2.8, 0, 0, 0, 2.8, 0, 0, 0, 2.8, 0, 0, 0)
+
+[node name="bucket2_4" type="Node3D" parent="KenneyDressing" unique_id=1137998142]
+transform = Transform3D(-0.7734104, 0, 0.63390565, 0, 1, 0, -0.63390565, 0, -0.7734104, -181.95, -1.171602, 140.486)
+metadata/size = Vector3(0.2626426, 0.35, 0.2626426)
+
+[node name="bucket2" type="Node3D" parent="KenneyDressing/bucket2_4" unique_id=1819513881 instance=ExtResource("19_upj8f")]
+transform = Transform3D(1.8223225, 0, 0, 0, 1.8223225, 0, 0, 0, 1.8223225, 0, 0, 0)
+
+[node name="tree-log-small2_4" type="Node3D" parent="KenneyDressing" unique_id=188761388]
+transform = Transform3D(-0.8904754, 0, -0.45503137, 0, 1, 0, 0.45503137, 0, -0.8904754, -180.885, -1.1356223, 146.13)
+metadata/size = Vector3(0.4501154, 0.5, 1.1727058)
+
+[node name="tree-log-small2" type="Node3D" parent="KenneyDressing/tree-log-small2_4" unique_id=1808642200 instance=ExtResource("20_1i7f4")]
+transform = Transform3D(1.8041627, 0, 0, 0, 1.8041627, 0, 0, 0, 1.8041627, 0, 0, 0)
+
+[node name="tree-tall2_0" type="Node3D" parent="KenneyDressing" unique_id=1548859531]
+transform = Transform3D(0.9873861, 0, 0.15833089, 0, 1, 0, -0.15833089, 0, 0.9873861, -181.754, 10.704284, -155.253)
+metadata/size = Vector3(1.5577862, 4.821, 1.4827752)
+
+[node name="tree-tall2" type="Node3D" parent="KenneyDressing/tree-tall2_0" unique_id=588085713 instance=ExtResource("21_ssxra")]
+transform = Transform3D(2.8176968, 0, 0, 0, 2.8176968, 0, 0, 0, 2.8176968, 0.013660204, 0, 0)
+
+[node name="tree-autumn2_0" type="Node3D" parent="KenneyDressing" unique_id=146634683]
+transform = Transform3D(-0.99598926, 0, 0.0894728, 0, 1, 0, -0.0894728, 0, -0.99598926, -89.716, 4.9060235, 98.363)
+metadata/size = Vector3(2.3466568, 5.9890003, 2.2336597)
+
+[node name="tree-autumn2" type="Node3D" parent="KenneyDressing/tree-autumn2_0" unique_id=573149043 instance=ExtResource("22_xlmm1")]
+transform = Transform3D(4.244592, 0, 0, 0, 4.244592, 0, 0, 0, 4.244592, 0.020577796, 0, 0)
+
+[node name="tree2_0" type="Node3D" parent="KenneyDressing" unique_id=1872077457]
+transform = Transform3D(-0.98713267, 0, 0.15990332, 0, 1, 0, -0.15990332, 0, -0.98713267, 197.498, -0.89492357, -109.159)
+metadata/size = Vector3(2.3948514, 6.112, 2.2795339)
+
+[node name="tree2" type="Node3D" parent="KenneyDressing/tree2_0" unique_id=181747670 instance=ExtResource("23_6jc5a")]
+transform = Transform3D(4.331766, 0, 0, 0, 4.331766, 0, 0, 0, 4.331766, 0.021000417, 0, 0)
+
+[node name="tree-autumn-tall2_0" type="Node3D" parent="KenneyDressing" unique_id=655401208]
+transform = Transform3D(-0.7162327, 0, -0.6978615, 0, 1, 0, 0.6978615, 0, -0.7162327, 174.317, 4.0777664, 5.61)
+metadata/size = Vector3(1.7397058, 5.3840003, 1.6559348)
+
+[node name="tree-autumn-tall2" type="Node3D" parent="KenneyDressing/tree-autumn-tall2_0" unique_id=604176922 instance=ExtResource("24_1s3f4")]
+transform = Transform3D(3.1467497, 0, 0, 0, 3.1467497, 0, 0, 0, 3.1467497, 0.015255453, 0, 0)
+
+[node name="tree-autumn-tall2_1" type="Node3D" parent="KenneyDressing" unique_id=590462963]
+transform = Transform3D(0.6674628, 0, 0.7446431, 0, 1, 0, -0.7446431, 0, 0.6674628, -192.757, -0.30437952, -52.779)
+metadata/size = Vector3(1.5616637, 4.8329997, 1.4864659)
+
+[node name="tree-autumn-tall2" type="Node3D" parent="KenneyDressing/tree-autumn-tall2_1" unique_id=1876642138 instance=ExtResource("24_1s3f4")]
+transform = Transform3D(2.8247104, 0, 0, 0, 2.8247104, 0, 0, 0, 2.8247104, 0.013694206, 0, 0)
+
+[node name="tree-autumn-tall2_2" type="Node3D" parent="KenneyDressing" unique_id=1769574436]
+transform = Transform3D(-0.4762534, 0, -0.8793081, 0, 1, 0, 0.8793081, 0, -0.4762534, -81.568, 1.1129311, 169.334)
+metadata/size = Vector3(1.5312899, 4.739, 1.4575548)
+
+[node name="tree-autumn-tall2" type="Node3D" parent="KenneyDressing/tree-autumn-tall2_2" unique_id=1431198600 instance=ExtResource("24_1s3f4")]
+transform = Transform3D(2.7697709, 0, 0, 0, 2.7697709, 0, 0, 0, 2.7697709, 0.013427859, 0, 0)
+
+[node name="tree-autumn-tall2_3" type="Node3D" parent="KenneyDressing" unique_id=522218417]
+transform = Transform3D(-0.5313588, 0, 0.84714687, 0, 1, 0, -0.84714687, 0, -0.5313588, -206.658, 4.140182, 97.601)
+metadata/size = Vector3(2.1936965, 6.789, 2.088065)
+
+[node name="tree-autumn-tall2" type="Node3D" parent="KenneyDressing/tree-autumn-tall2_3" unique_id=1664381601 instance=ExtResource("24_1s3f4")]
+transform = Transform3D(3.9679203, 0, 0, 0, 3.9679203, 0, 0, 0, 3.9679203, 0.019236492, 0, 0)
+
+[node name="tree2_1" type="Node3D" parent="KenneyDressing" unique_id=1663304999]
+transform = Transform3D(0.9612803, 0, -0.27557242, 0, 1, 0, 0.27557242, 0, 0.9612803, -39.214, -0.77930874, -188.534)
+metadata/size = Vector3(1.8075016, 4.613, 1.7204661)
+
+[node name="tree2" type="Node3D" parent="KenneyDressing/tree2_1" unique_id=2070422178 instance=ExtResource("23_6jc5a")]
+transform = Transform3D(3.2693777, 0, 0, 0, 3.2693777, 0, 0, 0, 3.2693777, 0.015849954, 0, 0)
+
+[node name="tree-tall2_1" type="Node3D" parent="KenneyDressing" unique_id=706902087]
+transform = Transform3D(-0.4425038, 0, -0.8967666, 0, 1, 0, 0.8967666, 0, -0.4425038, -177.724, 4.3965135, -209.186)
+metadata/size = Vector3(2.2334409, 6.9119997, 2.1258955)
+
+[node name="tree-tall2" type="Node3D" parent="KenneyDressing/tree-tall2_1" unique_id=1009601297 instance=ExtResource("21_ssxra")]
+transform = Transform3D(4.039809, 0, 0, 0, 4.039809, 0, 0, 0, 4.039809, 0.01958501, 0, 0)
+
+[node name="tree-tall2_2" type="Node3D" parent="KenneyDressing" unique_id=213033987]
+transform = Transform3D(-0.717498, 0, 0.69656056, 0, 1, 0, -0.69656056, 0, -0.717498, -203.124, 1.0407544, -75.345)
+metadata/size = Vector3(1.5338751, 4.747, 1.4600154)
+
+[node name="tree-tall2" type="Node3D" parent="KenneyDressing/tree-tall2_2" unique_id=1447504899 instance=ExtResource("21_ssxra")]
+transform = Transform3D(2.7744467, 0, 0, 0, 2.7744467, 0, 0, 0, 2.7744467, 0.013450527, 0, 0)
+
+[node name="tree2_2" type="Node3D" parent="KenneyDressing" unique_id=2095022293]
+transform = Transform3D(-0.21940418, 0, 0.97563404, 0, 1, 0, -0.97563404, 0, -0.21940418, -147.633, 3.1225991, -77.815)
+metadata/size = Vector3(1.9403312, 4.952, 1.8468997)
+
+[node name="tree2" type="Node3D" parent="KenneyDressing/tree2_2" unique_id=1595067013 instance=ExtResource("23_6jc5a")]
+transform = Transform3D(3.5096376, 0, 0, 0, 3.5096376, 0, 0, 0, 3.5096376, 0.017014734, 0, 0)
+
+[node name="tree-autumn-tall2_4" type="Node3D" parent="KenneyDressing" unique_id=678153623]
+transform = Transform3D(0.96100414, 0, -0.27653393, 0, 1, 0, 0.27653393, 0, 0.96100414, -126.983, -0.26437053, 177.556)
+metadata/size = Vector3(2.1691391, 6.7130003, 2.0646899)
+
+[node name="tree-autumn-tall2" type="Node3D" parent="KenneyDressing/tree-autumn-tall2_4" unique_id=806946379 instance=ExtResource("24_1s3f4")]
+transform = Transform3D(3.9235013, 0, 0, 0, 3.9235013, 0, 0, 0, 3.9235013, 0.019021148, 0, 0)
+
+[node name="tree2_3" type="Node3D" parent="KenneyDressing" unique_id=1789904862]
+transform = Transform3D(0.9885932, 0, -0.15061006, 0, 1, 0, 0.15061006, 0, 0.9885932, -22.576, 0.25255743, 80.965)
+metadata/size = Vector3(2.341563, 5.9760003, 2.2288113)
+
+[node name="tree2" type="Node3D" parent="KenneyDressing/tree2_3" unique_id=913594912 instance=ExtResource("23_6jc5a")]
+transform = Transform3D(4.2353787, 0, 0, 0, 4.2353787, 0, 0, 0, 4.2353787, 0.02053313, 0, 0)
+
+[node name="tree2_4" type="Node3D" parent="KenneyDressing" unique_id=1795089878]
+transform = Transform3D(-0.9247541, 0, -0.3805652, 0, 1, 0, 0.3805652, 0, -0.9247541, -155.943, 9.376345, -148.51)
+metadata/size = Vector3(2.2624135, 5.7739997, 2.1534731)
+
+[node name="tree2" type="Node3D" parent="KenneyDressing/tree2_4" unique_id=1013076751 instance=ExtResource("23_6jc5a")]
+transform = Transform3D(4.0922146, 0, 0, 0, 4.0922146, 0, 0, 0, 4.0922146, 0.01983907, 0, 0)
+
+[node name="tree2_5" type="Node3D" parent="KenneyDressing" unique_id=1097202824]
+transform = Transform3D(0.74317044, 0, 0.66910213, 0, 1, 0, -0.66910213, 0, 0.74317044, -90.303, 0.73521024, 83.713)
+metadata/size = Vector3(2.727905, 6.962, 2.59655)
+
+[node name="tree2" type="Node3D" parent="KenneyDressing/tree2_5" unique_id=1671897619 instance=ExtResource("23_6jc5a")]
+transform = Transform3D(4.9341874, 0, 0, 0, 4.9341874, 0, 0, 0, 4.9341874, 0.023920959, 0, 0)
+
+[node name="tree-autumn2_1" type="Node3D" parent="KenneyDressing" unique_id=1174760743]
+transform = Transform3D(0.9884702, 0, 0.15141536, 0, 1, 0, -0.15141536, 0, 0.9884702, -154.931, 7.9435387, -175.58)
+metadata/size = Vector3(1.8317949, 4.6749997, 1.7435896)
+
+[node name="tree-autumn2" type="Node3D" parent="KenneyDressing/tree-autumn2_1" unique_id=2110165571 instance=ExtResource("22_xlmm1")]
+transform = Transform3D(3.313319, 0, 0, 0, 3.313319, 0, 0, 0, 3.313319, 0.016062982, 0, 0)
+
+[node name="tree-tall2_3" type="Node3D" parent="KenneyDressing" unique_id=199313118]
+transform = Transform3D(-0.7140062, 0, 0.7001394, 0, 1, 0, -0.7001394, 0, -0.7140062, -199.335, 7.2744603, -165.183)
+metadata/size = Vector3(1.5232118, 4.714, 1.4498657)
+
+[node name="tree-tall2" type="Node3D" parent="KenneyDressing/tree-tall2_3" unique_id=1373203044 instance=ExtResource("21_ssxra")]
+transform = Transform3D(2.7551594, 0, 0, 0, 2.7551594, 0, 0, 0, 2.7551594, 0.013357022, 0, 0)
+
+[node name="tree-autumn-tall2_5" type="Node3D" parent="KenneyDressing" unique_id=1283066710]
+transform = Transform3D(-0.5433219, 0, -0.83952445, 0, 1, 0, 0.83952445, 0, -0.5433219, -165.759, 3.7357645, 57.605)
+metadata/size = Vector3(1.7364744, 5.3739996, 1.6528591)
+
+[node name="tree-autumn-tall2" type="Node3D" parent="KenneyDressing/tree-autumn-tall2_5" unique_id=1012642154 instance=ExtResource("24_1s3f4")]
+transform = Transform3D(3.140905, 0, 0, 0, 3.140905, 0, 0, 0, 3.140905, 0.0152271185, 0, 0)
+
+[node name="tree-autumn2_2" type="Node3D" parent="KenneyDressing" unique_id=492879329]
+transform = Transform3D(0.8424402, 0, 0.53878987, 0, 1, 0, -0.53878987, 0, 0.8424402, -205.362, 0.14570604, -55.839)
+metadata/size = Vector3(2.1401634, 5.462, 2.0371096)
+
+[node name="tree-autumn2" type="Node3D" parent="KenneyDressing/tree-autumn2_2" unique_id=489701128 instance=ExtResource("22_xlmm1")]
+transform = Transform3D(3.8710907, 0, 0, 0, 3.8710907, 0, 0, 0, 3.8710907, 0.01876706, 0, 0)
+
+[node name="tree-autumn-tall2_6" type="Node3D" parent="KenneyDressing" unique_id=54324494]
+transform = Transform3D(-0.9375048, 0, -0.34797227, 0, 1, 0, 0.34797227, 0, -0.9375048, -78.71, 3.2269983, 197.082)
+metadata/size = Vector3(2.2473354, 6.9550004, 2.1391208)
+
+[node name="tree-autumn-tall2" type="Node3D" parent="KenneyDressing/tree-autumn-tall2_6" unique_id=1084269634 instance=ExtResource("24_1s3f4")]
+transform = Transform3D(4.0649414, 0, 0, 0, 4.0649414, 0, 0, 0, 4.0649414, 0.019706849, 0, 0)
+
+[node name="tree2_6" type="Node3D" parent="KenneyDressing" unique_id=1318790714]
+transform = Transform3D(-0.21665719, 0, -0.9762477, 0, 1, 0, 0.9762477, 0, -0.21665719, -188.355, 5.9034724, 71.673)
+metadata/size = Vector3(2.1440816, 5.472, 2.0408392)
+
+[node name="tree2" type="Node3D" parent="KenneyDressing/tree2_6" unique_id=1816039862 instance=ExtResource("23_6jc5a")]
+transform = Transform3D(3.878178, 0, 0, 0, 3.878178, 0, 0, 0, 3.878178, 0.018801419, 0, 0)
+
+[node name="tree-tall2_4" type="Node3D" parent="KenneyDressing" unique_id=369631444]
+transform = Transform3D(0.90979767, 0, 0.41505203, 0, 1, 0, -0.41505203, 0, 0.90979767, -45.084, -0.2313398, -185.298)
+metadata/size = Vector3(2.1788328, 6.743, 2.073917)
+
+[node name="tree-tall2" type="Node3D" parent="KenneyDressing/tree-tall2_4" unique_id=1558831 instance=ExtResource("21_ssxra")]
+transform = Transform3D(3.941035, 0, 0, 0, 3.941035, 0, 0, 0, 3.941035, 0.019106152, 0, 0)
+
+[node name="tree2_7" type="Node3D" parent="KenneyDressing" unique_id=2113099764]
+transform = Transform3D(-0.6352937, 0, -0.7722706, 0, 1, 0, 0.7722706, 0, -0.6352937, 154.504, 3.0016754, -180.547)
+metadata/size = Vector3(1.8631412, 4.755, 1.7734265)
+
+[node name="tree2" type="Node3D" parent="KenneyDressing/tree2_7" unique_id=1504916485 instance=ExtResource("23_6jc5a")]
+transform = Transform3D(3.3700175, 0, 0, 0, 3.3700175, 0, 0, 0, 3.3700175, 0.016337857, 0, 0)
+
+[node name="tree-tall2_5" type="Node3D" parent="KenneyDressing" unique_id=121473993]
+transform = Transform3D(-0.93035835, 0, -0.3666515, 0, 1, 0, 0.3666515, 0, -0.93035835, -84.253, 6.9067416, 100.836)
+metadata/size = Vector3(1.8263032, 5.652, 1.7383624)
+
+[node name="tree-tall2" type="Node3D" parent="KenneyDressing/tree-tall2_5" unique_id=613108169 instance=ExtResource("21_ssxra")]
+transform = Transform3D(3.3033857, 0, 0, 0, 3.3033857, 0, 0, 0, 3.3033857, 0.016014826, 0, 0)
+
+[node name="tree-tall2_6" type="Node3D" parent="KenneyDressing" unique_id=841452192]
+transform = Transform3D(0.9987907, 0, -0.04916527, 0, 1, 0, 0.04916527, 0, 0.9987907, -172.669, 3.506182, -24.711)
+metadata/size = Vector3(1.8201638, 5.633, 1.7325187)
+
+[node name="tree-tall2" type="Node3D" parent="KenneyDressing/tree-tall2_6" unique_id=201743691 instance=ExtResource("21_ssxra")]
+transform = Transform3D(3.292281, 0, 0, 0, 3.292281, 0, 0, 0, 3.292281, 0.01596099, 0, 0)
+
+[node name="tree-tall2_7" type="Node3D" parent="KenneyDressing" unique_id=2102059072]
+transform = Transform3D(0.20122759, 0, -0.9795445, 0, 1, 0, 0.9795445, 0, 0.20122759, 14.385, -0.8662515, 172.076)
+metadata/size = Vector3(2.084157, 6.45, 1.9838)
+
+[node name="tree-tall2" type="Node3D" parent="KenneyDressing/tree-tall2_7" unique_id=877939581 instance=ExtResource("21_ssxra")]
+transform = Transform3D(3.7697873, 0, 0, 0, 3.7697873, 0, 0, 0, 3.7697873, 0.018275943, 0, 0)
+
+[node name="tree2_8" type="Node3D" parent="KenneyDressing" unique_id=1871281212]
+transform = Transform3D(-0.7266198, 0, -0.68703985, 0, 1, 0, 0.68703985, 0, -0.7266198, -102.331, -0.3542965, 153.537)
+metadata/size = Vector3(2.1374207, 5.455, 2.0344987)
+
+[node name="tree2" type="Node3D" parent="KenneyDressing/tree2_8" unique_id=352743410 instance=ExtResource("23_6jc5a")]
+transform = Transform3D(3.8661294, 0, 0, 0, 3.8661294, 0, 0, 0, 3.8661294, 0.018743008, 0, 0)
+
+[node name="tree-autumn-tall2_7" type="Node3D" parent="KenneyDressing" unique_id=1130072930]
+transform = Transform3D(0.8062564, 0, 0.5915662, 0, 1, 0, -0.5915662, 0, 0.8062564, 169.447, 2.5762603, -177.823)
+metadata/size = Vector3(2.1507208, 6.656, 2.0471587)
+
+[node name="tree-autumn-tall2" type="Node3D" parent="KenneyDressing/tree-autumn-tall2_7" unique_id=1382119025 instance=ExtResource("24_1s3f4")]
+transform = Transform3D(3.8901868, 0, 0, 0, 3.8901868, 0, 0, 0, 3.8901868, 0.018859638, 0, 0)
+
+[node name="tree2_9" type="Node3D" parent="KenneyDressing" unique_id=1569413704]
+transform = Transform3D(0.83194906, 0, -0.55485207, 0, 1, 0, 0.55485207, 0, 0.83194906, 157.965, 1.4056431, 24.849)
+metadata/size = Vector3(1.8506026, 4.723, 1.7614919)
+
+[node name="tree2" type="Node3D" parent="KenneyDressing/tree2_9" unique_id=1187807221 instance=ExtResource("23_6jc5a")]
+transform = Transform3D(3.3473382, 0, 0, 0, 3.3473382, 0, 0, 0, 3.3473382, 0.016227907, 0, 0)
+
+[node name="tree2_10" type="Node3D" parent="KenneyDressing" unique_id=1005956718]
+transform = Transform3D(0.317992, 0, -0.9480934, 0, 1, 0, 0.9480934, 0, 0.317992, 12.236, 1.5726926, 107.992)
+metadata/size = Vector3(2.2342021, 5.702, 2.12662)
+
+[node name="tree2" type="Node3D" parent="KenneyDressing/tree2_10" unique_id=930697921 instance=ExtResource("23_6jc5a")]
+transform = Transform3D(4.0411863, 0, 0, 0, 4.0411863, 0, 0, 0, 4.0411863, 0.019591684, 0, 0)
+
+[node name="tree-tall2_8" type="Node3D" parent="KenneyDressing" unique_id=975986302]
+transform = Transform3D(-0.9700384, 0, -0.24295157, 0, 1, 0, 0.24295157, 0, -0.9700384, -208.351, 7.942457, -160.869)
+metadata/size = Vector3(2.1801252, 6.747, 2.0751472)
+
+[node name="tree-tall2" type="Node3D" parent="KenneyDressing/tree-tall2_8" unique_id=1740581103 instance=ExtResource("21_ssxra")]
+transform = Transform3D(3.943373, 0, 0, 0, 3.943373, 0, 0, 0, 3.943373, 0.019117486, 0, 0)
+
+[node name="tree-autumn2_3" type="Node3D" parent="KenneyDressing" unique_id=953724662]
+transform = Transform3D(0.9198886, 0, 0.39217976, 0, 1, 0, -0.39217976, 0, 0.9198886, -198.406, -0.32246715, -49.191)
+metadata/size = Vector3(2.5841043, 6.595, 2.4596736)
+
+[node name="tree-autumn2" type="Node3D" parent="KenneyDressing/tree-autumn2_3" unique_id=1151614847 instance=ExtResource("22_xlmm1")]
+transform = Transform3D(4.674083, 0, 0, 0, 4.674083, 0, 0, 0, 4.674083, 0.02265997, 0, 0)
+
+[node name="tree-autumn2_4" type="Node3D" parent="KenneyDressing" unique_id=1116047807]
+transform = Transform3D(0.5855925, 0, -0.8106056, 0, 1, 0, 0.8106056, 0, 0.5855925, -62.909, 1.1401608, 146.45)
+metadata/size = Vector3(2.5884142, 6.6059995, 2.463776)
+
+[node name="tree-autumn2" type="Node3D" parent="KenneyDressing/tree-autumn2_4" unique_id=615845526 instance=ExtResource("22_xlmm1")]
+transform = Transform3D(4.681879, 0, 0, 0, 4.681879, 0, 0, 0, 4.681879, 0.022697767, 0, 0)
+
+[node name="tree-autumn2_5" type="Node3D" parent="KenneyDressing" unique_id=712509774]
+transform = Transform3D(-0.7368431, 0, -0.6760638, 0, 1, 0, 0.6760638, 0, -0.7368431, 42.369, -0.665863, -201.847)
+metadata/size = Vector3(2.3493996, 5.9960003, 2.2362704)
+
+[node name="tree-autumn2" type="Node3D" parent="KenneyDressing/tree-autumn2_5" unique_id=527473846 instance=ExtResource("22_xlmm1")]
+transform = Transform3D(4.249553, 0, 0, 0, 4.249553, 0, 0, 0, 4.249553, 0.020601848, 0, 0)
+
+[node name="tree-tall2_9" type="Node3D" parent="KenneyDressing" unique_id=1128086629]
+transform = Transform3D(-0.22427958, 0, 0.97452486, 0, 1, 0, -0.97452486, 0, -0.22427958, -179.352, 5.977053, -176.194)
+metadata/size = Vector3(2.02761, 6.2749996, 1.929976)
+
+[node name="tree-tall2" type="Node3D" parent="KenneyDressing/tree-tall2_9" unique_id=503429675 instance=ExtResource("21_ssxra")]
+transform = Transform3D(3.6675062, 0, 0, 0, 3.6675062, 0, 0, 0, 3.6675062, 0.017780082, 0, 0)
+
+[node name="tree2_11" type="Node3D" parent="KenneyDressing" unique_id=498447325]
+transform = Transform3D(0.77303475, 0, -0.6343637, 0, 1, 0, 0.6343637, 0, 0.77303475, -44.882, -1.305374, -201.724)
+metadata/size = Vector3(2.5182774, 6.427, 2.3970163)
+
+[node name="tree2" type="Node3D" parent="KenneyDressing/tree2_11" unique_id=500551975 instance=ExtResource("23_6jc5a")]
+transform = Transform3D(4.5550165, 0, 0, 0, 4.5550165, 0, 0, 0, 4.5550165, 0.022082735, 0, 0)
+
+[node name="rock-c2_0" type="Node3D" parent="KenneyDressing" unique_id=971816789]
+transform = Transform3D(0.42756405, 0, 0.9039851, 0, 1, 0, -0.9039851, 0, 0.42756405, -180.416, 2.5576406, -6.951)
+metadata/size = Vector3(1.9101121, 1.243, 1.379276)
+
+[node name="rock-c2" type="Node3D" parent="KenneyDressing/rock-c2_0" unique_id=1846896581 instance=ExtResource("25_u505x")]
+transform = Transform3D(2.437255, 0, 0, 0, 2.437255, 0, 0, 0, 2.437255, -0.025719196, -1.0996763e-16, 0.015481099)
+
+[node name="rock-c2_1" type="Node3D" parent="KenneyDressing" unique_id=247233133]
+transform = Transform3D(0.21589744, 0, -0.97641605, 0, 1, 0, 0.97641605, 0, 0.21589744, -108.405, 2.9535148, -172.141)
+metadata/size = Vector3(1.2647002, 0.823, 0.91322947)
+
+[node name="rock-c2" type="Node3D" parent="KenneyDressing/rock-c2_1" unique_id=1189789836 instance=ExtResource("25_u505x")]
+transform = Transform3D(1.6137255, 0, 0, 0, 1.6137255, 0, 0, 0, 1.6137255, -0.01702888, -7.281042e-17, 0.010250156)
+
+[node name="rock-b2_0" type="Node3D" parent="KenneyDressing" unique_id=1855817524]
+transform = Transform3D(-0.83886987, 0, 0.544332, 0, 1, 0, -0.544332, 0, -0.83886987, -192.197, 12.200395, -134.888)
+metadata/size = Vector3(3.040623, 1.525, 2.6401298)
+
+[node name="rock-b2" type="Node3D" parent="KenneyDressing/rock-b2_0" unique_id=632253849 instance=ExtResource("26_bwyfc")]
+transform = Transform3D(3.6430264, 0, 0, 0, 3.6430264, 0, 0, 0, 3.6430264, -0.14184842, 4.879776e-16, -0.027004234)
+
+[node name="rock-b2_1" type="Node3D" parent="KenneyDressing" unique_id=1248989255]
+transform = Transform3D(0.6247383, 0, 0.7808342, 0, 1, 0, -0.7808342, 0, 0.6247383, -169.168, 9.605181, -143.669)
+metadata/size = Vector3(2.6956866, 1.352, 2.3406265)
+
+[node name="rock-b2" type="Node3D" parent="KenneyDressing/rock-b2_1" unique_id=1896840064 instance=ExtResource("26_bwyfc")]
+transform = Transform3D(3.2297518, 0, 0, 0, 3.2297518, 0, 0, 0, 3.2297518, -0.12575676, 4.3262015e-16, -0.023940803)
+
+[node name="rock-a2_0" type="Node3D" parent="KenneyDressing" unique_id=122315905]
+transform = Transform3D(-0.9935553, 0, 0.11334841, 0, 1, 0, -0.11334841, 0, -0.9935553, 205.536, -0.11057844, -24.699)
+metadata/size = Vector3(2.0032916, 1.417, 2.242877)
+
+[node name="rock-a2" type="Node3D" parent="KenneyDressing/rock-a2_0" unique_id=596675555 instance=ExtResource("27_asksh")]
+transform = Transform3D(3.6083527, 0, 0, 0, 3.6083527, 0, 0, 0, 3.6083527, 0.08086008, 0, -0.04933972)
+
+[node name="rock-c2_2" type="Node3D" parent="KenneyDressing" unique_id=1908436717]
+transform = Transform3D(-0.33479643, 0, -0.9422905, 0, 1, 0, 0.9422905, 0, -0.33479643, -145.346, 4.317209, -116.904)
+metadata/size = Vector3(1.6580942, 1.079, 1.197296)
+
+[node name="rock-c2" type="Node3D" parent="KenneyDressing/rock-c2_2" unique_id=887553581 instance=ExtResource("25_u505x")]
+transform = Transform3D(2.1156864, 0, 0, 0, 2.1156864, 0, 0, 0, 2.1156864, -0.022325834, -9.545862e-17, 0.01343854)
+
+[node name="rock-c2_3" type="Node3D" parent="KenneyDressing" unique_id=469882042]
+transform = Transform3D(0.23458958, 0, 0.97209454, 0, 1, 0, -0.97209454, 0, 0.23458958, 122.012, 7.4560704, 29.746)
+metadata/size = Vector3(2.3357768, 1.52, 1.6866449)
+
+[node name="rock-c2" type="Node3D" parent="KenneyDressing/rock-c2_3" unique_id=832295021 instance=ExtResource("25_u505x")]
+transform = Transform3D(2.9803922, 0, 0, 0, 2.9803922, 0, 0, 0, 2.9803922, -0.031450666, -1.344737e-16, 0.01893103)
+
+[node name="rock-a2_1" type="Node3D" parent="KenneyDressing" unique_id=248447314]
+transform = Transform3D(0.90687007, 0, 0.4214104, 0, 1, 0, -0.4214104, 0, 0.90687007, 193.568, 1.5929, -32.879)
+metadata/size = Vector3(1.9820851, 1.402, 2.2191343)
+
+[node name="rock-a2" type="Node3D" parent="KenneyDressing/rock-a2_1" unique_id=1319176423 instance=ExtResource("27_asksh")]
+transform = Transform3D(3.5701554, 0, 0, 0, 3.5701554, 0, 0, 0, 3.5701554, 0.08000412, 0, -0.048817422)
+
+[node name="rock-b2_2" type="Node3D" parent="KenneyDressing" unique_id=1554294026]
+transform = Transform3D(-0.3319678, 0, -0.9432907, 0, 1, 0, 0.9432907, 0, -0.3319678, 43.665, 3.7626803, 23.476)
+metadata/size = Vector3(3.2320328, 1.621, 2.806328)
+
+[node name="rock-b2" type="Node3D" parent="KenneyDressing/rock-b2_2" unique_id=1115571771 instance=ExtResource("26_bwyfc")]
+transform = Transform3D(3.8723578, 0, 0, 0, 3.8723578, 0, 0, 0, 3.8723578, -0.15077789, 5.186962e-16, -0.028704172)
+
+[node name="rock-b2_3" type="Node3D" parent="KenneyDressing" unique_id=1956219720]
+transform = Transform3D(0.8741151, 0, -0.4857188, 0, 1, 0, 0.4857188, 0, 0.8741151, 38.693, 1.6871017, -184.036)
+metadata/size = Vector3(1.4275974, 0.716, 1.2395626)
+
+[node name="rock-b2" type="Node3D" parent="KenneyDressing/rock-b2_3" unique_id=1894072003 instance=ExtResource("26_bwyfc")]
+transform = Transform3D(1.7104307, 0, 0, 0, 1.7104307, 0, 0, 0, 1.7104307, -0.066599, 2.291095e-16, -0.012678709)
+
+[node name="rock-a2_2" type="Node3D" parent="KenneyDressing" unique_id=1040891459]
+transform = Transform3D(0.9681195, 0, -0.2504888, 0, 1, 0, 0.2504888, 0, 0.9681195, -102.708, -0.8107584, 98.685)
+metadata/size = Vector3(1.5183733, 1.074, 1.6999646)
+
+[node name="rock-a2" type="Node3D" parent="KenneyDressing/rock-a2_2" unique_id=1472116921 instance=ExtResource("27_asksh")]
+transform = Transform3D(2.7349122, 0, 0, 0, 2.7349122, 0, 0, 0, 2.7349122, 0.061287034, 0, -0.037396513)
+
+[node name="rock-c2_4" type="Node3D" parent="KenneyDressing" unique_id=589179384]
+transform = Transform3D(0.6016864, 0, -0.7987324, 0, 1, 0, 0.7987324, 0, 0.6016864, -133.648, 2.8945622, -162.299)
+metadata/size = Vector3(2.3019693, 1.498, 1.6622329)
+
+[node name="rock-c2" type="Node3D" parent="KenneyDressing/rock-c2_4" unique_id=478811700 instance=ExtResource("25_u505x")]
+transform = Transform3D(2.937255, 0, 0, 0, 2.937255, 0, 0, 0, 2.937255, -0.030995458, -1.3252736e-16, 0.018657027)
+
+[node name="rock-a2_3" type="Node3D" parent="KenneyDressing" unique_id=6904958]
+transform = Transform3D(0.28941062, 0, -0.95720506, 0, 1, 0, 0.95720506, 0, 0.28941062, -157.343, 3.4260821, -100.803)
+metadata/size = Vector3(2.0146015, 1.425, 2.2555397)
+
+[node name="rock-a2" type="Node3D" parent="KenneyDressing/rock-a2_3" unique_id=712699075 instance=ExtResource("27_asksh")]
+transform = Transform3D(3.6287243, 0, 0, 0, 3.6287243, 0, 0, 0, 3.6287243, 0.0813166, 0, -0.049618278)
+
+[node name="rock-a2_4" type="Node3D" parent="KenneyDressing" unique_id=282954479]
+transform = Transform3D(0.76536685, 0, -0.64359426, 0, 1, 0, 0.64359426, 0, 0.76536685, 197.476, 4.402921, -17.764)
+metadata/size = Vector3(2.2464573, 1.5889999, 2.5151246)
+
+[node name="rock-a2" type="Node3D" parent="KenneyDressing/rock-a2_4" unique_id=156262054 instance=ExtResource("27_asksh")]
+transform = Transform3D(4.0463457, 0, 0, 0, 4.0463457, 0, 0, 0, 4.0463457, 0.09067514, 0, -0.055328734)
+
+[node name="rock-c2_5" type="Node3D" parent="KenneyDressing" unique_id=1354366674]
+transform = Transform3D(0.48275363, 0, 0.8757562, 0, 1, 0, -0.8757562, 0, 0.48275363, -154.156, 7.0327353, -185.734)
+metadata/size = Vector3(2.3818777, 1.5500001, 1.719934)
+
+[node name="rock-c2" type="Node3D" parent="KenneyDressing/rock-c2_5" unique_id=1775893647 instance=ExtResource("25_u505x")]
+transform = Transform3D(3.0392158, 0, 0, 0, 3.0392158, 0, 0, 0, 3.0392158, -0.0320714, -1.3712778e-16, 0.019304669)
+
+[node name="rock-c2_6" type="Node3D" parent="KenneyDressing" unique_id=975107033]
+transform = Transform3D(0.84980285, 0, -0.5271006, 0, 1, 0, 0.5271006, 0, 0.84980285, 143.755, 4.9974236, 30.045)
+metadata/size = Vector3(1.8793783, 1.223, 1.3570834)
+
+[node name="rock-c2" type="Node3D" parent="KenneyDressing/rock-c2_6" unique_id=690443768 instance=ExtResource("25_u505x")]
+transform = Transform3D(2.3980393, 0, 0, 0, 2.3980393, 0, 0, 0, 2.3980393, -0.02530537, -1.08198235e-16, 0.015232006)
+
+[node name="rock-c2_7" type="Node3D" parent="KenneyDressing" unique_id=659354501]
+transform = Transform3D(0.5086455, 0, -0.86097604, 0, 1, 0, 0.86097604, 0, 0.5086455, 192.945, -0.04810275, -51.455)
+metadata/size = Vector3(2.234355, 1.454, 1.613409)
+
+[node name="rock-c2" type="Node3D" parent="KenneyDressing/rock-c2_7" unique_id=829594312 instance=ExtResource("25_u505x")]
+transform = Transform3D(2.8509805, 0, 0, 0, 2.8509805, 0, 0, 0, 2.8509805, -0.030085044, -1.286347e-16, 0.018109024)
+
+[node name="rock-a2_5" type="Node3D" parent="KenneyDressing" unique_id=416600124]
+transform = Transform3D(-0.2966699, 0, 0.9549801, 0, 1, 0, -0.9549801, 0, -0.2966699, -106.988, -0.12281535, -109.568)
+metadata/size = Vector3(1.3699291, 0.96900004, 1.533767)
+
+[node name="rock-a2" type="Node3D" parent="KenneyDressing/rock-a2_5" unique_id=2056441491 instance=ExtResource("27_asksh")]
+transform = Transform3D(2.4675326, 0, 0, 0, 2.4675326, 0, 0, 0, 2.4675326, 0.055295285, 0, -0.03374043)
+
+[node name="rock-a2_6" type="Node3D" parent="KenneyDressing" unique_id=950657139]
+transform = Transform3D(-0.5466758, 0, -0.83734435, 0, 1, 0, 0.83734435, 0, -0.5466758, -127.385, 2.4879243, -112.434)
+metadata/size = Vector3(1.1833134, 0.8370001, 1.3248328)
+
+[node name="rock-a2" type="Node3D" parent="KenneyDressing/rock-a2_6" unique_id=453394200 instance=ExtResource("27_asksh")]
+transform = Transform3D(2.1313982, 0, 0, 0, 2.1313982, 0, 0, 0, 2.1313982, 0.0477628, 0, -0.02914421)
+
+[node name="rock-c2_8" type="Node3D" parent="KenneyDressing" unique_id=1420182331]
+transform = Transform3D(-0.13181886, 0, 0.9912738, 0, 1, 0, -0.9912738, 0, -0.13181886, -153.496, -1.034137, 184.601)
+metadata/size = Vector3(2.0899055, 1.36, 1.5091033)
+
+[node name="rock-c2" type="Node3D" parent="KenneyDressing/rock-c2_8" unique_id=2113561123 instance=ExtResource("25_u505x")]
+transform = Transform3D(2.6666667, 0, 0, 0, 2.6666667, 0, 0, 0, 2.6666667, -0.028140068, -1.2031857e-16, 0.01693829)
+
+[node name="rock-c2_9" type="Node3D" parent="KenneyDressing" unique_id=1738097583]
+transform = Transform3D(0.8080275, 0, 0.58914477, 0, 1, 0, -0.58914477, 0, 0.8080275, -200.144, 3.0877645, 151.35)
+metadata/size = Vector3(1.9900203, 1.2950001, 1.4369771)
+
+[node name="rock-c2" type="Node3D" parent="KenneyDressing/rock-c2_9" unique_id=537539674 instance=ExtResource("25_u505x")]
+transform = Transform3D(2.5392158, 0, 0, 0, 2.5392158, 0, 0, 0, 2.5392158, -0.02679514, -1.1456805e-16, 0.01612874)
+
+[node name="rock-a2_7" type="Node3D" parent="KenneyDressing" unique_id=751586314]
+transform = Transform3D(0.35845372, 0, -0.9335475, 0, 1, 0, 0.9335475, 0, 0.35845372, -172.257, 7.1426215, -177.513)
+metadata/size = Vector3(2.3326964, 1.65, 2.6116774)
+
+[node name="rock-a2" type="Node3D" parent="KenneyDressing/rock-a2_7" unique_id=884392507 instance=ExtResource("27_asksh")]
+transform = Transform3D(4.2016807, 0, 0, 0, 4.2016807, 0, 0, 0, 4.2016807, 0.09415606, 0, -0.057452742)
+
+[node name="rock-c2_10" type="Node3D" parent="KenneyDressing" unique_id=487937371]
+transform = Transform3D(-0.85169095, 0, 0.5240444, 0, 1, 0, -0.5240444, 0, -0.85169095, -135.448, 4.387899, -137.688)
+metadata/size = Vector3(1.4352733, 0.934, 1.0363989)
+
+[node name="rock-c2" type="Node3D" parent="KenneyDressing/rock-c2_10" unique_id=999449488 instance=ExtResource("25_u505x")]
+transform = Transform3D(1.8313726, 0, 0, 0, 1.8313726, 0, 0, 0, 1.8313726, -0.019325607, -8.263054e-17, 0.011632619)
+
+[node name="rock-a2_8" type="Node3D" parent="KenneyDressing" unique_id=992426181]
+transform = Transform3D(0.603283, 0, -0.7975272, 0, 1, 0, 0.7975272, 0, 0.603283, 187.666, 1.4914029, -200.437)
+metadata/size = Vector3(1.0744542, 0.76, 1.2029545)
+
+[node name="rock-a2" type="Node3D" parent="KenneyDressing/rock-a2_8" unique_id=594462585 instance=ExtResource("27_asksh")]
+transform = Transform3D(1.9353197, 0, 0, 0, 1.9353197, 0, 0, 0, 1.9353197, 0.04336885, 0, -0.026463082)
+
+[node name="rock-c2_11" type="Node3D" parent="KenneyDressing" unique_id=1050550742]
+transform = Transform3D(-0.879687, 0, 0.47555315, 0, 1, 0, -0.47555315, 0, -0.879687, -140.206, 3.111519, -82.216)
+metadata/size = Vector3(1.960823, 1.2759999, 1.4158939)
+
+[node name="rock-c2" type="Node3D" parent="KenneyDressing/rock-c2_11" unique_id=235436249 instance=ExtResource("25_u505x")]
+transform = Transform3D(2.5019608, 0, 0, 0, 2.5019608, 0, 0, 0, 2.5019608, -0.026402006, -1.1288712e-16, 0.015892101)
+
+[node name="rock-b2_4" type="Node3D" parent="KenneyDressing" unique_id=1680904483]
+transform = Transform3D(0.95233357, 0, 0.30505863, 0, 1, 0, -0.30505863, 0, 0.95233357, -204.314, 5.88979, 110.659)
+metadata/size = Vector3(1.5113392, 0.758, 1.3122743)
+
+[node name="rock-b2" type="Node3D" parent="KenneyDressing/rock-b2_4" unique_id=393535430 instance=ExtResource("26_bwyfc")]
+transform = Transform3D(1.8107632, 0, 0, 0, 1.8107632, 0, 0, 0, 1.8107632, -0.07050564, 2.4254886e-16, -0.013422432)
+
+[node name="rock-c2_12" type="Node3D" parent="KenneyDressing" unique_id=550986498]
+transform = Transform3D(-0.98763704, 0, -0.15675816, 0, 1, 0, 0.15675816, 0, -0.98763704, -74.472, 0.6579538, 157.711)
+metadata/size = Vector3(1.8332773, 1.193, 1.3237944)
+
+[node name="rock-c2" type="Node3D" parent="KenneyDressing/rock-c2_12" unique_id=875928807 instance=ExtResource("25_u505x")]
+transform = Transform3D(2.3392158, 0, 0, 0, 2.3392158, 0, 0, 0, 2.3392158, -0.024684634, -1.0554415e-16, 0.014858367)
+
+[node name="rock-b2_5" type="Node3D" parent="KenneyDressing" unique_id=1920788006]
+transform = Transform3D(0.5129441, 0, -0.85842204, 0, 1, 0, 0.85842204, 0, 0.5129441, -86.534, 0.6609859, 208.289)
+metadata/size = Vector3(2.6717603, 1.3399999, 2.3198516)
+
+[node name="rock-b2" type="Node3D" parent="KenneyDressing/rock-b2_5" unique_id=1380543559 instance=ExtResource("26_bwyfc")]
+transform = Transform3D(3.2010853, 0, 0, 0, 3.2010853, 0, 0, 0, 3.2010853, -0.12464058, 4.287803e-16, -0.023728311)
+
+[node name="rock-a2_9" type="Node3D" parent="KenneyDressing" unique_id=654944194]
+transform = Transform3D(0.84297854, 0, 0.5379472, 0, 1, 0, -0.5379472, 0, 0.84297854, -154.476, 0.29572612, 1.976)
+metadata/size = Vector3(2.047118, 1.4480001, 2.291945)
+
+[node name="rock-a2" type="Node3D" parent="KenneyDressing/rock-a2_9" unique_id=1512478559 instance=ExtResource("27_asksh")]
+transform = Transform3D(3.6872933, 0, 0, 0, 3.6872933, 0, 0, 0, 3.6872933, 0.08262908, 0, -0.050419137)
+
+[node name="rock-b2_6" type="Node3D" parent="KenneyDressing" unique_id=1443585736]
+transform = Transform3D(-0.27672932, 0, -0.96094793, 0, 1, 0, 0.96094793, 0, -0.27672932, -123.367, 0.91830146, -137.655)
+metadata/size = Vector3(2.36072, 1.184, 2.0497794)
+
+[node name="rock-b2" type="Node3D" parent="KenneyDressing/rock-b2_6" unique_id=207898185 instance=ExtResource("26_bwyfc")]
+transform = Transform3D(2.8284218, 0, 0, 0, 2.8284218, 0, 0, 0, 2.8284218, -0.11013018, 3.7886262e-16, -0.02096591)
+
+[node name="rock-b2_7" type="Node3D" parent="KenneyDressing" unique_id=1987804605]
+transform = Transform3D(-0.039193645, 0, 0.99923164, 0, 1, 0, -0.99923164, 0, -0.039193645, -55.668, -0.96968627, 191.314)
+metadata/size = Vector3(2.3547382, 1.181, 2.0445857)
+
+[node name="rock-b2" type="Node3D" parent="KenneyDressing/rock-b2_7" unique_id=504081012 instance=ExtResource("26_bwyfc")]
+transform = Transform3D(2.8212552, 0, 0, 0, 2.8212552, 0, 0, 0, 2.8212552, -0.10985114, 3.7790266e-16, -0.020912787)
+
+[node name="rock-c2_13" type="Node3D" parent="KenneyDressing" unique_id=577547595]
+transform = Transform3D(0.37537038, 0, 0.9268749, 0, 1, 0, -0.9268749, 0, 0.37537038, -171.872, 1.0929698, -52.063)
+metadata/size = Vector3(2.2020843, 1.433, 1.5901066)
+
+[node name="rock-c2" type="Node3D" parent="KenneyDressing/rock-c2_13" unique_id=720574292 instance=ExtResource("25_u505x")]
+transform = Transform3D(2.809804, 0, 0, 0, 2.809804, 0, 0, 0, 2.809804, -0.029650528, -1.2677684e-16, 0.017847477)
+
+[node name="rock-b2_8" type="Node3D" parent="KenneyDressing" unique_id=2068937151]
+transform = Transform3D(-0.0753175, 0, -0.9971596, 0, 1, 0, 0.9971596, 0, -0.0753175, 14.789, -0.8697317, 184.762)
+metadata/size = Vector3(3.2459896, 1.6279999, 2.8184466)
+
+[node name="rock-b2" type="Node3D" parent="KenneyDressing/rock-b2_8" unique_id=670036398 instance=ExtResource("26_bwyfc")]
+transform = Transform3D(3.8890798, 0, 0, 0, 3.8890798, 0, 0, 0, 3.8890798, -0.151429, 5.2093606e-16, -0.028828125)
+
+[node name="rock-a2_10" type="Node3D" parent="KenneyDressing" unique_id=2081515264]
+transform = Transform3D(-0.32441103, 0, -0.94591624, 0, 1, 0, 0.94591624, 0, -0.32441103, 84.431, 0.8799704, 134.026)
+metadata/size = Vector3(2.2973526, 1.625, 2.5721066)
+
+[node name="rock-a2" type="Node3D" parent="KenneyDressing/rock-a2_10" unique_id=996378819 instance=ExtResource("27_asksh")]
+transform = Transform3D(4.138019, 0, 0, 0, 4.138019, 0, 0, 0, 4.138019, 0.09272945, 0, -0.056582246)
+
+[node name="rock-a2_11" type="Node3D" parent="KenneyDressing" unique_id=1632876590]
+transform = Transform3D(0.14113829, 0, -0.9899899, 0, 1, 0, 0.9899899, 0, 0.14113829, -91.525, 1.2959911, -161.153)
+metadata/size = Vector3(1.4589957, 1.0320001, 1.6334857)
+
+[node name="rock-a2" type="Node3D" parent="KenneyDressing/rock-a2_11" unique_id=1882319063 instance=ExtResource("27_asksh")]
+transform = Transform3D(2.6279604, 0, 0, 0, 2.6279604, 0, 0, 0, 2.6279604, 0.058890335, 0, -0.03593408)
+
+[node name="rock-b2_9" type="Node3D" parent="KenneyDressing" unique_id=1161912502]
+transform = Transform3D(-0.8426596, 0, 0.5384467, 0, 1, 0, -0.5384467, 0, -0.8426596, -11.702, 1.8279649, 59.892)
+metadata/size = Vector3(1.5771363, 0.791, 1.369405)
+
+[node name="rock-b2" type="Node3D" parent="KenneyDressing/rock-b2_9" unique_id=384399211 instance=ExtResource("26_bwyfc")]
+transform = Transform3D(1.889596, 0, 0, 0, 1.889596, 0, 0, 0, 1.889596, -0.07357515, 2.5310837e-16, -0.014006786)
+
+[node name="rock-a2_12" type="Node3D" parent="KenneyDressing" unique_id=507089970]
+transform = Transform3D(-0.06634031, 0, -0.9977971, 0, 1, 0, 0.9977971, 0, -0.06634031, 176.551, 2.3699903, 26.272)
+metadata/size = Vector3(2.2676637, 1.6040001, 2.5388672)
+
+[node name="rock-a2" type="Node3D" parent="KenneyDressing/rock-a2_12" unique_id=1725848527 instance=ExtResource("27_asksh")]
+transform = Transform3D(4.084543, 0, 0, 0, 4.084543, 0, 0, 0, 4.084543, 0.0915311, 0, -0.05585103)
+
+[node name="rock-a2_13" type="Node3D" parent="KenneyDressing" unique_id=2022459505]
+transform = Transform3D(-0.9830111, 0, 0.18354611, 0, 1, 0, -0.18354611, 0, -0.9830111, 13.14, 2.292931, 49.939)
+metadata/size = Vector3(2.3454201, 1.6589999, 2.625923)
+
+[node name="rock-a2" type="Node3D" parent="KenneyDressing/rock-a2_13" unique_id=1830269408 instance=ExtResource("27_asksh")]
+transform = Transform3D(4.224599, 0, 0, 0, 4.224599, 0, 0, 0, 4.224599, 0.09466964, 0, -0.05776612)
+
+[node name="rock-b2_10" type="Node3D" parent="KenneyDressing" unique_id=546074315]
+transform = Transform3D(-0.7508771, 0, -0.660442, 0, 1, 0, 0.660442, 0, -0.7508771, -135.062, 4.481325, -168.239)
+metadata/size = Vector3(1.8582692, 0.932, 1.6135088)
+
+[node name="rock-b2" type="Node3D" parent="KenneyDressing/rock-b2_10" unique_id=782731072 instance=ExtResource("26_bwyfc")]
+transform = Transform3D(2.2264266, 0, 0, 0, 2.2264266, 0, 0, 0, 2.2264266, -0.086690314, 2.982263e-16, -0.01650357)
+
+[node name="rock-b2_11" type="Node3D" parent="KenneyDressing" unique_id=261035509]
+transform = Transform3D(-0.9458502, 0, 0.32460356, 0, 1, 0, -0.32460356, 0, -0.9458502, -189.219, 0.25339788, -57.009)
+metadata/size = Vector3(1.621001, 0.813, 1.4074922)
+
+[node name="rock-b2" type="Node3D" parent="KenneyDressing/rock-b2_11" unique_id=2123425593 instance=ExtResource("26_bwyfc")]
+transform = Transform3D(1.9421511, 0, 0, 0, 1.9421511, 0, 0, 0, 1.9421511, -0.075621486, 2.6014806e-16, -0.0143963555)

@@ -1,8 +1,9 @@
 extends Node
 ## Dead Acres networking. Autoload name: "Net".
 ##
-## Host-based ENet co-op, 2-4 players. The host owns the world seed and the
-## player roster. Players are spawned by manual RPC (no MultiplayerSpawner) so
+## Host-based ENet co-op, 2-4 players. The host owns the player roster and a session seed that it sends in
+## the join handshake (_rpc_welcome -> world_seed_received, which starts the client's game). The world itself is
+## baked (scenes/world/world_baked.tscn) and identical on every peer, so the seed no longer drives world content. Players are spawned by manual RPC (no MultiplayerSpawner) so
 ## the world scene needs no special node. Every peer instantiates
 ## res://scenes/player/player.tscn, names the node after the peer id and gives
 ## that peer multiplayer authority over it.
@@ -31,7 +32,7 @@ const MENU_SCENE_PATH := "res://scenes/ui/menu.tscn"
 
 ## True from host()/join() until leave().
 var active := false
-## Shared world seed. The host picks it; clients receive it right after joining.
+## Session seed: the host picks it, clients receive it in the welcome handshake. Not used to build the world.
 var world_seed := 0
 ## Peer ids currently in the game (host is always 1).
 var roster: Array[int] = []

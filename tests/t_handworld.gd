@@ -6,7 +6,7 @@ extends SceneTree
 ## location / the city / the dungeon gate connected to the spawn by roads, houses beside roads, cars on roads,
 ## and the map texture builds with the hand footprints.
 
-const HandLayout = preload("res://scripts/world/hand_layout.gd")
+const HandLayout = preload("res://tools/worldgen/hand_layout.gd")
 
 var fails := 0
 
@@ -244,7 +244,7 @@ func _run() -> void:
 		await physics_frame
 	var sig2: String = _signature(w2)
 	check(sig1 == sig2, "world is identical for seeds 1 and 424242 (%s vs %s)" % [sig1.substr(0, 8), sig2.substr(0, 8)])
-	check(w2.world_seed == HandLayout.HAND_SEED, "world_seed is the fixed hand seed")
+	check(w2.has_node("Markers") and w2.has_node("Terrain") and w2.terrain.has_method("ground_color"), "world is loaded from the baked scenes (seed only recorded, %d)" % w2.world_seed)
 
 	print("RESULT failures=%d" % fails)
 	quit(1 if fails > 0 else 0)

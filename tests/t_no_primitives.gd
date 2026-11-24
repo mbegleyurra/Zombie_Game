@@ -5,6 +5,9 @@ extends SceneTree
 ## downloaded asset (scene under res://assets/ or a mesh resource from a .glb) or on the allowed list below
 ## (terrain chunks, the terrain-baked road mesh, pickup glow discs). Also builds one zombie of each kind and one
 ## placed piece of each building kind, and scans them the same way.
+## Meshes the bake copied out of an imported model into scenes/world/baked/res/ carry meta "source_asset" = the
+## model file they came from; they count as assets only if that file exists under res://assets/. Meshes generated
+## in code have no such stamp and are still flagged.
 
 const ALLOWED_PREFIX := ["Chunk_", "Roads", "Glow"]
 
@@ -36,6 +39,14 @@ func _mesh_of(n: Node) -> Mesh:
 	return null
 
 
+func _baked_asset(mesh: Mesh) -> bool:
+	if not mesh.has_meta("source_asset"):
+		return false
+	var src := str(mesh.get_meta("source_asset"))
+	return src.begins_with("res://assets/") and (src.ends_with(".glb") or src.ends_with(".gltf")) \
+		and ResourceLoader.exists(src)
+
+
 func _offenders(root_node: Node, out: Array) -> int:
 	var seen := 0
 	for n in root_node.find_children("*", "", true, false):
@@ -46,7 +57,7 @@ func _offenders(root_node: Node, out: Array) -> int:
 			continue
 		seen += 1
 		var rp: String = mesh.resource_path
-		if _is_asset(n) or rp.contains("assets/") or rp.contains(".glb"):
+		if _is_asset(n) or rp.contains("assets/") or rp.contains(".glb") or _baked_asset(mesh):
 			continue
 		var allowed := false
 		for pre in ALLOWED_PREFIX:

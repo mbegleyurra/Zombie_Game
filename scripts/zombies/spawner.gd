@@ -23,7 +23,7 @@ signal horde_started(count: int)
 
 const ZOMBIE_SCENE := "res://scenes/zombies/zombie.tscn"
 const MASK_WORLD := 1
-const HandMapData = preload("res://scripts/world/hand_map_data.gd")
+const SpawnMarkers = preload("res://scripts/world/spawn_markers.gd")
 
 @export var enabled: bool = true
 @export var base_cap: int = 8
@@ -50,6 +50,7 @@ var kills: int = 0
 var _seq: int = 0                 ## deterministic round-robin counter (player choice, row cycling); no random draws
 var _cursor: Dictionary = {}      ## section -> next authored spawn row to try
 var _last_row: Array = []         ## authored row [x, z, yaw, roll, variant_seed] picked for the next spawn
+var _rows: Dictionary = {}        ## section -> rows read from the baked spawn markers (cached once non-empty)
 
 
 func _ready() -> void:
@@ -208,11 +209,11 @@ func _try_spawn(players: Array[Player]) -> void:
 			return
 
 
-## Returns a ground point 32-60 m from `anchor` that no player can currently see, or null. Candidates are the
-## AUTHORED spawn rows of `section` in data/hand_map/placements.json, walked from a rolling cursor (no random draws).
+## Returns a ground point 32-60 m from `anchor` that no player can currently see, or null. Candidates are the baked
+## spawn markers of `section` (zombie_spawn / skeleton_spawn groups), walked from a rolling cursor (no random draws).
 ## The row used is left in _last_row for the spawn that follows.
 func _pick_point(anchor: Player, players: Array[Player], section: String = "ZOMBIE_SPAWNS") -> Variant:
-	var rows: Array = HandMapData.section(section)
+	var rows: Array = spawn_rows(section)
 	if rows.is_empty():
 		return null
 	var start: int = int(_cursor.get(section, 0))
@@ -265,10 +266,19 @@ func _player_can_see(pl: Player, space: PhysicsDirectSpaceState3D, spot: Vector3
 	return space.intersect_ray(q).is_empty()
 
 
-## The authored row for the next spawn: the one _pick_point just chose, else the next row in file order.
+## Spawn rows [x, z, yaw, roll, variant_seed] from the baked markers of `section`, in marker index order.
+func spawn_rows(section: String) -> Array:
+	var rows: Array = _rows.get(section, []) as Array
+	if rows.is_empty() and is_inside_tree():
+		rows = SpawnMarkers.rows(get_tree(), section)
+		_rows[section] = rows
+	return rows
+
+
+## The authored row for the next spawn: the one _pick_point just chose, else the next marker in index order.
 func _row() -> Array:
 	if _last_row.is_empty():
-		var rows: Array = HandMapData.section("ZOMBIE_SPAWNS")
+		var rows: Array = spawn_rows("ZOMBIE_SPAWNS")
 		if rows.is_empty():
 			_last_row = [0.0, 0.0, 0.0, 0.5, 1]
 		else:

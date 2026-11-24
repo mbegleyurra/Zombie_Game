@@ -4,7 +4,7 @@ extends SceneTree
 ## handlers exist, and the dungeon has about half the guards it used to.
 ## Run: godot --headless --path . --script res://tests/t_dungeon_access.gd -- <seed>
 
-const DB = preload("res://scripts/world/dungeon_builder.gd")
+const DB = preload("res://tools/worldgen/dungeon_builder.gd")
 
 const ORIGINAL_GUARDS := 25      # guard markers before the "easier dungeon" pass
 const MAX_GUARDS := 13           # ceil(ORIGINAL_GUARDS / 2)
@@ -106,7 +106,7 @@ func _run() -> void:
 	var boss := 0
 	var types := {}
 	for m in get_nodes_in_group("dungeon_skeleton_spawn"):
-		if dn.is_ancestor_of(m):
+		if _in_dungeon(dn, m):
 			markers.append(m)
 			types[str(m.get_meta("type"))] = true
 			if m.has_meta("boss"):
@@ -117,7 +117,7 @@ func _run() -> void:
 	var cons := 0
 	var golds := 0
 	for c in get_nodes_in_group("loot_container"):
-		if dn.is_ancestor_of(c):
+		if _in_dungeon(dn, c):
 			cons += 1
 			if str(c.get("dkind")) == "gold_chest":
 				golds += 1
@@ -204,3 +204,15 @@ func _run() -> void:
 
 	print("RESULT fails=%d" % fails)
 	quit(1 if fails > 0 else 0)
+
+
+## Dungeon content. Before the bake it sat under World/Dungeon; the baked scene keeps containers and guard markers
+## under Markers (LootContainers / DungeonSkeletonSpawns), so a dungeon container (it has dkind) or a guard marker
+## anywhere in this world counts too.
+func _in_dungeon(dn: Node, n: Node) -> bool:
+	if dn == null:
+		return false
+	if dn.is_ancestor_of(n):
+		return true
+	var w: Node = dn.get_parent()
+	return w != null and w.is_ancestor_of(n) and (n.is_in_group("dungeon_skeleton_spawn") or ("dkind" in n and str(n.get("dkind")) != ""))

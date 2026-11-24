@@ -1,8 +1,8 @@
 extends "res://scripts/world/loot_container.gd"
 ## A loot container dressed with a KayKit Dungeon Pack model (chest, gold chest, barrel, crates, bottle table).
 ## Same contract as loot_container.gd: groups "interactable" + "loot_container", interact(player), get_prompt(),
-## apply_open_state(bool), signal opened. Contents are rolled deterministically from (world_seed, loot_id, table).
-## Build it with setup_dungeon(loot_id, dkind, table, world_seed) BEFORE adding it to the tree.
+## apply_open_state(bool), signal opened. Contents, dkind and model_size are exported and baked into
+## scenes/world/baked/markers.tscn; setup_dungeon() is only used by the bake-only generator.
 
 const ModelUtil = preload("res://scripts/world/model_util.gd")
 const DUN := "res://assets/kaykit/dungeon/KayKit_Dungeon_Pack_1.1_FREE/Assets/gltf/"
@@ -19,9 +19,15 @@ const DKINDS := {
 	"bottle_table": {"model": "table_medium.gltf", "scale": 0.6, "label": "Bottle Table", "verb": "Search"},
 }
 
-var dkind: String = "box"
-var model_size: Vector3 = Vector3.ONE
+@export var dkind: String = "box"
+@export var model_size: Vector3 = Vector3.ONE
 var _model: Node3D
+
+
+func _ready() -> void:
+	super._ready()
+	if _model == null:   # loaded from a baked scene
+		_model = get_node_or_null("Model") as Node3D
 
 
 func setup_dungeon(p_loot_id: int, p_dkind: String, p_table: String, world_seed: int) -> void:

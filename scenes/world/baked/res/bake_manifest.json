@@ -1,0 +1,153 @@
+{
+  "builder": {
+    "dressing": {
+      "camp_models": 40,
+      "camps": 5,
+      "cars": 14,
+      "cones": 9,
+      "crates_barrels": 12,
+      "models": 155,
+      "rocks": 40,
+      "shapes": 131,
+      "signposts": 4,
+      "trees": 36
+    },
+    "forest": {
+      "bushes": 260,
+      "grass": 1500,
+      "instances": 2450,
+      "multimeshes": 316,
+      "rocks": 170,
+      "shapes": 564,
+      "trees": 520
+    },
+    "locations": 12,
+    "loot_nodes": 250,
+    "vehicles": 10
+  },
+  "files": [],
+  "scenes": {
+    "buildings": {
+      "nodes": 10553,
+      "semantic": {
+        "collision_shapes": 991,
+        "glb_instances": 2890,
+        "ground_loot": 0,
+        "loot_containers": 0,
+        "markers": 0,
+        "mm_instances": 0,
+        "multimeshes": 0,
+        "vehicles": 0
+      }
+    },
+    "dungeon": {
+      "nodes": 692,
+      "semantic": {
+        "collision_shapes": 152,
+        "glb_instances": 233,
+        "ground_loot": 0,
+        "loot_containers": 0,
+        "markers": 0,
+        "mm_instances": 0,
+        "multimeshes": 0,
+        "vehicles": 0
+      }
+    },
+    "markers": {
+      "nodes": 1447,
+      "semantic": {
+        "collision_shapes": 109,
+        "glb_instances": 115,
+        "ground_loot": 141,
+        "loot_containers": 109,
+        "markers": 454,
+        "mm_instances": 0,
+        "multimeshes": 0,
+        "vehicles": 0
+      }
+    },
+    "props": {
+      "nodes": 751,
+      "semantic": {
+        "collision_shapes": 149,
+        "glb_instances": 173,
+        "ground_loot": 0,
+        "loot_containers": 0,
+        "markers": 0,
+        "mm_instances": 0,
+        "multimeshes": 0,
+        "vehicles": 0
+      }
+    },
+    "roads": {
+      "nodes": 1,
+      "semantic": {
+        "collision_shapes": 0,
+        "glb_instances": 0,
+        "ground_loot": 0,
+        "loot_containers": 0,
+        "markers": 0,
+        "mm_instances": 0,
+        "multimeshes": 0,
+        "vehicles": 0
+      }
+    },
+    "terrain": {
+      "nodes": 192,
+      "semantic": {
+        "collision_shapes": 64,
+        "glb_instances": 0,
+        "ground_loot": 0,
+        "loot_containers": 0,
+        "markers": 0,
+        "mm_instances": 0,
+        "multimeshes": 0,
+        "vehicles": 0
+      }
+    },
+    "vegetation": {
+      "nodes": 882,
+      "semantic": {
+        "collision_shapes": 564,
+        "glb_instances": 0,
+        "ground_loot": 0,
+        "loot_containers": 0,
+        "markers": 0,
+        "mm_instances": 2450,
+        "multimeshes": 316,
+        "vehicles": 0
+      }
+    },
+    "vehicles": {
+      "nodes": 11,
+      "semantic": {
+        "collision_shapes": 0,
+        "glb_instances": 0,
+        "ground_loot": 0,
+        "loot_containers": 0,
+        "markers": 0,
+        "mm_instances": 0,
+        "multimeshes": 0,
+        "vehicles": 10
+      }
+    }
+  },
+  "scripts": [
+    "res://scripts/world/dungeon_door.gd",
+    "res://scripts/vehicles/vehicle.gd",
+    "res://scripts/world/loot_container.gd",
+    "res://scripts/world/dungeon_container.gd",
+    "res://scripts/world/loot_item.gd"
+  ],
+  "stats": {
+    "flattened_instances": 12,
+    "imported_copies": 56,
+    "materials": 29,
+    "meshes": 93,
+    "meta_node_refs": 0,
+    "multimeshes": 316,
+    "renamed_auto": 6124,
+    "road_vertices_raised": 120,
+    "shapes": 64
+  }
+}

@@ -1,6 +1,7 @@
 extends RefCounted
-## KayKit Resource Bits (CC0) wired into Dead Acres: item definitions, loot tables, building-stock feed and
-## deterministic ground pickups around locations and in the wild.
+## KayKit Resource Bits (CC0) wired into Dead Acres: item definitions, loot tables and building-stock feed.
+## The ground pickups themselves are baked into scenes/world/baked/markers.tscn (GroupLoot); the bake-only scatter
+## that originally placed them lives in tools/worldgen/kaykit_scatter.gd.
 ##
 ## ItemDB merges this file in (has_item / get_item / all_ids / roll_table), so nothing else has to know about it:
 ##   ITEMS    new item ids (ingots, nuggets, fuel can, parts, logs, coin)
@@ -11,7 +12,6 @@ extends RefCounted
 ## Entries whose item id does not exist in ItemDB (for example a rifle that has not been added yet) are skipped
 ## when the table is read, so a table can name future items safely.
 
-const HandMapData = preload("res://scripts/world/hand_map_data.gd")
 const RES := "res://assets/kaykit/resources/KayKit_ResourceBits_1.0_FREE/Assets/gltf/"
 const DUN := "res://assets/kaykit/dungeon/KayKit_Dungeon_Pack_1.1_FREE/Assets/gltf/"
 
@@ -171,48 +171,7 @@ static func feed_for(item_id: String) -> Array:
 	return FEED.get(item_id, []) as Array
 
 
-## Wires the ground-pickup scatter to the world's `built` signal (called from DungeonBuilder.attach).
-static func attach(world: Node) -> void:
-	world.built.connect(func(): scatter(world))
-
-
-## Places the HAND-AUTHORED ground pickups: one PICKUPS row [item, amount, x, z] each in data/hand_map/placements.json.
-## Uses next_loot_id() so every peer builds identical ids. Returns the number of pickups placed.
-static func scatter(world: Node) -> int:
-	var count := 0
-	for row in HandMapData.section("PICKUPS"):
-		var r: Array = row
-		_drop(world, str(r[0]), int(r[1]), Vector2(float(r[2]), float(r[3])))
-		count += 1
-	return count
-
-
-static func _drop(world: Node, item: String, amount: int, p: Vector2) -> void:
-	var y: float = world.terrain.height_at(p.x, p.y) + 0.06
-	world.spawn_ground_item(item, amount, Vector3(p.x, y, p.y), world.next_loot_id())
-
-
-
-## Flat enough, off every placed pickup, off the procedural props, off the Kenney dressing colliders.
-## clear_margin > 0 additionally demands terrain.is_clear(x, z, margin) (wild deposits stay off pads and roads).
-static func _spot_ok(world: Node, terrain, p: Vector2, clear_margin: float, placed: Array) -> bool:
-	if absf(p.x) > 215.0 or absf(p.y) > 215.0:
-		return false
-	if clear_margin > 0.0 and not terrain.is_clear(p.x, p.y, clear_margin):
-		return false
-	if terrain.normal_at(p.x, p.y).y < 0.93:
-		return false
-	for q in placed:
-		if (q as Vector2).distance_to(p) < 2.5:
-			return false
-	for q in world.prop_points:
-		if (q as Vector2).distance_to(p) < 2.6:
-			return false
-	return not blocked_by_dressing(world, p, 0.7)
-
-
-## True if (x, z) lies inside (or within `pad` of) any Kenney-dressing or KayKit-forest collider. The scatter runs on
-## `built`, after both exist, so deposits are rejected here instead of the forest having to dodge them.
+## True if (x, z) lies inside (or within `pad` of) any Kenney-dressing or KayKit-forest collider (read-only query).
 static func blocked_by_dressing(world: Node, p: Vector2, pad: float) -> bool:
 	for path in ["KenneyDressing/Collision", "KayKitForest/Collision"]:
 		if _blocked_by_body(world.get_node_or_null(path), p, pad):

@@ -4,7 +4,7 @@ extends SceneTree
 ## Run it in several PROCESSES (different seeds) and diff the signature files: the layout must be byte-identical.
 ## Geometry is recomputed here from HandLayout's raw data and the built world, not copied from t_handworld.
 
-const HandLayout = preload("res://scripts/world/hand_layout.gd")
+const HandLayout = preload("res://tools/worldgen/hand_layout.gd")
 
 var fails := 0
 

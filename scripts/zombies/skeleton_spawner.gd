@@ -20,7 +20,7 @@ signal skeleton_killed(s: SkeletonEnemy)
 const SCENE := "res://scenes/zombies/skeleton.tscn"
 const MARKER_GROUP := "dungeon_skeleton_spawn"
 const ACTIVATE_DIST := 40.0
-const HandMapData = preload("res://scripts/world/hand_map_data.gd")
+const SpawnMarkers = preload("res://scripts/world/spawn_markers.gd")
 
 @export var enabled: bool = true
 @export var day_cap_per_player: int = 1
@@ -168,10 +168,15 @@ func _prune_far() -> void:
 			s.queue_free()
 
 
-## The authored row for the next skeleton: the one just picked, else the next SKELETON_SPAWNS row in file order.
+## The authored row for the next skeleton: the one just picked, else the next skeleton_spawn marker in index order.
 func _row() -> Array:
 	if _last_row.is_empty():
-		var rows: Array = HandMapData.section("SKELETON_SPAWNS")
+		var rows: Array = []
+		var zs := get_parent()
+		if zs != null and zs.has_method("spawn_rows"):
+			rows = zs.call("spawn_rows", "SKELETON_SPAWNS")
+		elif is_inside_tree():
+			rows = SpawnMarkers.rows(get_tree(), "SKELETON_SPAWNS")
 		if rows.is_empty():
 			_last_row = [0.0, 0.0, 0.0, 0.5, 1]
 		else:

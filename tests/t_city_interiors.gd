@@ -6,7 +6,7 @@ extends SceneTree
 ## back wall without touching anything while the walls beside the door are solid, no loot / pickup / interactable sits
 ## in a room, nothing failed to load, and the interiors are identical for seeds 1 and 424242.
 
-const InteriorsScript = preload("res://scripts/world/city_interiors.gd")
+const InteriorsScript = preload("res://tools/worldgen/city_interiors.gd")
 
 var fails := 0
 

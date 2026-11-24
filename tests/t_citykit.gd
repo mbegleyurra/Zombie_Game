@@ -5,7 +5,7 @@ extends SceneTree
 ## fixtures, city-kit-roads tiles and street props), no model failed to load, buildings and street props have
 ## collision, roads add no collision (terrain stays the drivable ground), and the world is identical per run.
 
-const HandLayout = preload("res://scripts/world/hand_layout.gd")
+const HandLayout = preload("res://tools/worldgen/hand_layout.gd")
 const ModelUtil = preload("res://scripts/world/model_util.gd")
 
 const STREET_HALF_W := 3.2   ## city streets are 6.4 m wide (road_kit CITY_W)

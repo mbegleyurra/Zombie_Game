@@ -6,7 +6,7 @@ extends SceneTree
 ## Optional: append `-- host <port>` to change the port (default 17777).
 ## The client role is `-- client <port>` and is started by the host.
 ##
-## Proves: join handshake, shared world seed, synced player spawn (node name =
+## Proves: join handshake (session seed delivered), synced player spawn (node name =
 ## peer id, authority = peer id), ping RPC round trip, server-validated building
 ## placement synced both ways, and duplicate placement rejection.
 ## Exit code 0 = PASS, 1 = FAIL. Prints "SELFTEST PASS" / "SELFTEST FAIL: ...".

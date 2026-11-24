@@ -80,13 +80,14 @@ func _run() -> void:
 		var r_solid := space.intersect_ray(PhysicsRayQueryParameters3D.create(solid_from, solid_to, 1))
 		check(r_door.is_empty(), "farmhouse door gap is open (ray passes into interior)%s" % ("" if r_door.is_empty() else " hit " + str(r_door.get("position"))))
 		check(not r_solid.is_empty(), "farmhouse wall beside door is solid")
-		# Loot inside the house footprint (local x,z in [-5,5]x[-4,4])
+		# Loot inside the house footprint (local x,z in [-5,5]x[-4,4]). Baked loot lives under Markers, so this checks
+		# position only, not parentage.
 		var inside := 0
 		for id in world.loot_by_id:
 			var n = world.loot_by_id[id]
-			if n is Node3D and node.is_ancestor_of(n):
+			if n is Node3D and is_instance_valid(n):
 				var lp: Vector3 = node.to_local(n.global_position)
-				if absf(lp.x) < 5.0 and absf(lp.z) < 4.0:
+				if absf(lp.x) < 5.0 and absf(lp.z) < 4.0 and absf(lp.y) < 4.0:
 					inside += 1
 		check(inside >= 2, "farmhouse interior holds loot (%d items/containers)" % inside)
 		# Roof: ray straight down from above the house must be stopped by the roof

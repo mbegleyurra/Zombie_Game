@@ -2,7 +2,7 @@ extends SceneTree
 ## KayKit dungeon: deterministic layout, connectivity, loot, guard markers, no overlaps, solid floor.
 ## Run: godot --headless --path . --script res://tests/t_dungeon.gd -- <seed>
 
-const DB = preload("res://scripts/world/dungeon_builder.gd")
+const DB = preload("res://tools/worldgen/dungeon_builder.gd")
 const IDB = preload("res://scripts/world/item_db.gd")
 
 var fails := 0
@@ -33,10 +33,10 @@ func _signature(world: Node3D) -> String:
 	if d == null:
 		return ""
 	for c in get_nodes_in_group("loot_container"):
-		if d.is_ancestor_of(c):
+		if _in_dungeon(d, c):
 			sig.append("%s|%s|%s|%s" % [c.kind, str(c.position), c.table, str(c.contents)])
 	for m in get_nodes_in_group("dungeon_skeleton_spawn"):
-		if d.is_ancestor_of(m):
+		if _in_dungeon(d, m):
 			sig.append("M|%s|%s|%s" % [str(m.position), str(m.get_meta("type")), str(m.get_meta("room"))])
 	return "\n".join(sig).md5_text() + "|" + str((world.get_meta("dungeon_site") as Dictionary)["origin"])
 
@@ -115,7 +115,7 @@ func _run() -> void:
 	var with_loot := 0
 	var cons: Array = []
 	for c in get_nodes_in_group("loot_container"):
-		if d.is_ancestor_of(c):
+		if _in_dungeon(d, c):
 			cons.append(c)
 			if str(c.get("dkind")) == "chest":
 				chests += 1
@@ -148,7 +148,7 @@ func _run() -> void:
 	var boss := 0
 	var markers: Array = []
 	for m in get_nodes_in_group("dungeon_skeleton_spawn"):
-		if d.is_ancestor_of(m):
+		if _in_dungeon(d, m):
 			markers.append(m)
 			types[str(m.get_meta("type"))] = int(types.get(str(m.get_meta("type")), 0)) + 1
 			if m.has_meta("boss"):
@@ -231,3 +231,15 @@ func _run() -> void:
 
 	print("RESULT fails=%d" % fails)
 	quit(1 if fails > 0 else 0)
+
+
+## Dungeon content. Before the bake it sat under World/Dungeon; the baked scene keeps containers and guard markers
+## under Markers (LootContainers / DungeonSkeletonSpawns), so a dungeon container (it has dkind) or a guard marker
+## anywhere in this world counts too.
+func _in_dungeon(dn: Node, n: Node) -> bool:
+	if dn == null:
+		return false
+	if dn.is_ancestor_of(n):
+		return true
+	var w: Node = dn.get_parent()
+	return w != null and w.is_ancestor_of(n) and (n.is_in_group("dungeon_skeleton_spawn") or ("dkind" in n and str(n.get("dkind")) != ""))

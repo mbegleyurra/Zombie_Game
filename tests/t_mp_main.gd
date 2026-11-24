@@ -1,7 +1,8 @@
 extends SceneTree
 ## Host flow against the real scenes/main.tscn.
 ## Run: godot --headless --path . --script res://tests/t_mp_main.gd
-## Checks: Net.world_seed is honoured by main.gd, and exactly one local player exists after host().
+## Checks: Net.host works, the baked map is identical regardless of Net.world_seed, and exactly one local player
+## exists after host().
 
 var fails := 0
 
@@ -16,6 +17,20 @@ func check(cond: bool, label: String) -> void:
 
 func _initialize() -> void:
 	_run.call_deferred()
+
+
+## md5 of what makes up the map: every location (type, name, position) and the ground height on a 40 m grid.
+func _world_sig(w: Node) -> String:
+	if w == null or not w.has_method("get_locations"):
+		return ""
+	var parts := PackedStringArray()
+	for l in w.get_locations():
+		var p2: Vector2 = l["pos2"]
+		parts.append("%s|%s|%.2f,%.2f" % [l["type"], l["name"], p2.x, p2.y])
+	for gx in range(-240, 241, 40):
+		for gz in range(-240, 241, 40):
+			parts.append("%.3f" % w.get_height(float(gx), float(gz)))
+	return "\n".join(parts).md5_text()
 
 
 func _run() -> void:
@@ -39,11 +54,15 @@ func _run() -> void:
 	current_scene = main
 	for _i in 30:
 		await physics_frame
-	# The handcrafted world ignores the seed by design (world_builder.build sets world_seed = HandLayout.HAND_SEED),
-	# so the host's Net seed must NOT change it: every peer builds the identical map.
-	var hand_seed: int = (load("res://scripts/world/hand_layout.gd") as GDScript).HAND_SEED
-	var ws: int = main.world.world_seed
-	check(ws == hand_seed, "world built from the fixed hand seed regardless of Net.world_seed (main world seed=%d, hand seed=%d, Net seed=%d)" % [ws, hand_seed, host_seed])
+	# The world is baked (scenes/world/world_baked.tscn), so the host's Net seed must NOT change it: every peer loads
+	# the identical map. Compare the host's world with a standalone world built from a different seed.
+	var other: Node3D = (load("res://scenes/world/world.tscn") as PackedScene).instantiate()
+	root.add_child(other)
+	other.build(1)
+	var sig_main := _world_sig(main.world)
+	var sig_other := _world_sig(other)
+	check(sig_main != "" and sig_main == sig_other, "world map is identical regardless of Net.world_seed (Net seed=%d vs seed 1: %s / %s)" % [host_seed, sig_main, sig_other])
+	other.queue_free()
 	var in_group := get_nodes_in_group("players")
 	var names := []
 	for p in in_group:

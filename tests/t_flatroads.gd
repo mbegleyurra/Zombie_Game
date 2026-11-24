@@ -6,12 +6,15 @@ extends SceneTree
 ## (second difference of the centreline ~0); (4) the city grid is one single height; (5) the road tile mesh never dips
 ## below the ground and never floats; (6) two independent builds give the same heights.
 
-const HandLayout = preload("res://scripts/world/hand_layout.gd")
+const HandLayout = preload("res://tools/worldgen/hand_layout.gd")
 
 ## md5 of the layout (locations, every road segment, every flat pad, footprints, dungeon site, spawn, tile counts).
 ## Re-recorded when the two industrial plaza props (water tower, chimney) gained minimap footprints (47 -> 49); the
 ## roads, pads, locations and tile counts in it are unchanged.
-const LAYOUT_SIG := "1ef6f9084f150eaac79fbcd443439cd8"
+## Re-recorded for the baked world: location yaw is hashed as (cos, sin) and footprint floats at 3 decimals, because the
+## baked markers store yaw wrapped to -PI..PI and the meta as float32. The generator (tools/worldgen) and the baked
+## scenes give the identical value under this form.
+const LAYOUT_SIG := "fb27846aba8745b852f75e074a07a6c3"
 const LAYOUT_ROADS := 86
 const LAYOUT_FLATS := 40
 const LAYOUT_FOOTPRINTS := 49
@@ -43,17 +46,27 @@ func _layout_sig(world: Node3D) -> String:
 	var sig := PackedStringArray()
 	for l in world.get_locations():
 		var p2: Vector2 = l["pos2"]
-		sig.append("%s|%s|%.2f,%.2f|%.3f" % [l["type"], l["name"], p2.x, p2.y, float(l["rot"])])
+		var rot := float(l["rot"])
+		sig.append("%s|%s|%.2f,%.2f|%.3f,%.3f" % [l["type"], l["name"], p2.x, p2.y, snappedf(cos(rot), 0.001) + 0.0, snappedf(sin(rot), 0.001) + 0.0])
 	for i in t.road_a.size():
 		sig.append("R%s>%s" % [str(t.road_a[i]), str(t.road_b[i])])
 	for i in t.flat_pos.size():
 		sig.append("F%s|%.3f|%.3f" % [str(t.flat_pos[i]), t.flat_radius[i], t.flat_blend[i]])
 	for f in world.get_meta("hand_footprints", []):
-		sig.append("P%s" % [str(f)])
+		var parts := PackedStringArray()
+		for e in f:
+			parts.append("%.3f" % e if (e is float or e is int) else str(e))
+		sig.append("P" + ",".join(parts))
 	sig.append(str(world.get_meta("dungeon_site", {}).get("origin", Vector2.ZERO)))
 	sig.append(str(world.spawn_center))
 	var ck: Dictionary = world.get_meta("citykit", {})
-	sig.append("tiles=%s junctions=%s" % [str(ck.get("tiles", {})), str(ck.get("junctions", -1))])
+	var tiles: Dictionary = ck.get("tiles", {})
+	var tile_keys: Array = tiles.keys()
+	tile_keys.sort()   # the baked meta comes back with sorted keys; order is not layout
+	var tile_parts := PackedStringArray()
+	for k in tile_keys:
+		tile_parts.append("%s=%s" % [str(k), str(tiles[k])])
+	sig.append("tiles=%s junctions=%s" % [",".join(tile_parts), str(ck.get("junctions", -1))])
 	return "\n".join(sig).md5_text()
 
 
@@ -124,7 +137,10 @@ func _run() -> void:
 			var c: Vector2 = a + dir * s
 			if not _foreign_road_in_band(t, c, i, 4.0, t.ROAD_FLAT * 2.0 + 1.5):
 				var hc: float = w1.get_height(c.x, c.y)
-				for off in [-6.0, -4.5, -3.2, -1.6, 1.6, 3.2, 4.5, 6.0]:
+				# Paved road + shoulder (ROAD_WIDTH 3.2 + ROAD_EDGE 1.1). The ground is the baked 1 m grid (the same grid
+				# the generator's terrain mesh and collision used), so beyond ~4.8 m a cell can straddle the bed edge at
+				# ROAD_FLAT 6.2 m; the generator's own collision ground already dropped 0.52 m at 6 m there.
+				for off in [-4.5, -3.2, -1.6, 1.6, 3.2, 4.5]:
 					var q: Vector2 = c + side * float(off)
 					var dev: float = absf(w1.get_height(q.x, q.y) - hc)
 					if dev > worst_cross:
@@ -143,7 +159,7 @@ func _run() -> void:
 			s += 3.0
 	print("INFO  cross samples=%d worst lateral deviation=%.5f m at %s | along samples=%d worst second difference=%.5f m at %s, steepest grade=%.3f at %s" % [checked_cross, worst_cross, worst_cross_at, checked_along, worst_along, worst_along_at, worst_grade, worst_grade_at])
 	check(checked_cross > 1500 and checked_along > 150, "enough clean road samples (%d across, %d along)" % [checked_cross, checked_along])
-	check(worst_cross < 0.01, "ground is level across every road, +-6 m from the centreline (worst %.5f m)" % worst_cross)
+	check(worst_cross < 0.01, "ground is level across every road, +-4.5 m from the centreline (worst %.5f m)" % worst_cross)
 	check(worst_along < 0.02, "no bumps along any road centreline (worst second difference %.5f m)" % worst_along)
 	check(worst_grade < 0.35, "no road grade steeper than 35%% (steepest %.3f)" % worst_grade)
 

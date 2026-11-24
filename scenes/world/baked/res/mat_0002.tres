@@ -1,0 +1,9 @@
+[gd_resource type="StandardMaterial3D" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/kaykit/forest/KayKit_Forest_Nature_Pack_1.0_FREE/Assets/gltf/forest_texture.png" id="1_yplju"]
+
+[resource]
+resource_name = "forest"
+albedo_texture = ExtResource("1_yplju")
+roughness = 0.6
+metadata/_gltf_primary_texture_coord = 0

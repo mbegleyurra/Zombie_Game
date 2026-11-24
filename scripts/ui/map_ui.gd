@@ -1,5 +1,5 @@
 extends Control
-## World map. Toggle: M (action "toggle_map", registered here in code). Full-screen map of the procedural world plus a
+## World map. Toggle: M (action "toggle_map", registered here in code). Full-screen map of the baked world plus a
 ## small always-on minimap in the bottom-left corner. Drawn from world_builder data: a baked top-down ground texture
 ## (terrain ground colours, roads, forest, trees/rocks, building footprints, dungeon crater; see make_height_texture),
 ## locations (world.locations), the dungeon (world meta "dungeon_site"), the spawn pad, other players, and the local
@@ -12,10 +12,11 @@ signal opened
 signal closed
 
 const ACTION := "toggle_map"
+const ForestData = preload("res://scripts/world/forest_data.gd")
 const GROUP_OPEN := "ui_open"        ## Hud.is_ui_open() is true while any member is in this group
 const GROUP_ALL := "overlay_ui"
 const TEX_SIZE := 384            ## ground texture resolution (1.33 m per texel over the 512 m world), built once per world
-const FOREST_CORE := 0.12        ## Terrain.forest_density at or above this is dense forest (same as KayKitForest)
+const FOREST_CORE := 0.12        ## baked forest density (world.terrain.forest_density) at or above this is dense forest
 const MINI_SIZE := 220.0
 const MINI_HALF := 90.0
 const FONT_TITLE := 48
@@ -209,8 +210,8 @@ static func height_color(h: float) -> Color:
 	return stops[stops.size() - 1][1]
 
 
-## Top-down "render" of the whole world, built once per world (cached by the owner) and fully deterministic from
-## the seed: the terrain's own ground colours (grass/dirt/rock/sand/road, via Terrain._tri_color) with a light
+## Top-down "render" of the whole world, built once per world (cached by the owner) from the BAKED data: the baked
+## heightmap and ground-colour map (world.terrain.height_at / ground_color, scenes/world/baked/res/) with a light
 ## hillshade, a dark forest floor, the dungeon crater, building footprints and tree/rock/bush stamps.
 static func make_height_texture(world: Node, n: int = TEX_SIZE) -> ImageTexture:
 	var t = world.terrain
@@ -220,9 +221,9 @@ static func make_height_texture(world: Node, n: int = TEX_SIZE) -> ImageTexture:
 	hts.resize(n * n)
 	for y in n:
 		for x in n:
-			hts[y * n + x] = t.height_at(-half + (float(x) + 0.5) * cell, -half + (float(y) + 0.5) * cell)
-	var rd := _road_distances(t, n, cell, half)
-	var real: bool = t.has_method("_tri_color") and t.has_method("_hash2")
+			var hv: float = t.height_at(-half + (float(x) + 0.5) * cell, -half + (float(y) + 0.5) * cell)
+			hts[y * n + x] = 0.0 if is_nan(hv) else hv
+	var baked: bool = t.has_method("ground_color")
 	var img := Image.create(n, n, false, Image.FORMAT_RGBA8)
 	for y in n:
 		var ym: int = maxi(y - 1, 0)
@@ -234,11 +235,13 @@ static func make_height_texture(world: Node, n: int = TEX_SIZE) -> ImageTexture:
 			var hx: float = hts[y * n + xp] - hts[y * n + xm]
 			var hz: float = hts[yp * n + x] - hts[ym * n + x]
 			var col: Color
-			if real:
-				var wx: float = -half + (float(x) + 0.5) * cell
-				var wz: float = -half + (float(y) + 0.5) * cell
-				var ny: float = 2.0 * cell / Vector3(-hx, 2.0 * cell, -hz).length()
-				col = t._tri_color(ny, h, rd[y * n + x], t._hash2(x, y), wx, wz)
+			var gc := Color(0, 0, 0, 0)
+			var wx: float = -half + (float(x) + 0.5) * cell
+			var wz: float = -half + (float(y) + 0.5) * cell
+			if baked:
+				gc = t.ground_color(wx, wz)
+			if gc.r + gc.g + gc.b > 0.0:
+				col = Color(gc.r, gc.g, gc.b, 1.0)
 				if t.forest_density(wx, wz) >= FOREST_CORE:
 					col = col.lerp(TREE_COL, 0.3)
 			else:
@@ -249,34 +252,6 @@ static func make_height_texture(world: Node, n: int = TEX_SIZE) -> ImageTexture:
 	_stamp_buildings(img, world, n, half, cell)
 	_stamp_vegetation(img, world, n, half, cell)
 	return ImageTexture.create_from_image(img)
-
-
-## Distance from every texel centre to the nearest road centreline (1e9 beyond the verge), walking each road once.
-static func _road_distances(t, n: int, cell: float, half: float) -> PackedFloat32Array:
-	var rd := PackedFloat32Array()
-	rd.resize(n * n)
-	rd.fill(1.0e9)
-	var reach: float = float(t.ROAD_WIDTH) * 0.5 + float(t.ROAD_EDGE)
-	var r_px: int = int(ceil(reach / cell))
-	for i in t.road_a.size():
-		var a: Vector2 = t.road_a[i]
-		var b: Vector2 = t.road_b[i]
-		var steps: int = maxi(int(ceil(a.distance_to(b) / cell)), 1)
-		var last := Vector2i(-99999, -99999)
-		for s in steps + 1:
-			var p: Vector2 = a.lerp(b, float(s) / float(steps))
-			var cx: int = int(floor((p.x + half) / cell))
-			var cy: int = int(floor((p.y + half) / cell))
-			if cx == last.x and cy == last.y:
-				continue
-			last = Vector2i(cx, cy)
-			for y in range(maxi(cy - r_px, 0), mini(cy + r_px + 1, n)):
-				for x in range(maxi(cx - r_px, 0), mini(cx + r_px + 1, n)):
-					var c := Vector2(-half + (float(x) + 0.5) * cell, -half + (float(y) + 0.5) * cell)
-					var d: float = c.distance_to(Geometry2D.get_closest_point_to_segment(c, a, b))
-					if d < rd[y * n + x]:
-						rd[y * n + x] = d
-	return rd
 
 
 ## Filled circle with a lit upper-left highlight; (x, z) in world metres.
@@ -342,27 +317,16 @@ static func _stamp_buildings(img: Image, world: Node, n: int, half: float, cell:
 		_fill_rect(img, n, half, cell, Vector2(float(f[0]), float(f[1])), float(f[4]), Vector2(float(f[2]), float(f[3])), col, OUTLINE_COL)
 
 
-## KayKitForest keeps every placed instance in its "sites" meta; the procedural trees (first Trunks-count entries of
-## world.prop_points) then the procedural rocks and wrecks (the rest) come from the world builder.
+## Vegetation dots come straight from the KayKitForest MultiMesh buffers (scripts/world/forest_data.gd), so the map
+## follows any edit made to scenes/world/baked/vegetation.tscn.
 static func _stamp_vegetation(img: Image, world: Node, n: int, half: float, cell: float) -> void:
-	var sites: Array = []
-	var forest: Node = world.get_node_or_null("KayKitForest")
-	if forest != null and forest.has_meta("sites"):
-		sites = forest.get_meta("sites") as Array
+	var sites: Array = ForestData.sites(world.get_node_or_null("KayKitForest"))
 	for s in sites:
 		if s[0] == "bush":
 			_dot(img, n, half, cell, Vector2(s[1], s[2]), 1.0, BUSH_COL, BUSH_COL)
 	for s in sites:
 		if s[0] == "rock":
 			_dot(img, n, half, cell, Vector2(s[1], s[2]), 1.1, ROCK_COL, ROCK_COL.lightened(0.15))
-	var trunks: Node = world.get_node_or_null("Props/Trunks")
-	var tree_n: int = (trunks as MultiMeshInstance3D).multimesh.instance_count if trunks is MultiMeshInstance3D else world.prop_points.size()
-	for i in world.prop_points.size():
-		if i < tree_n:
-			continue
-		_dot(img, n, half, cell, world.prop_points[i], 1.2, ROCK_COL, ROCK_COL.lightened(0.15))
-	for i in mini(tree_n, world.prop_points.size()):
-		_dot(img, n, half, cell, world.prop_points[i], 1.7, TREE_COL, TREE_HI)
 	for s in sites:
 		if s[0] == "tree":
 			_dot(img, n, half, cell, Vector2(s[1], s[2]), 2.0, TREE_COL, TREE_HI)

@@ -1,7 +1,7 @@
 extends VehicleBody3D
 ## Drivable car built from a Kenney Car Kit model (the same .glb files KenneyDressing uses).
-## Spawned deterministically by vehicle_spawner.gd, so every peer builds the same cars at the same paths
-## (World/Vehicles/Car_N). No class_name on purpose: callers preload this script.
+## Baked into scenes/world/baked/vehicles.tscn (exported `kind`), so every peer loads the same cars at the same paths
+## (World/Vehicles/Car_N); the model, collider and wheels are built in _ready. No class_name on purpose: callers preload this script.
 ##
 ## Interaction: Player's hover ray finds this node (interact + get_prompt), so E enters; Player._interact
 ## forwards E to us while seated, so E exits. Enter/exit go through the server (any peer -> server validates ->
@@ -10,7 +10,13 @@ extends VehicleBody3D
 ## The driver's Player is hidden, parked on the seat each physics frame and told `vehicle = self` so it stops walking.
 
 const ModelUtil = preload("res://scripts/world/model_util.gd")
-const Dressing = preload("res://scripts/world/kenney_dressing.gd")
+## Kenney Car Kit folder and per-kind fitted height (also read by the bake-only tools/worldgen/kenney_dressing.gd).
+const CARS := "res://assets/kenney/cars/"
+const CAR_H := {
+	"sedan": 1.45, "sedan-sports": 1.35, "hatchback-sports": 1.35, "suv": 1.75, "suv-luxury": 1.75,
+	"van": 2.1, "truck": 2.6, "taxi": 1.45, "police": 1.5, "ambulance": 2.3, "delivery": 2.5,
+	"garbage-truck": 3.0, "firetruck": 3.1,
+}
 
 const FORWARD := Vector3(0.0, 0.0, -1.0)   ## local travel direction; the glb front (+Z) is turned to match
 const MAX_SPEED := 30.0
@@ -25,7 +31,7 @@ const ENTER_RANGE := 6.0
 const TOGGLE_DEBOUNCE_MSEC := 400   ## E both enters (hover ray) and exits (Player forward): ignore the echo
 const REST := 0.2
 
-var kind: String = "sedan"
+@export var kind: String = "sedan"
 var driver_id: int = 0
 var size := Vector3(1.8, 1.4, 4.0)
 ## Control inputs, -1..1. Read from the keyboard for the local driver unless `scripted` is set (tests).
@@ -65,8 +71,8 @@ func _ready() -> void:
 # ================================================================== build
 
 func _build() -> void:
-	var h: float = float(Dressing.CAR_H.get(kind, 1.6))
-	var m: Node3D = ModelUtil.load_fit(Dressing.CARS + kind + ".glb", h)
+	var h: float = float(CAR_H.get(kind, 1.6))
+	var m: Node3D = ModelUtil.load_fit(CARS + kind + ".glb", h)
 	if m == null:
 		push_warning("[Vehicle] missing model %s, collider only (no primitive visual)" % kind)
 		m = Node3D.new()

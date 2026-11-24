@@ -1,9 +1,10 @@
 extends Node3D
-## Entry scene for Dead Acres. Builds the deterministic world and spawns the local player.
-## Command line (after "--"): --seed=N  sets the world seed, --no-player skips the local player.
+## Entry scene for Dead Acres. Loads the baked world (scenes/world/world_baked.tscn via world_builder.gd) and spawns
+## the local player. Command line (after "--"): --no-player skips the local player. --seed=N is still accepted and
+## kept as the session seed, but it no longer changes the world: every peer loads the same baked scenes.
 ##
 ## Public API:
-##   build_world(seed)               builds the world (done automatically in _ready)
+##   build_world(seed)               loads the baked world (done automatically in _ready; seed is ignored)
 ##   spawn_player(slot, peer_id)     instances res://scenes/player/player.tscn (or a fallback camera), returns the node
 ## Nodes in group "spawner" that implement on_world_ready(world, main) are called once the world exists.
 ## Signal: world_ready(world)

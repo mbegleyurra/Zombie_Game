@@ -1,0 +1,837 @@
+[gd_scene format=3]
+
+[ext_resource type="Material" path="res://scenes/world/baked/res/mat_0000.tres" id="1_dun67"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0000.res" id="2_wt1uu"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0000.res" id="3_bths6"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0001.res" id="4_4x0f0"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0001.res" id="5_ovlhd"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0002.res" id="6_ho21a"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0002.res" id="7_wix7p"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0003.res" id="8_rq6dt"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0003.res" id="9_oasjs"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0004.res" id="10_qhi1t"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0004.res" id="11_pk8v5"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0005.res" id="12_q3q6a"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0005.res" id="13_btxxn"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0006.res" id="14_oc0b1"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0006.res" id="15_rm18u"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0007.res" id="16_tqyfx"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0007.res" id="17_lowgj"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0008.res" id="18_wfgb2"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0008.res" id="19_wwffr"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0009.res" id="20_kj4o2"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0009.res" id="21_6nn22"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0010.res" id="22_8doi4"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0010.res" id="23_w02jq"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0011.res" id="24_76s0p"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0011.res" id="25_q365r"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0012.res" id="26_l2kj1"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0012.res" id="27_wxosp"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0013.res" id="28_ksfy4"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0013.res" id="29_b3y6g"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0014.res" id="30_58cxv"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0014.res" id="31_5erpa"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0015.res" id="32_i1s54"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0015.res" id="33_0og7f"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0016.res" id="34_t8foc"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0016.res" id="35_k1iug"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0017.res" id="36_t6p3e"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0017.res" id="37_i7s7t"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0018.res" id="38_68mvl"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0018.res" id="39_w48vg"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0019.res" id="40_eq3eg"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0019.res" id="41_gobq5"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0020.res" id="42_8cock"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0020.res" id="43_arlnq"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0021.res" id="44_ii04g"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0021.res" id="45_kfuxi"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0022.res" id="46_lvf60"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0022.res" id="47_wa18n"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0023.res" id="48_3hr21"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0023.res" id="49_igxbv"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0024.res" id="50_uxjjm"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0024.res" id="51_5t1iw"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0025.res" id="52_sct2f"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0025.res" id="53_w0xge"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0026.res" id="54_rpry3"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0026.res" id="55_xb1qq"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0027.res" id="56_efh6r"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0027.res" id="57_qob8y"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0028.res" id="58_rkwfc"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0028.res" id="59_kt2r1"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0029.res" id="60_qfmex"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0029.res" id="61_eih1c"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0030.res" id="62_7p54w"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0030.res" id="63_d54ms"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0031.res" id="64_2mr5v"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0031.res" id="65_nh2gd"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0032.res" id="66_pyq1v"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0032.res" id="67_m6gt4"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0033.res" id="68_wh7wj"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0033.res" id="69_2rd05"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0034.res" id="70_drxtg"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0034.res" id="71_0cb5c"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0035.res" id="72_75tkt"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0035.res" id="73_kqo60"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0036.res" id="74_sgcw4"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0036.res" id="75_3xl2q"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0037.res" id="76_pl1r7"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0037.res" id="77_ks4gq"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0038.res" id="78_lf310"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0038.res" id="79_aavj5"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0039.res" id="80_ou3mg"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0039.res" id="81_npgds"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0040.res" id="82_f82u8"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0040.res" id="83_02h0k"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0041.res" id="84_xubxd"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0041.res" id="85_5vdhc"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0042.res" id="86_c4c67"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0042.res" id="87_ednwl"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0043.res" id="88_2vt1f"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0043.res" id="89_82yyw"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0044.res" id="90_d0ery"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0044.res" id="91_cj61j"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0045.res" id="92_clrnu"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0045.res" id="93_o75wa"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0046.res" id="94_cfdfj"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0046.res" id="95_jlnjc"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0047.res" id="96_0kxuj"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0047.res" id="97_045h1"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0048.res" id="98_snbj1"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0048.res" id="99_cmfic"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0049.res" id="100_6l1hv"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0049.res" id="101_ljuwt"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0050.res" id="102_oh640"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0050.res" id="103_385v8"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0051.res" id="104_c5ud7"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0051.res" id="105_at6kk"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0052.res" id="106_7pd8o"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0052.res" id="107_fmwix"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0053.res" id="108_nry3y"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0053.res" id="109_4sndl"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0054.res" id="110_ixmq6"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0054.res" id="111_3hbbn"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0055.res" id="112_1y7c7"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0055.res" id="113_oc0sk"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0056.res" id="114_n657y"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0056.res" id="115_mf4mf"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0057.res" id="116_owp3x"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0057.res" id="117_3uhtj"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0058.res" id="118_6jf1q"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0058.res" id="119_1sa0a"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0059.res" id="120_km36f"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0059.res" id="121_7utd4"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0060.res" id="122_vk32o"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0060.res" id="123_beyjl"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0061.res" id="124_0nep5"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0061.res" id="125_k57qc"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0062.res" id="126_1opo7"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0062.res" id="127_0a2iy"]
+[ext_resource type="ArrayMesh" path="res://scenes/world/baked/res/terrain_mesh_0063.res" id="128_24xrr"]
+[ext_resource type="Shape3D" path="res://scenes/world/baked/res/terrain_shape_0063.res" id="129_fmfn8"]
+
+[node name="Terrain" type="Node3D" unique_id=1877671107]
+
+[node name="Chunk_0_0" type="MeshInstance3D" parent="." unique_id=1852589417]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("2_wt1uu")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_0_0" unique_id=382800896]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_0_0/Collision" unique_id=199181408]
+shape = ExtResource("3_bths6")
+
+[node name="Chunk_1_0" type="MeshInstance3D" parent="." unique_id=1895048268]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("4_4x0f0")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_1_0" unique_id=1527724096]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_1_0/Collision" unique_id=148853050]
+shape = ExtResource("5_ovlhd")
+
+[node name="Chunk_2_0" type="MeshInstance3D" parent="." unique_id=619274001]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("6_ho21a")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_2_0" unique_id=433913743]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_2_0/Collision" unique_id=839222742]
+shape = ExtResource("7_wix7p")
+
+[node name="Chunk_3_0" type="MeshInstance3D" parent="." unique_id=1273119081]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("8_rq6dt")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_3_0" unique_id=1523002638]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_3_0/Collision" unique_id=96251570]
+shape = ExtResource("9_oasjs")
+
+[node name="Chunk_4_0" type="MeshInstance3D" parent="." unique_id=229135982]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("10_qhi1t")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_4_0" unique_id=1763099324]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_4_0/Collision" unique_id=1677582985]
+shape = ExtResource("11_pk8v5")
+
+[node name="Chunk_5_0" type="MeshInstance3D" parent="." unique_id=355880052]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("12_q3q6a")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_5_0" unique_id=1688914828]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_5_0/Collision" unique_id=1426712358]
+shape = ExtResource("13_btxxn")
+
+[node name="Chunk_6_0" type="MeshInstance3D" parent="." unique_id=1953948760]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("14_oc0b1")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_6_0" unique_id=1070496578]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_6_0/Collision" unique_id=1258959164]
+shape = ExtResource("15_rm18u")
+
+[node name="Chunk_7_0" type="MeshInstance3D" parent="." unique_id=781446715]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("16_tqyfx")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_7_0" unique_id=1021086221]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_7_0/Collision" unique_id=661721433]
+shape = ExtResource("17_lowgj")
+
+[node name="Chunk_0_1" type="MeshInstance3D" parent="." unique_id=1098839144]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("18_wfgb2")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_0_1" unique_id=411255514]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_0_1/Collision" unique_id=981705391]
+shape = ExtResource("19_wwffr")
+
+[node name="Chunk_1_1" type="MeshInstance3D" parent="." unique_id=262526001]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("20_kj4o2")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_1_1" unique_id=2091179813]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_1_1/Collision" unique_id=1413502720]
+shape = ExtResource("21_6nn22")
+
+[node name="Chunk_2_1" type="MeshInstance3D" parent="." unique_id=509450628]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("22_8doi4")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_2_1" unique_id=1237219005]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_2_1/Collision" unique_id=830041741]
+shape = ExtResource("23_w02jq")
+
+[node name="Chunk_3_1" type="MeshInstance3D" parent="." unique_id=1558462154]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("24_76s0p")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_3_1" unique_id=181505702]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_3_1/Collision" unique_id=1802922601]
+shape = ExtResource("25_q365r")
+
+[node name="Chunk_4_1" type="MeshInstance3D" parent="." unique_id=1730565079]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("26_l2kj1")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_4_1" unique_id=1293716709]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_4_1/Collision" unique_id=793008191]
+shape = ExtResource("27_wxosp")
+
+[node name="Chunk_5_1" type="MeshInstance3D" parent="." unique_id=571503511]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("28_ksfy4")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_5_1" unique_id=1081637726]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_5_1/Collision" unique_id=800580037]
+shape = ExtResource("29_b3y6g")
+
+[node name="Chunk_6_1" type="MeshInstance3D" parent="." unique_id=776933037]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("30_58cxv")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_6_1" unique_id=1797875881]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_6_1/Collision" unique_id=2045857441]
+shape = ExtResource("31_5erpa")
+
+[node name="Chunk_7_1" type="MeshInstance3D" parent="." unique_id=145845927]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("32_i1s54")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_7_1" unique_id=38320740]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_7_1/Collision" unique_id=1399636024]
+shape = ExtResource("33_0og7f")
+
+[node name="Chunk_0_2" type="MeshInstance3D" parent="." unique_id=1693267510]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("34_t8foc")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_0_2" unique_id=543570160]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_0_2/Collision" unique_id=1821103140]
+shape = ExtResource("35_k1iug")
+
+[node name="Chunk_1_2" type="MeshInstance3D" parent="." unique_id=376840671]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("36_t6p3e")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_1_2" unique_id=1849806188]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_1_2/Collision" unique_id=1325288354]
+shape = ExtResource("37_i7s7t")
+
+[node name="Chunk_2_2" type="MeshInstance3D" parent="." unique_id=642402297]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("38_68mvl")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_2_2" unique_id=2114587392]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_2_2/Collision" unique_id=941869592]
+shape = ExtResource("39_w48vg")
+
+[node name="Chunk_3_2" type="MeshInstance3D" parent="." unique_id=1652974217]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("40_eq3eg")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_3_2" unique_id=1520069614]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_3_2/Collision" unique_id=592105722]
+shape = ExtResource("41_gobq5")
+
+[node name="Chunk_4_2" type="MeshInstance3D" parent="." unique_id=1296370145]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("42_8cock")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_4_2" unique_id=531110550]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_4_2/Collision" unique_id=229957497]
+shape = ExtResource("43_arlnq")
+
+[node name="Chunk_5_2" type="MeshInstance3D" parent="." unique_id=2115167678]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("44_ii04g")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_5_2" unique_id=1325109297]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_5_2/Collision" unique_id=1631660357]
+shape = ExtResource("45_kfuxi")
+
+[node name="Chunk_6_2" type="MeshInstance3D" parent="." unique_id=12974160]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("46_lvf60")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_6_2" unique_id=195657495]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_6_2/Collision" unique_id=1941959471]
+shape = ExtResource("47_wa18n")
+
+[node name="Chunk_7_2" type="MeshInstance3D" parent="." unique_id=635651801]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("48_3hr21")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_7_2" unique_id=645752314]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_7_2/Collision" unique_id=851194403]
+shape = ExtResource("49_igxbv")
+
+[node name="Chunk_0_3" type="MeshInstance3D" parent="." unique_id=1485190997]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("50_uxjjm")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_0_3" unique_id=1100824576]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_0_3/Collision" unique_id=1817435746]
+shape = ExtResource("51_5t1iw")
+
+[node name="Chunk_1_3" type="MeshInstance3D" parent="." unique_id=1481101759]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("52_sct2f")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_1_3" unique_id=837443920]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_1_3/Collision" unique_id=42939580]
+shape = ExtResource("53_w0xge")
+
+[node name="Chunk_2_3" type="MeshInstance3D" parent="." unique_id=2063274980]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("54_rpry3")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_2_3" unique_id=674599141]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_2_3/Collision" unique_id=665459241]
+shape = ExtResource("55_xb1qq")
+
+[node name="Chunk_3_3" type="MeshInstance3D" parent="." unique_id=1040296308]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("56_efh6r")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_3_3" unique_id=1807372035]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_3_3/Collision" unique_id=1834088680]
+shape = ExtResource("57_qob8y")
+
+[node name="Chunk_4_3" type="MeshInstance3D" parent="." unique_id=752726381]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("58_rkwfc")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_4_3" unique_id=1515307900]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_4_3/Collision" unique_id=1642333215]
+shape = ExtResource("59_kt2r1")
+
+[node name="Chunk_5_3" type="MeshInstance3D" parent="." unique_id=1140017306]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("60_qfmex")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_5_3" unique_id=168930601]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_5_3/Collision" unique_id=1338509721]
+shape = ExtResource("61_eih1c")
+
+[node name="Chunk_6_3" type="MeshInstance3D" parent="." unique_id=111855241]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("62_7p54w")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_6_3" unique_id=2016793280]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_6_3/Collision" unique_id=1661015290]
+shape = ExtResource("63_d54ms")
+
+[node name="Chunk_7_3" type="MeshInstance3D" parent="." unique_id=1862498155]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("64_2mr5v")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_7_3" unique_id=1065898525]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_7_3/Collision" unique_id=1822632867]
+shape = ExtResource("65_nh2gd")
+
+[node name="Chunk_0_4" type="MeshInstance3D" parent="." unique_id=1848629509]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("66_pyq1v")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_0_4" unique_id=1349872931]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_0_4/Collision" unique_id=2016409375]
+shape = ExtResource("67_m6gt4")
+
+[node name="Chunk_1_4" type="MeshInstance3D" parent="." unique_id=684129637]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("68_wh7wj")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_1_4" unique_id=1257329422]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_1_4/Collision" unique_id=204045300]
+shape = ExtResource("69_2rd05")
+
+[node name="Chunk_2_4" type="MeshInstance3D" parent="." unique_id=1104220450]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("70_drxtg")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_2_4" unique_id=991185905]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_2_4/Collision" unique_id=591857213]
+shape = ExtResource("71_0cb5c")
+
+[node name="Chunk_3_4" type="MeshInstance3D" parent="." unique_id=1430224044]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("72_75tkt")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_3_4" unique_id=862648307]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_3_4/Collision" unique_id=2146374450]
+shape = ExtResource("73_kqo60")
+
+[node name="Chunk_4_4" type="MeshInstance3D" parent="." unique_id=490105357]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("74_sgcw4")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_4_4" unique_id=1059977788]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_4_4/Collision" unique_id=464105096]
+shape = ExtResource("75_3xl2q")
+
+[node name="Chunk_5_4" type="MeshInstance3D" parent="." unique_id=953535946]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("76_pl1r7")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_5_4" unique_id=339413748]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_5_4/Collision" unique_id=515954107]
+shape = ExtResource("77_ks4gq")
+
+[node name="Chunk_6_4" type="MeshInstance3D" parent="." unique_id=935524276]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("78_lf310")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_6_4" unique_id=999617794]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_6_4/Collision" unique_id=1994921289]
+shape = ExtResource("79_aavj5")
+
+[node name="Chunk_7_4" type="MeshInstance3D" parent="." unique_id=781300774]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("80_ou3mg")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_7_4" unique_id=715405679]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_7_4/Collision" unique_id=672780457]
+shape = ExtResource("81_npgds")
+
+[node name="Chunk_0_5" type="MeshInstance3D" parent="." unique_id=681897873]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("82_f82u8")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_0_5" unique_id=1591469675]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_0_5/Collision" unique_id=1356273160]
+shape = ExtResource("83_02h0k")
+
+[node name="Chunk_1_5" type="MeshInstance3D" parent="." unique_id=438557034]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("84_xubxd")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_1_5" unique_id=1211501744]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_1_5/Collision" unique_id=1538219072]
+shape = ExtResource("85_5vdhc")
+
+[node name="Chunk_2_5" type="MeshInstance3D" parent="." unique_id=1674245033]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("86_c4c67")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_2_5" unique_id=1730906929]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_2_5/Collision" unique_id=483965624]
+shape = ExtResource("87_ednwl")
+
+[node name="Chunk_3_5" type="MeshInstance3D" parent="." unique_id=1664005087]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("88_2vt1f")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_3_5" unique_id=1174472958]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_3_5/Collision" unique_id=1918516542]
+shape = ExtResource("89_82yyw")
+
+[node name="Chunk_4_5" type="MeshInstance3D" parent="." unique_id=288259984]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("90_d0ery")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_4_5" unique_id=84149388]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_4_5/Collision" unique_id=1094510431]
+shape = ExtResource("91_cj61j")
+
+[node name="Chunk_5_5" type="MeshInstance3D" parent="." unique_id=696417975]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("92_clrnu")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_5_5" unique_id=700951932]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_5_5/Collision" unique_id=1481836974]
+shape = ExtResource("93_o75wa")
+
+[node name="Chunk_6_5" type="MeshInstance3D" parent="." unique_id=1568177394]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("94_cfdfj")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_6_5" unique_id=2124406678]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_6_5/Collision" unique_id=1508249857]
+shape = ExtResource("95_jlnjc")
+
+[node name="Chunk_7_5" type="MeshInstance3D" parent="." unique_id=89275446]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("96_0kxuj")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_7_5" unique_id=1251401781]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_7_5/Collision" unique_id=895521878]
+shape = ExtResource("97_045h1")
+
+[node name="Chunk_0_6" type="MeshInstance3D" parent="." unique_id=955279152]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("98_snbj1")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_0_6" unique_id=211861937]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_0_6/Collision" unique_id=192796881]
+shape = ExtResource("99_cmfic")
+
+[node name="Chunk_1_6" type="MeshInstance3D" parent="." unique_id=1830797553]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("100_6l1hv")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_1_6" unique_id=1309148785]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_1_6/Collision" unique_id=441387602]
+shape = ExtResource("101_ljuwt")
+
+[node name="Chunk_2_6" type="MeshInstance3D" parent="." unique_id=1550233320]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("102_oh640")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_2_6" unique_id=1417957084]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_2_6/Collision" unique_id=1480347978]
+shape = ExtResource("103_385v8")
+
+[node name="Chunk_3_6" type="MeshInstance3D" parent="." unique_id=1001626201]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("104_c5ud7")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_3_6" unique_id=782378418]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_3_6/Collision" unique_id=1267366470]
+shape = ExtResource("105_at6kk")
+
+[node name="Chunk_4_6" type="MeshInstance3D" parent="." unique_id=1234079351]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("106_7pd8o")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_4_6" unique_id=448527715]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_4_6/Collision" unique_id=1041256684]
+shape = ExtResource("107_fmwix")
+
+[node name="Chunk_5_6" type="MeshInstance3D" parent="." unique_id=383452980]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("108_nry3y")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_5_6" unique_id=1812204730]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_5_6/Collision" unique_id=2122651295]
+shape = ExtResource("109_4sndl")
+
+[node name="Chunk_6_6" type="MeshInstance3D" parent="." unique_id=1515843533]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("110_ixmq6")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_6_6" unique_id=1416049999]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_6_6/Collision" unique_id=357009027]
+shape = ExtResource("111_3hbbn")
+
+[node name="Chunk_7_6" type="MeshInstance3D" parent="." unique_id=1537589555]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("112_1y7c7")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_7_6" unique_id=902656865]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_7_6/Collision" unique_id=702988555]
+shape = ExtResource("113_oc0sk")
+
+[node name="Chunk_0_7" type="MeshInstance3D" parent="." unique_id=1568888533]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("114_n657y")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_0_7" unique_id=1464150781]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_0_7/Collision" unique_id=551025055]
+shape = ExtResource("115_mf4mf")
+
+[node name="Chunk_1_7" type="MeshInstance3D" parent="." unique_id=1356407835]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("116_owp3x")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_1_7" unique_id=97716821]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_1_7/Collision" unique_id=1459613307]
+shape = ExtResource("117_3uhtj")
+
+[node name="Chunk_2_7" type="MeshInstance3D" parent="." unique_id=1508548505]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("118_6jf1q")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_2_7" unique_id=1658569345]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_2_7/Collision" unique_id=856923785]
+shape = ExtResource("119_1sa0a")
+
+[node name="Chunk_3_7" type="MeshInstance3D" parent="." unique_id=1432340989]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("120_km36f")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_3_7" unique_id=1405101174]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_3_7/Collision" unique_id=304668054]
+shape = ExtResource("121_7utd4")
+
+[node name="Chunk_4_7" type="MeshInstance3D" parent="." unique_id=1852443822]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("122_vk32o")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_4_7" unique_id=1859723368]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_4_7/Collision" unique_id=1778271147]
+shape = ExtResource("123_beyjl")
+
+[node name="Chunk_5_7" type="MeshInstance3D" parent="." unique_id=1203988163]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("124_0nep5")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_5_7" unique_id=1213202543]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_5_7/Collision" unique_id=755971822]
+shape = ExtResource("125_k57qc")
+
+[node name="Chunk_6_7" type="MeshInstance3D" parent="." unique_id=171120846]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("126_1opo7")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_6_7" unique_id=357116860]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_6_7/Collision" unique_id=861696906]
+shape = ExtResource("127_0a2iy")
+
+[node name="Chunk_7_7" type="MeshInstance3D" parent="." unique_id=355173302]
+material_override = ExtResource("1_dun67")
+visibility_range_end = 300.0
+visibility_range_end_margin = 20.0
+mesh = ExtResource("128_24xrr")
+
+[node name="Collision" type="StaticBody3D" parent="Chunk_7_7" unique_id=1226290795]
+
+[node name="ColConcavePolygon_0" type="CollisionShape3D" parent="Chunk_7_7/Collision" unique_id=178519206]
+shape = ExtResource("129_fmfn8")
